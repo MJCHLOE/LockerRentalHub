@@ -2,12 +2,20 @@
   // Start session
   session_start();
 
-  // Check if user is not logged in or not an admin
-  if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
-      // Redirect to login page
+  // Generate a unique session identifier for admin
+  $adminSessionKey = md5('Admin_' . $_SESSION['user_id']);
+
+  // Check if user is logged in and is admin using both regular and role-specific session
+  if (!isset($_SESSION[$adminSessionKey]) || 
+      !isset($_SESSION['role']) || 
+      $_SESSION['role'] !== 'Admin') {
       header("Location: ../LoginPage.html");
       exit();
-}
+  }
+
+  // Update last activity
+  $_SESSION[$adminSessionKey]['last_activity'] = time();
+
   if (isset($_GET['success'])) {
       echo "<script>alert('".$_GET['success']."');</script>";
   }

@@ -1,12 +1,20 @@
 <?php
-  session_start();
+session_start();
 
-  // Check if user is not logged in or not an admin
-  if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'Staff') {
-    // Redirect to login page
+// Generate a unique session identifier for staff
+$staffSessionKey = md5('Staff_' . $_SESSION['user_id']);
+
+// Check if user is logged in and is staff using both regular and role-specific session
+if (!isset($_SESSION[$staffSessionKey]) || 
+    !isset($_SESSION['role']) || 
+    $_SESSION['role'] !== 'Staff') {
     header("Location: ../LoginPage.html");
     exit();
 }
+
+// Update last activity
+$_SESSION[$staffSessionKey]['last_activity'] = time();
+
 if (isset($_GET['success'])) {
     echo "<script>alert('".$_GET['success']."');</script>";
 }
