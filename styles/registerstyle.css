@@ -1,0 +1,145 @@
+body {
+    background-color: #2d2d2d;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .container-fluid {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .locker-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .locker-icon {
+    position: absolute;
+    font-size: 250px;
+    color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .locker-left {
+    top: 10%;
+    left: 50%;
+    transform: rotate(-15deg);
+  }
+  
+  .locker-right {
+    top: 45%;
+    left: 70%;
+    transform: rotate(15deg);
+  }
+  
+  .back-arrow {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    color: white;
+    z-index: 3;
+    text-decoration: none;
+  }
+  
+  .title-text {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 400px;
+    padding: 0 40px;
+    text-align: right;
+  }
+  
+  .title-text h1 {
+    color: white;
+    font-size: 3rem;
+    line-height: 1.2;
+    font-weight: bold;
+  }
+  
+  .login-card {
+    background-color: #1f1f1f;
+    padding: 40px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 2;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+  }
+  
+  .login-card h3 {
+    color: white;
+    margin-top: 10px;
+  }
+  
+  .input-icon {
+    display: flex;
+    align-items: center;
+    background-color: #343a40;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+  }
+  
+  .input-icon iconify-icon {
+    color: white;
+    margin-right: 10px;
+    font-size: 20px;
+  }
+  
+  .input-icon input.form-control {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+  }
+  
+  .btn-login {
+    background-color: #6c757d;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    width: 100%;
+  }
+  
+  .btn-login:hover {
+    background-color: #5a6268;
+  }
+  
+  .create-account-link {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  
+  .create-account-link:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .title-text {
+      padding: 0 20px;
+      text-align: center;
+    }
+  
+    .title-text h1 {
+      font-size: 2.5rem;
+    }
+  
+    .locker-icon {
+      font-size: 150px;
+    }
+  
+    .login-card {
+      padding: 20px;
+      max-width: 90%;
+    }
+  }
+  

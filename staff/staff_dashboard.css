@@ -1,0 +1,90 @@
+body {
+    background: linear-gradient(to bottom left, #1a1a1a 0%, #666699 100%);
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  section {
+    margin-top: 56px; /* Adjust this value based on your navbar height */
+    padding-top: 56px; /* Same value to maintain spacing */
+  }
+  
+  .navbar {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  
+  .navbar-brand iconify-icon {
+    margin-right: 5px;
+  }
+  
+  .navbar-nav .nav-item {
+    padding-left: 1rem;
+  }
+  
+  .navbar-nav .nav-item .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .nav-link:hover {
+    text-decoration: none;
+    color: #e0e0e0;
+  }
+  
+  .main-content {
+    padding: 80px 2rem 2rem;
+  }
+  
+  .table th, .table td {
+    vertical-align: middle;
+  }
+  
+  .rounded {
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 6rem 1rem 1rem;
+    }
+  
+    .nav-link {
+      font-size: 0.9rem;
+    }
+  
+    h3 {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .navbar-brand {
+      font-size: 1rem;
+    }
+  
+    .btn-sm {
+      font-size: 0.75rem;
+    }
+  
+    .table-responsive {
+      overflow-x: auto;
+    }
+  
+    section {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+  }
+  

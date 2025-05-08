@@ -1,0 +1,135 @@
+body {
+    background-color: #2d2d2d;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .container-fluid {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .locker-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .locker-icon {
+    position: absolute;
+    font-size: 250px;
+    color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .locker-left {
+    top: 10%;
+    left: 5%;
+    transform: rotate(-15deg);
+  }
+  
+  .locker-right {
+    top: 45%;
+    left: 25%;
+    transform: rotate(15deg);
+  }
+  
+  .back-arrow {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    color: white;
+    z-index: 3;
+    text-decoration: none;
+  }
+  
+  .title-text {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 400px;
+    padding-left: 40px;
+  }
+  
+  .title-text h1 {
+    color: white;
+    font-size: rem;
+    line-height: 1.2;
+    font-weight: bold;
+  }
+  
+  .login-card {
+    background-color: #1f1f1f;
+    padding: 40px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 2;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+  }
+  
+  .login-card h3 {
+    color: white;
+    margin-top: 10px;
+  }
+  
+  .input-icon {
+    display: flex;
+    align-items: center;
+    background-color: #343a40;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .input-icon iconify-icon {
+    color: white;
+    margin-right: 10px;
+    font-size: 20px;
+  }
+  
+  .input-icon input.form-control {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+  }
+  
+  .btn-login {
+    background-color: #6c757d;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+  }
+  
+  .btn-create {
+    background-color: transparent;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    font-weight: bold;
+    border-radius: 5px;
+  }
+  
+  .btn-create:hover {
+    background-color: #6c757d;
+    color: white;
+  }
+
+
+  
+  /* Ensure full responsiveness */
+  @media (max-width: 576px) {
+    .title-text h1 {
+        text-align: center;
+      font-size: 2.5rem;
+    }
+    .locker-icon {
+      font-size: 150px;
+    }
+    .login-card {
+      padding: 20px;
+      max-width: 90%;
+    }
+  }  

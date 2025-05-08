@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Locker Rental Hub - Login</title>
+
+  <!-- Bootstrap & Icons -->
+  <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles/loginStyle.css" />
+</head>
+<body>
+  <div class="locker-background">
+    <iconify-icon icon="game-icons:lockers" width="300px" height="300px" class="locker-icon locker-left"></iconify-icon>
+    <iconify-icon icon="game-icons:lockers" width="400px" height="400px" class="locker-icon locker-right"></iconify-icon>
+  </div>
+
+  <a href="index.html" class="back-arrow">
+    <iconify-icon icon="mdi:arrow-left" width="28" height="28"></iconify-icon>
+  </a>
+
+  <div class="container-fluid d-flex align-items-center justify-content-center min-vh-100">
+    <div class="row w-100 px-3">
+      <div class="col-12 col-md-6 d-flex flex-column justify-content-center text-center text-md-left">
+        <div class="title-text px-3">
+          <h1>Locker Rental Hub</h1>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 d-flex justify-content-center align-items-center">
+        <div class="login-card">
+          <div class="text-center mb-4">
+            <iconify-icon icon="mdi:lock-outline" style="color: #e0d4d4;" width="40" height="40"></iconify-icon>
+            <h3>LOGIN</h3>
+          </div>
+          <!-- UPDATED: Added action & method -->
+          <form action="backend/login_handler.php" method="POST">
+            <div class="form-group">
+              <div class="input-icon">
+                <iconify-icon icon="mdi:account"></iconify-icon>
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="input-icon">
+                <iconify-icon icon="mdi:key-variant"></iconify-icon>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>        
+              </div>
+                <!-- Show Password Checkbox -->
+              <div class="form-check mt-2">
+                <input type="checkbox" class="form-check-input" id="showPasswordToggle" onclick="togglePasswordVisibility()">
+                <label class="form-check-label" for="showPasswordToggle" style="color: white;">Show Password</label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-login btn-block">Login</button>
+            <a href="RegisterPage.html" class="btn btn-create btn-block mt-2">Create New Account</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function togglePasswordVisibility() {
+      var passwordInput = document.getElementById("password");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+      } else {
+        passwordInput.type = "password";
+      }
+    }
+  </script>
+</body>
+</html>

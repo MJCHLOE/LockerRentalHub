@@ -1,0 +1,125 @@
+body {
+  background-color: #2d2d2d;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  padding-top: 80px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.navbar {
+  background-color: #1e1e1e;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.navbar-brand iconify-icon {
+  margin-right: 10px;
+}
+
+.nav-link {
+  color: white !important;
+  margin-right: 1rem;
+}
+
+.navbar-nav .nav-link {
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #00f6ff !important;
+}
+
+.hero {
+  padding: 4rem 2rem;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.hero p {
+  color: #4dd0e1;
+  font-size: 1.1rem;
+}
+
+.btn-custom {
+  background-color: #4f7c82;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.btn-custom:hover {
+  background-color: white;
+  color: #4f7c82;
+}
+
+.hero-image iconify-icon {
+  margin: 0 10px;
+  color: #eee;
+}
+
+.hero .text-left-content {
+  padding-left: 8rem; /* adjust as needed */
+}
+
+/* Locker Icons Wrapper */
+.locker-icons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.locker-icons iconify-icon {
+  font-size: 100px;
+  max-width: 100%;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .hero .text-left-content {
+    padding-left: 1.5rem; /* smaller padding for mobile */
+  }
+
+  .hero h1 {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+
+  .hero p,
+  .btn-custom {
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .locker-icons iconify-icon {
+    font-size: 30px;
+    width: 5;
+  }
+}
+
+/* Larger screen heading */
+@media (min-width: 768px) {
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+}
