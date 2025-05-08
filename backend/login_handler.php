@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require '../db/database.php';
+require_once '../db/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST["username"]);
