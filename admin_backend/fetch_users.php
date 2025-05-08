@@ -35,9 +35,9 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        // Display both User ID and role-specific ID
+        // Display User ID and role-specific ID with parentheses and reduced opacity
         echo "<td>" . htmlspecialchars("User #{$row['user_id']}") . 
-             ($row['role_specific_id'] ? "<br>" . htmlspecialchars($row['role_specific_id']) : "") . "</td>";
+             ($row['role_specific_id'] ? "<br><span style='opacity: 0.7'>(" . htmlspecialchars($row['role_specific_id']) . ")</span>" : "") . "</td>";
         echo "<td>" . htmlspecialchars($row['username']) . "</td>";
         echo "<td>" . htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) . "</td>";
         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
