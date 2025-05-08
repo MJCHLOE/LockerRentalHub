@@ -18,7 +18,8 @@ $_SESSION[$clientSessionKey]['last_activity'] = time();
 // Get client's first name from role-specific session
 $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ? 
             $_SESSION[$clientSessionKey]['firstname'] : 'Client';
-}
+
+?>
 
 require_once '../db/database.php';
 
