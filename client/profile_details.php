@@ -1,6 +1,12 @@
 <?php
 session_start();
 
+// Check if user is logged in and is a client
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Client') {
+    header('Location: ../LoginPage.html');
+    exit();
+}
+
 // Generate a unique session identifier for client
 $clientSessionKey = md5('Client_' . $_SESSION['user_id']);
 
@@ -18,8 +24,6 @@ $_SESSION[$clientSessionKey]['last_activity'] = time();
 // Get client's first name from role-specific session
 $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ? 
             $_SESSION[$clientSessionKey]['firstname'] : 'Client';
-
-?>
 
 require_once '../db/database.php';
 
