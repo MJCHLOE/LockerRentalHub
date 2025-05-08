@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// Include database connection file
 require_once '../db/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -33,12 +34,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             // Redirect based on role
             if ($role === "Admin") {
                 header("Location: ../admin/dashboard.php");
+                exit();
             } elseif ($role === "Staff") {
                 header("Location: ../staff/dashboard.php");
+                exit();
             } else {
                 header("Location: ../client/home.php");
+                exit();
             }
-            exit();
         } else {
             echo "<script>alert('Invalid password.'); window.location.href='../LoginPage.html';</script>";
         }
