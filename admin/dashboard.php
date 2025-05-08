@@ -421,6 +421,7 @@
             <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
             <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Active</button>
             <button type="button" class="btn btn-danger" onclick="filterRentals('denied')">Denied</button>
+            <button type="button" class="btn btn-secondary" onclick="filterRentals('cancelled')">Cancelled</button>
             <button type="button" class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
         </div>
     </div>

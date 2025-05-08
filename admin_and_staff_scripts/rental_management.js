@@ -30,7 +30,26 @@ function filterRentals(status) {
 }
 
 function updateRentalStatus(rentalId, newStatus) {
-    if (!confirm(`Are you sure you want to ${newStatus} this rental?`)) {
+    let confirmMessage = 'Are you sure you want to ';
+    switch(newStatus) {
+        case 'approved':
+            confirmMessage += 'approve';
+            break;
+        case 'denied':
+            confirmMessage += 'deny';
+            break;
+        case 'cancelled':
+            confirmMessage += 'cancel';
+            break;
+        case 'completed':
+            confirmMessage += 'complete';
+            break;
+        default:
+            confirmMessage += 'update';
+    }
+    confirmMessage += ' this rental?';
+
+    if (!confirm(confirmMessage)) {
         return;
     }
 

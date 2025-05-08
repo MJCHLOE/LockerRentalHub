@@ -29,11 +29,22 @@ try {
         echo "<td>{$row['client_name']}</td>";
         echo "<td>{$row['locker_id']}</td>";
         echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-        echo "<td data-status='{$row['rental_status']}'>{$row['rental_status']}</td>";
+        
+        // Add specific classes for different statuses
+        $statusClass = '';
+        switch($row['rental_status']) {
+            case 'pending': $statusClass = 'text-warning'; break;
+            case 'approved': $statusClass = 'text-success'; break;
+            case 'denied': $statusClass = 'text-danger'; break;
+            case 'cancelled': $statusClass = 'text-secondary'; break;
+            case 'completed': $statusClass = 'text-info'; break;
+        }
+        
+        echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
         echo "<td>{$row['payment_status']}</td>";
         echo "<td>";
         
-        // Both admin and staff can approve, deny, and complete rentals
+        // Add buttons based on rental status
         switch($row['rental_status']) {
             case 'pending':
                 if ($isAdminOrStaff) {
@@ -45,9 +56,8 @@ try {
                 if ($row['payment_status'] === 'paid' && $isAdminOrStaff) {
                     echo "<button class='btn btn-sm btn-info' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
                 }
-                // Only admin can cancel approved rentals
                 if ($_SESSION['role'] === 'Admin') {
-                    echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                    echo "<button class='btn btn-sm btn-secondary ml-1' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
                 }
                 break;
         }
