@@ -1,6 +1,5 @@
 <?php
   // Start session
-  session_name("LockerRentalHubSession");
   session_start();
 
   // Check if user is not logged in or not an admin
