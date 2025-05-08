@@ -5,7 +5,7 @@ session_start();
 $staffSessionKey = md5('Staff_' . $_SESSION['user_id']);
 
 // Check if user is logged in and is staff using both regular and role-specific session
-if (!isset($_SESSION[$staffSessionKey]) || 
+if (!isset($_SESSION[$staffSessionKey] ) || 
     !isset($_SESSION['role']) || 
     $_SESSION['role'] !== 'Staff') {
     header("Location: ../LoginPage.html");
@@ -119,40 +119,43 @@ if (isset($_GET['success'])) {
         <!-- Manage Rentals Section -->
         <section id="manage-rentals" class="my-4">
             <h3>Manage Rentals</h3>
-            <p>Process rental requests and manage active rentals.</p>
+            <p>Process and manage locker rentals.</p>
 
+            <!-- Search and Filter Controls -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <input type="text" id="rentalSearchInput" class="form-control w-50" 
-                       placeholder="Search by ID or Client Name">
-                <div class="btn-group">
-                    <button class="btn btn-primary active" onclick="filterRentals('all')">All</button>
-                    <button class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
-                    <button class="btn btn-success" onclick="filterRentals('approved')">Active</button>
-                    <button class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
+                       placeholder="Search by ID, Client, or Locker ID" onkeyup="searchRentals()">
+                
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
+                    <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
+                    <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Active</button>
+                    <button type="button" class="btn btn-danger" onclick="filterRentals('denied')">Denied</button>
+                    <button type="button" class="btn btn-secondary" onclick="filterRentals('cancelled')">Cancelled</button>
+                    <button type="button" class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
                 </div>
             </div>
 
+            <!-- Rentals Table -->
             <div class="table-responsive bg-dark text-white p-3 rounded">
                 <table class="table table-dark table-bordered">
                     <thead>
                         <tr>
                             <th>Rental ID</th>
-                            <th>Client Name</th>
+                            <th>Client</th>
                             <th>Locker ID</th>
-                            <th>Date</th>
+                            <th>Request Date</th>
                             <th>Status</th>
-                            <th>Payment</th>
+                            <th>Payment Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="rentalsTableBody">
-                        <!-- Populated by AJAX -->
+                        <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
                     </tbody>
                 </table>
             </div>
         </section>
-
-        
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
