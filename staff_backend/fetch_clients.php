@@ -2,9 +2,11 @@
 
 require '../db/database.php';
 
-// Query to fetch only clients
-$sql = "SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.phone_number
+// Modified query to include client_id from clients table
+$sql = "SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.phone_number,
+        CONCAT('Client #', c.client_id) as client_number
         FROM users u
+        JOIN clients c ON u.user_id = c.user_id
         WHERE u.role = 'Client'
         ORDER BY u.user_id ASC";
 
@@ -14,7 +16,9 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         echo "<tr>";
-        echo "<td>" . htmlspecialchars($row['user_id']) . "</td>";
+        // Display both User ID and Client ID with styling
+        echo "<td>" . htmlspecialchars("User #{$row['user_id']}") . 
+             "<br><span style='opacity: 0.7'>(" . htmlspecialchars($row['client_number']) . ")</span></td>";
         echo "<td>" . htmlspecialchars($row['username']) . "</td>";
         echo "<td>" . htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) . "</td>";
         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
