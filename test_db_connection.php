@@ -44,7 +44,7 @@ try {
     }
     
     // Test Users table specifically
-    $query = "SELECT COUNT(*) as count FROM Users";
+    $query = "SELECT COUNT(*) as count FROM users";
     $result = $conn->query($query);
     
     if ($result) {

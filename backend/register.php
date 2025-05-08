@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $hashedPassword = password_hash($passwordInput, PASSWORD_BCRYPT);
 
     // Prepare SQL to insert new user
-    $stmt = $conn->prepare("INSERT INTO Users (username, password, firstname, lastname, role) VALUES (?, ?, ?, ?, 'Client')");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, role) VALUES (?, ?, ?, ?, 'Client')");
 
     if (!$stmt) {
         die("Prepare failed (Registration): (" . $conn->errno . ") " . $conn->error);
