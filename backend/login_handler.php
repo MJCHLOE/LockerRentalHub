@@ -24,7 +24,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->fetch();
 
         if (password_verify($passwordInput, $hashedPassword)) {
-            // Set session variables
+            // Generate a unique session identifier for each role
+            $sessionKey = md5($role . '_' . $user_id);
+            
+            // Store session data with role-specific key
+            $_SESSION[$sessionKey] = [
+                'user_id' => $user_id,
+                'username' => $usernameDB,
+                'role' => $role,
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'last_activity' => time()
+            ];
+
+            // Also store main session variables for compatibility
             $_SESSION["user_id"] = $user_id;
             $_SESSION["username"] = $usernameDB;
             $_SESSION["role"] = $role;
