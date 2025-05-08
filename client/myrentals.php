@@ -2,7 +2,23 @@
 // Start session 
 session_start();
 
+// Generate a unique session identifier for client
+$clientSessionKey = md5('Client_' . $_SESSION['user_id']);
 
+// Check if user is logged in and is client using both regular and role-specific session
+if (!isset($_SESSION[$clientSessionKey]) || 
+    !isset($_SESSION['role']) || 
+    $_SESSION['role'] !== 'Client') {
+    header("Location: ../LoginPage.html");
+    exit();
+}
+
+// Update last activity
+$_SESSION[$clientSessionKey]['last_activity'] = time();
+
+// Get client's first name from role-specific session
+$firstName = isset($_SESSION[$clientSessionKey]['firstname']) ? 
+            $_SESSION[$clientSessionKey]['firstname'] : 'Client';
 ?>
 
 <!DOCTYPE html>
