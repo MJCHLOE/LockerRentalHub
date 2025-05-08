@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$host = "https://auth-db1858.hstgr.io/";
+$host = "localhost";
 $user = "u130348899_u130348899_";
 $password = "LockerRentThing_69"; 
 $dbname = "u130348899_LockerRental";
