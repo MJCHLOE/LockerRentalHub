@@ -68,7 +68,7 @@ echo "<h3>Current Connection Parameters:</h3>";
 echo "<ul>";
 echo "<li>Host: $host</li>";
 echo "<li>User: $user</li>";
-echo "<li>Password: $password"</li>";
+echo "<li>Password: " . str_repeat("*", strlen($password)) . "</li>";
 echo "<li>Database: $dbname</li>";
 echo "</ul>";
 
