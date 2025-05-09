@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once '../db/database.php';
-require_once 'log_actions.php'; // Assuming this contains your logging classes
+require_once '../admin_backend/log_actions.php'; // Assuming this contains your logging classes
 
 header('Content-Type: application/json');
 
