@@ -48,21 +48,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Hash the password
     $hashedPassword = password_hash($passwordInput, PASSWORD_BCRYPT);
 
-    // Prepare SQL to insert new user
-    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
-
-    if (!$stmt) {
-        echo "<script>alert('Prepare failed: " . $conn->error . "'); window.location.href='../RegisterPage.html';</script>";
-        $conn->close();
-        exit();
-    }
-
-    $stmt->bind_param("ssssss", $username, $hashedPassword, $firstname, $lastname, $email, $phone_number);
-
-    if ($stmt->execute()) {
-        echo "<script>alert('Registration successful!'); window.location.href='../LoginPage.html';</script>";
-    } else {
-        echo "<script>alert('Error during registration: " . $conn->error . "'); window.location.href='../RegisterPage.html';</script>";
+    // Begin transaction
+    $conn->begin_transaction();
+    
+    try {
+        // Insert into Users table
+        $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
+        $stmt->bind_param("ssssss", $username, $hashedPassword, $firstname, $lastname, $email, $phone_number);
+        
+        if ($stmt->execute()) {
+            $conn->commit();
+            echo "<script>alert('Registration successful!'); window.location.href='../LoginPage.html';</script>";
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo "<script>alert('Error during registration: " . $e->getMessage() . "'); window.location.href='../RegisterPage.html';</script>";
     }
 
     $stmt->close();
