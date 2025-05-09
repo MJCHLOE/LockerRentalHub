@@ -212,7 +212,7 @@
 
       <!-- Displaying all users details -->  
       <div class="table-responsive bg-dark text-white p-3 rounded">
-        <table class="table table-dark table-bordered">
+        <table class="table-scrolled table-dark table-bordered">
           <thead>
             <tr>
               <th>ID</th>
