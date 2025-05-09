@@ -41,7 +41,7 @@ try {
             case 'completed': $statusClass = 'text-info'; break;
         }
         
-        echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
+        
         
         // Payment status with class
         $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
