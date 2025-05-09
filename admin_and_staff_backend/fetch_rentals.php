@@ -9,11 +9,13 @@ try {
     $query = "SELECT r.rental_id, 
                      CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
+                     l.price_per_month,
                      r.rental_date,
                      r.rental_status,
                      r.payment_status
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
+              JOIN lockerunits l ON r.locker_id = l.locker_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -28,6 +30,7 @@ try {
         echo "<td>{$row['rental_id']}</td>";
         echo "<td>{$row['client_name']}</td>";
         echo "<td>{$row['locker_id']}</td>";
+        echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
         echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
         
         // Add specific classes for different statuses
@@ -43,15 +46,12 @@ try {
         
         echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
         
-        // Payment status with class
+        // Payment status with class and clickable if admin/staff
         $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
-        echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
-        
-        // Display processor name with role in parentheses if available
-        if (!empty($row['processor_name'])) {
-            echo "<td>{$row['processor_name']} ({$row['processor_role']})</td>";
+        if ($isAdminOrStaff) {
+            echo "<td class='{$paymentClass} payment-status' data-rental-id='{$row['rental_id']}' data-payment='{$row['payment_status']}'>{$row['payment_status']}</td>";
         } else {
-            echo "<td>N/A</td>";
+            echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
         }
         
         echo "<td>";
