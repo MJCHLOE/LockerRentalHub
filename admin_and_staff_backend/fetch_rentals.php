@@ -10,6 +10,7 @@ try {
                      CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
                      r.rental_date,
+                     r.rent_ended_date,
                      r.rental_status,
                      r.payment_status
               FROM rental r
@@ -29,6 +30,15 @@ try {
         echo "<td>{$row['client_name']}</td>";
         echo "<td>{$row['locker_id']}</td>";
         echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+        
+        // Display rent ended date or "None" if null
+        echo "<td>";
+        if (!is_null($row['rent_ended_date'])) {
+            echo date('Y-m-d H:i', strtotime($row['rent_ended_date']));
+        } else {
+            echo "None";
+        }
+        echo "</td>";
         
         // Add specific classes for different statuses
         $statusClass = '';
@@ -79,6 +89,6 @@ try {
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='8'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 }
 ?>

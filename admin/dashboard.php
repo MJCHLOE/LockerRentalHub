@@ -434,7 +434,7 @@
                   <tr>
                   <th>Rental ID</th>
                   <th>Client</th>
-                  <th>Locker</th>
+                  <th>Locker ID</th>
                   <th>Rental Date</th>
                   <th>Rent Ended Date</th>
                   <th>Status</th>
