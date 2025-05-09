@@ -48,6 +48,8 @@ try {
         echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
         
         
+        echo "<td>";
+        
         // Add buttons based on rental status and user role
         if ($isAdminOrStaff) {
             switch($row['rental_status']) {
