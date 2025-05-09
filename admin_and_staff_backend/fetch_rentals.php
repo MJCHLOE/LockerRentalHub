@@ -6,7 +6,6 @@ require '../db/database.php';
 $isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || $_SESSION['role'] === 'Staff');
 
 try {
-    // Join with rentalstatus table to utilize the predefined statuses
     $query = "SELECT r.rental_id, 
                      CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
@@ -14,14 +13,10 @@ try {
                      r.rental_status,
                      r.payment_status,
                      r.processed_by,
-                     CONCAT(p.firstname, ' ', p.lastname) as processor_name,
-                     ls.size_name as locker_size,
-                     lu.price_per_month
+                     CONCAT(p.firstname, ' ', p.lastname) as processor_name
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
               LEFT JOIN users p ON r.processed_by = p.user_id
-              JOIN lockerunits lu ON r.locker_id = lu.locker_id
-              JOIN lockersizes ls ON lu.size_id = ls.size_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -35,7 +30,7 @@ try {
         echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
         echo "<td>{$row['rental_id']}</td>";
         echo "<td>{$row['client_name']}</td>";
-        echo "<td>{$row['locker_id']} ({$row['locker_size']} - ₱{$row['price_per_month']})</td>";
+        echo "<td>{$row['locker_id']}</td>";
         echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
         
         // Add specific classes for different statuses
@@ -43,7 +38,6 @@ try {
         switch($row['rental_status']) {
             case 'pending': $statusClass = 'text-warning'; break;
             case 'approved': $statusClass = 'text-success'; break;
-            case 'active': $statusClass = 'text-success'; break;
             case 'denied': $statusClass = 'text-danger'; break;
             case 'cancelled': $statusClass = 'text-secondary'; break;
             case 'completed': $statusClass = 'text-info'; break;
@@ -68,7 +62,7 @@ try {
                     echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")'>Deny</button>";
                     break;
                     
-                case 'active':
+                case 'approved':
                     echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
                     
                     if ($_SESSION['role'] === 'Admin') {
