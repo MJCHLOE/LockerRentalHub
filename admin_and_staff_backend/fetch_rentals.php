@@ -31,7 +31,7 @@ try {
         echo "<td>{$row['rental_id']}</td>";
         echo "<td>{$row['client_name']}</td>";
         echo "<td>{$row['locker_id']}</td>";
-        echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+        echo "<td>" . date('Y-m-d H:i') . "</td>";
         
         // Add specific classes for different statuses
         $statusClass = '';
