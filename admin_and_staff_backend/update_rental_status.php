@@ -16,13 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Validate required fields
-if (!isset($_POST['rental_id'], $_POST['status'])) {
+if (!isset($_POST['rental_id'], $_POST['rental_status'])) {
     echo json_encode(['success' => false, 'message' => 'Missing required data']);
     exit;
 }
 
 $rental_id = intval($_POST['rental_id']);
-$new_status = $_POST['status'];
+$new_status = $_POST['rental_status'];
 $staff_id = $_SESSION['user_id'];
 
 // Validate status
