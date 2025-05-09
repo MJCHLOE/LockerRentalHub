@@ -18,10 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
         // Update rental status
-        $updateRental = "UPDATE rental SET status = ?, staff_id = ? WHERE rental_id = ?";
+        $updateRental = "UPDATE rental SET rental_status = ?, processed_by = ? WHERE rental_id = ?";
         $stmt = $conn->prepare($updateRental);
         $stmt->bind_param("sis", $new_status, $staff_id, $rental_id);
         $stmt->execute();
+
 
         // Update locker status based on rental status
         $updateLocker = "UPDATE lockerunits lu 
