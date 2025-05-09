@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $phone_number = mysqli_real_escape_string($conn, trim($_POST["phone_number"]));
 
     // Check if username exists
-    $checkUsername = $conn->prepare("SELECT username FROM users WHERE username = ?");
+    $checkUsername = $conn->prepare("SELECT username FROM Users WHERE username = ?");
     $checkUsername->bind_param("s", $username);
     $checkUsername->execute();
     $usernameResult = $checkUsername->get_result();
@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $checkUsername->close();
 
     // Check if email exists
-    $checkEmail = $conn->prepare("SELECT email FROM users WHERE email = ?");
+    $checkEmail = $conn->prepare("SELECT email FROM Users WHERE email = ?");
     $checkEmail->bind_param("s", $email);
     $checkEmail->execute();
     $emailResult = $checkEmail->get_result();
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     try {
         // Insert into Users table
-        $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
+        $stmt = $conn->prepare("INSERT INTO Users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
         $stmt->bind_param("ssssss", $username, $hashedPassword, $firstname, $lastname, $email, $phone_number);
         
         if ($stmt->execute()) {
