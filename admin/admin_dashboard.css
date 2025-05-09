@@ -55,37 +55,7 @@ section {
   border-radius: 12px;
 }
 
-/* Scrollable Tables */
-.table-scroll {
-  max-height: 400px;  /* Adjust this value as needed */
-  overflow-y: auto;
-  position: relative;
-}
 
-.table-scroll thead th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: #343a40; /* Matches your dark theme background */
-}
-
-/* Custom scrollbar styling */
-.table-scroll::-webkit-scrollbar {
-  width: 10px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-  background: #343a40;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-  background: #495057;
-  border-radius: 5px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb:hover {
-  background: #6c757d;
-}
 
 @media (max-width: 768px) {
   .main-content {
