@@ -18,10 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
 
-        // Update rental status
+        // Update rental status - removed the extra comma before WHERE
         $updateRental = "UPDATE rental 
                         SET rental_status = ?,
-                            processed_by = ?,
+                            processed_by = ?
                         WHERE rental_id = ?";
         $stmt = $conn->prepare($updateRental);
         $stmt->bind_param("sis", $new_status, $staff_id, $rental_id);
