@@ -3,143 +3,162 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .container-fluid {
+}
+
+.container-fluid {
     position: relative;
     z-index: 2;
-  }
-  
-  .locker-background {
-    position: absolute;
+}
+
+.locker-background {
+    position: fixed;  /* Changed from absolute to fixed */
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     z-index: 1;
-  }
-  
-  .locker-icon {
+}
+
+.locker-icon {
     position: absolute;
     font-size: 250px;
-    color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .locker-left {
+    color: rgba(255, 255, 255, 0.03);  /* Made icons more subtle */
+}
+
+.locker-left {
     top: 10%;
-    left: 50%;
+    left: 10%;  /* Adjusted position */
     transform: rotate(-15deg);
-  }
-  
-  .locker-right {
-    top: 45%;
-    left: 70%;
+}
+
+.locker-right {
+    bottom: 10%;  /* Changed from top to bottom */
+    right: 10%;   /* Changed from left to right */
     transform: rotate(15deg);
-  }
-  
-  .back-arrow {
-    position: absolute;
+}
+
+.back-arrow {
+    position: fixed;  /* Changed from absolute to fixed */
     top: 30px;
     left: 30px;
     color: white;
     z-index: 3;
     text-decoration: none;
-  }
-  
-  .title-text {
-    margin-left: auto;
-    margin-right: auto;
+    transition: color 0.3s ease;  /* Added transition */
+}
+
+.back-arrow:hover {
+    color: #6c757d;  /* Added hover effect */
+}
+
+.title-text {
+    margin: 2rem auto;  /* Added margin */
     max-width: 400px;
     padding: 0 40px;
-    text-align: right;
-  }
-  
-  .title-text h1 {
+    text-align: center;  /* Changed to center */
+}
+
+.title-text h1 {
     color: white;
-    font-size: 3rem;
+    font-size: 2.5rem;  /* Reduced size slightly */
     line-height: 1.2;
     font-weight: bold;
-  }
-  
-  .login-card {
+    margin-bottom: 1.5rem;  /* Added margin */
+}
+
+.login-card {
     background-color: #1f1f1f;
     padding: 40px;
     border-radius: 15px;
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;  /* Increased max-width */
     z-index: 2;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
-  }
-  
-  .login-card h3 {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);  /* Enhanced shadow */
+    margin: 2rem auto;  /* Added margin */
+}
+
+.login-card h3 {
     color: white;
-    margin-top: 10px;
-  }
-  
-  .input-icon {
+    margin: 1rem 0 2rem;  /* Adjusted margins */
+    font-weight: 600;
+}
+
+.input-icon {
     display: flex;
     align-items: center;
     background-color: #343a40;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-  }
-  
-  .input-icon iconify-icon {
-    color: white;
-    margin-right: 10px;
+    padding: 12px 15px;  /* Increased padding */
+    border-radius: 8px;  /* Increased border radius */
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;  /* Added transition */
+}
+
+.input-icon:focus-within {
+    background-color: #404850;  /* Added focus state */
+}
+
+.input-icon iconify-icon {
+    color: #6c757d;
+    margin-right: 12px;
     font-size: 20px;
-  }
-  
-  .input-icon input.form-control {
+}
+
+.input-icon input.form-control {
     background: transparent;
     border: none;
     color: white;
     width: 100%;
-  }
-  
-  .btn-login {
+    padding: 5px 0;
+}
+
+.input-icon input.form-control:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-login {
     background-color: #6c757d;
     color: white;
     font-weight: bold;
-    border-radius: 5px;
+    border-radius: 8px;  /* Increased border radius */
     width: 100%;
-  }
-  
-  .btn-login:hover {
+    padding: 12px;  /* Added padding */
+    margin-top: 1.5rem;  /* Added margin */
+    transition: background-color 0.3s ease;  /* Added transition */
+}
+
+.btn-login:hover {
     background-color: #5a6268;
-  }
-  
-  .create-account-link {
-    color: #ccc;
-    text-decoration: none;
-    font-size: 0.9rem;
-  }
-  
-  .create-account-link:hover {
-    color: #fff;
-    text-decoration: underline;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .title-text {
-      padding: 0 20px;
-      text-align: center;
+        padding: 0 20px;
     }
-  
+
     .title-text h1 {
-      font-size: 2.5rem;
+        font-size: 2rem;
     }
-  
+
     .locker-icon {
-      font-size: 150px;
+        font-size: 150px;
     }
-  
+
     .login-card {
-      padding: 20px;
-      max-width: 90%;
+        padding: 25px;
+        max-width: 90%;
+        margin: 1rem auto;
     }
-  }
-  
+}
+
+/* Add smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Improve form control placeholder color */
+::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
