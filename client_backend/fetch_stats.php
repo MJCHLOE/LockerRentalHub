@@ -13,7 +13,7 @@ try {
     $activeQuery = "SELECT COUNT(*) as active 
                    FROM rental 
                    WHERE user_id = ? 
-                   AND rental_status = 'approved'";
+                   AND rental_status = 'active'";
     $stmt = $conn->prepare($activeQuery);
     $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
