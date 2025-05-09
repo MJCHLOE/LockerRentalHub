@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update rental status
         $updateRental = "UPDATE rental 
                         SET rental_status = ?,
-                            processed_by = ?,
+                            processed_by = ?
                         WHERE rental_id = ?";
         $stmt = $conn->prepare($updateRental);
         $stmt->bind_param("sis", $new_status, $staff_id, $rental_id);
