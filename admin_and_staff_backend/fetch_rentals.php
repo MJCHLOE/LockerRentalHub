@@ -13,7 +13,8 @@ try {
                      r.rental_status,
                      r.payment_status,
                      r.processed_by,
-                     CONCAT(p.firstname, ' ', p.lastname) as processor_name
+                     CONCAT(p.firstname, ' ', p.lastname) as processor_name,
+                     p.role as processor_role
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
               LEFT JOIN users p ON r.processed_by = p.user_id
@@ -31,13 +32,14 @@ try {
         echo "<td>{$row['rental_id']}</td>";
         echo "<td>{$row['client_name']}</td>";
         echo "<td>{$row['locker_id']}</td>";
-        echo "<td>" . date('Y-m-d') . "</td>";
+        echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
         
         // Add specific classes for different statuses
         $statusClass = '';
         switch($row['rental_status']) {
             case 'pending': $statusClass = 'text-warning'; break;
             case 'approved': $statusClass = 'text-success'; break;
+            case 'active': $statusClass = 'text-success'; break;
             case 'denied': $statusClass = 'text-danger'; break;
             case 'cancelled': $statusClass = 'text-secondary'; break;
             case 'completed': $statusClass = 'text-info'; break;
@@ -49,8 +51,12 @@ try {
         $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
         echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
         
-        // Display processor if available
-        echo "<td>" . ($row['processor_name'] ?? 'N/A') . "</td>";
+        // Display processor name with role in parentheses if available
+        if (!empty($row['processor_name'])) {
+            echo "<td>{$row['processor_name']} ({$row['processor_role']})</td>";
+        } else {
+            echo "<td>N/A</td>";
+        }
         
         echo "<td>";
         
@@ -61,8 +67,11 @@ try {
                     echo "<button class='btn btn-sm btn-success mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")'>Approve</button>";
                     echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")'>Deny</button>";
                     break;
-                    
                 case 'approved':
+                    echo "<button class='btn btn-sm btn-primary mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"active\")'>Activate</button>";
+                    echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                    break;
+                case 'active':
                     echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
                     
                     if ($_SESSION['role'] === 'Admin') {

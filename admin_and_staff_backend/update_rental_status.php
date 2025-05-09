@@ -1,70 +1,129 @@
 <?php
 session_start();
-require_once '../db/database.php';
+require '../db/database.php';
 
-header('Content-Type: application/json');
-
-// Check if user is authorized
+// Check if user is logged in and is admin or staff
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff')) {
+    http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Debug: Log POST and SESSION data
-    error_log("POST DATA: " . print_r($_POST, true));
-    error_log("SESSION DATA: " . print_r($_SESSION, true));
+// Check if required parameters are set
+if (!isset($_POST['rental_id']) || !isset($_POST['status'])) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+    exit();
+}
 
-    $rental_id = $_POST['rental_id'] ?? null;
-    $new_status = $_POST['status'] ?? null;
-    $staff_id = $_SESSION['user_id'] ?? null;
+$rental_id = intval($_POST['rental_id']);
+$new_status = $_POST['status'];
+$processed_by = $_SESSION['user_id']; // Current user ID
 
-    if (!$rental_id || !$new_status || !$staff_id) {
-        echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
-        exit;
+// Validate status
+$valid_statuses = ['pending', 'approved', 'active', 'denied', 'cancelled', 'completed'];
+if (!in_array($new_status, $valid_statuses)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Invalid status']);
+    exit();
+}
+
+// Start transaction
+$conn->begin_transaction();
+
+try {
+    // Get current rental status first to check if transition is valid
+    $check_query = "SELECT rental_status, locker_id FROM rental WHERE rental_id = ?";
+    $check_stmt = $conn->prepare($check_query);
+    $check_stmt->bind_param("i", $rental_id);
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception("Rental not found");
     }
-
-    try {
-        $conn->begin_transaction();
-
-        // Update rental status and processed_by
-        $updateRental = "UPDATE rental SET rental_status = ?, processed_by = ? WHERE rental_id = ?";
-        $stmt = $conn->prepare($updateRental);
-        $stmt->bind_param("sis", $new_status, $staff_id, $rental_id);
-        $stmt->execute();
-
-        if ($stmt->affected_rows === 0) {
-            throw new Exception("Rental update failed or no rows were affected.");
-        }
-
-        // Update locker status based on rental status
-        $updateLocker = "UPDATE lockerunits lu 
-                         JOIN rental r ON lu.locker_id = r.locker_id 
-                         SET lu.status_id = CASE 
-                             WHEN ? = 'approved' THEN 3 -- Occupied
-                             WHEN ? IN ('denied', 'cancelled', 'completed') THEN 1 -- Vacant
-                             ELSE lu.status_id 
-                         END 
-                         WHERE r.rental_id = ?";
-        $stmt = $conn->prepare($updateLocker);
-        $stmt->bind_param("ssi", $new_status, $new_status, $rental_id);
-        $stmt->execute();
-
-        if ($stmt->affected_rows === 0) {
-            error_log("No locker status was updated. This might be due to the JOIN not matching.");
-        }
-
-        $conn->commit();
-        echo json_encode(['success' => true]);
-
-    } catch (Exception $e) {
-        $conn->rollback();
-        error_log("Error updating rental: " . $e->getMessage());
-        echo json_encode(['success' => false, 'message' => 'An error occurred: ' . $e->getMessage()]);
+    
+    $rental = $result->fetch_assoc();
+    $current_status = $rental['rental_status'];
+    $locker_id = $rental['locker_id'];
+    
+    // Validate status transition
+    $valid_transition = false;
+    
+    switch ($current_status) {
+        case 'pending':
+            $valid_transition = in_array($new_status, ['approved', 'denied']);
+            break;
+        case 'approved':
+            $valid_transition = in_array($new_status, ['active', 'cancelled']);
+            break;
+        case 'active':
+            $valid_transition = in_array($new_status, ['completed', 'cancelled']);
+            break;
+        case 'denied':
+        case 'cancelled':
+        case 'completed':
+            // These are final states, no transitions allowed
+            $valid_transition = false;
+            break;
     }
-
-    $conn->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
+    
+    if (!$valid_transition && $_SESSION['role'] !== 'Admin') {
+        // Only admin can override status transition rules
+        throw new Exception("Invalid status transition from {$current_status} to {$new_status}");
+    }
+    
+    // Update rental status
+    $update_query = "UPDATE rental SET rental_status = ?, processed_by = ? WHERE rental_id = ?";
+    $update_stmt = $conn->prepare($update_query);
+    $update_stmt->bind_param("sii", $new_status, $processed_by, $rental_id);
+    $update_stmt->execute();
+    
+    // Update locker status based on rental status
+    $locker_status = '';
+    if ($new_status === 'approved' || $new_status === 'active') {
+        $locker_status = 'Occupied';
+    } elseif ($new_status === 'completed' || $new_status === 'denied' || $new_status === 'cancelled') {
+        $locker_status = 'Vacant';
+    }
+    
+    if (!empty($locker_status)) {
+        $status_id_query = "SELECT status_id FROM lockerstatuses WHERE status_name = ?";
+        $status_stmt = $conn->prepare($status_id_query);
+        $status_stmt->bind_param("s", $locker_status);
+        $status_stmt->execute();
+        $status_result = $status_stmt->get_result();
+        $status_row = $status_result->fetch_assoc();
+        $status_id = $status_row['status_id'];
+        
+        $locker_update = "UPDATE lockers SET status_id = ? WHERE locker_id = ?";
+        $locker_stmt = $conn->prepare($locker_update);
+        $locker_stmt->bind_param("is", $status_id, $locker_id);
+        $locker_stmt->execute();
+    }
+    
+    // Log the action
+    $action = "Update Rental Status";
+    $description = "Updated rental #{$rental_id} status from {$current_status} to {$new_status}";
+    $user_id = $_SESSION['user_id'];
+    $entity = "rental";
+    
+    $log_query = "INSERT INTO activity_logs (action, description, user_id, entity) VALUES (?, ?, ?, ?)";
+    $log_stmt = $conn->prepare($log_query);
+    $log_stmt->bind_param("ssis", $action, $description, $user_id, $entity);
+    $log_stmt->execute();
+    
+    // Commit the transaction
+    $conn->commit();
+    
+    // Return success response
+    echo json_encode(['success' => true, 'message' => "Rental #{$rental_id} status updated to {$new_status}"]);
+    
+} catch (Exception $e) {
+    // Rollback the transaction on error
+    $conn->rollback();
+    
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>

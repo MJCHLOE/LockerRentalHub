@@ -1,79 +1,120 @@
-function searchRentals() {
-    const searchInput = document.getElementById('rentalSearchInput').value.toLowerCase();
-    const rows = document.getElementById('rentalsTableBody').getElementsByTagName('tr');
+/**
+ * Rental Management JavaScript Functions
+ */
 
-    Array.from(rows).forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchInput) ? '' : 'none';
-    });
-}
-
-function filterRentals(status) {
-    const rows = document.getElementById('rentalsTableBody').getElementsByTagName('tr');
-    
-    Array.from(rows).forEach(row => {
-        const rowStatus = row.querySelector('[data-status]')?.dataset.status;
-        if (status === 'all' || rowStatus === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-
-    // Update active button state
-    document.querySelectorAll('.btn-group button').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.onclick.toString().includes(status)) {
-            btn.classList.add('active');
-        }
-    });
-}
-
+// Function to handle updating rental status
 function updateRentalStatus(rentalId, newStatus) {
-    let confirmMessage = 'Are you sure you want to ';
-    switch(newStatus) {
-        case 'approved':
-            confirmMessage += 'approve';
-            break;
-        case 'denied':
-            confirmMessage += 'deny';
-            break;
-        case 'cancelled':
-            confirmMessage += 'cancel';
-            break;
-        case 'completed':
-            confirmMessage += 'complete';
-            break;
-        default:
-            confirmMessage += 'update';
-    }
-    confirmMessage += ' this rental?';
-
-    if (!confirm(confirmMessage)) {
+    // Confirm before proceeding
+    let statusText = {
+        'approved': 'approve',
+        'denied': 'deny',
+        'active': 'activate',
+        'completed': 'complete',
+        'cancelled': 'cancel'
+    };
+    
+    let confirmAction = confirm(`Are you sure you want to ${statusText[newStatus]} this rental?`);
+    if (!confirmAction) {
         return;
     }
-
-    fetch('../admin_and_staff_backend/update_rental_status.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    
+    // Send AJAX request to update status
+    $.ajax({
+        url: '../admin_and_staff_backend/update_rental_status.php',
+        type: 'POST',
+        data: {
             rental_id: rentalId,
             status: newStatus
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Rental status updated successfully');
-            location.reload();
-        } else {
-            alert('Error updating rental status: ' + data.message);
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Show success message
+                alert(response.message);
+                
+                // Refresh the rentals table
+                refreshRentalsTable();
+            } else {
+                alert('Error: ' + response.message);
+            }
+        },
+        error: function(xhr, status, error) {
+            let errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'An unknown error occurred';
+            alert('Error: ' + errorMessage);
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error updating rental status');
     });
 }
+
+// Function to refresh the rentals table
+function refreshRentalsTable() {
+    $.ajax({
+        url: '../admin_and_staff_backend/fetch_rentals.php',
+        type: 'GET',
+        success: function(html) {
+            $('#rentalsTableBody').html(html);
+        },
+        error: function() {
+            alert('Error refreshing rentals table');
+        }
+    });
+}
+
+// Function to search rentals
+function searchRentals() {
+    let input = document.getElementById('rentalSearchInput');
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById('rentalsTableBody');
+    let tr = table.getElementsByTagName('tr');
+    
+    for (let i = 0; i < tr.length; i++) {
+        let tdId = tr[i].getElementsByTagName('td')[0];
+        let tdClient = tr[i].getElementsByTagName('td')[1];
+        let tdLocker = tr[i].getElementsByTagName('td')[2];
+        
+        if (tdId || tdClient || tdLocker) {
+            let idText = tdId.textContent || tdId.innerText;
+            let clientText = tdClient.textContent || tdClient.innerText;
+            let lockerText = tdLocker.textContent || tdLocker.innerText;
+            
+            if (idText.toUpperCase().indexOf(filter) > -1 || 
+                clientText.toUpperCase().indexOf(filter) > -1 || 
+                lockerText.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+// Function to filter rentals by status
+function filterRentals(status) {
+    // Set active button
+    $('.btn-group button').removeClass('active');
+    $(event.target).addClass('active');
+    
+    let table = document.getElementById('rentalsTableBody');
+    let tr = table.getElementsByTagName('tr');
+    
+    for (let i = 0; i < tr.length; i++) {
+        if (status === 'all') {
+            tr[i].style.display = '';
+        } else {
+            let dataStatus = tr[i].getAttribute('data-status');
+            if (dataStatus === status) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+
+// Load rentals when document is ready
+$(document).ready(function() {
+    // Initial load of rentals
+    refreshRentalsTable();
+    
+    // Set up automatic refresh every 30 seconds
+    setInterval(refreshRentalsTable, 30000);
+});
