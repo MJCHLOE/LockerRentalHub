@@ -21,8 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
 
-        // When approving a rental, automatically set payment status to 'paid'
+        // When approving a rental, automatically set payment status to 'paid' and change status to 'active'
         if ($new_status === 'approved') {
+            $new_status = 'active';
             $payment_status = 'paid';
         }
 
@@ -55,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateLocker = "UPDATE lockerunits lu 
                         JOIN rental r ON lu.locker_id = r.locker_id 
                         SET lu.status_id = CASE 
-                            WHEN ? = 'approved' THEN 2 -- Occupied (status_id = 2 from your DB schema)
+                            WHEN ? = 'active' THEN 2 -- Occupied (status_id = 2 from your DB schema)
                             WHEN ? IN ('denied', 'cancelled', 'completed') THEN 1 -- Vacant (status_id = 1)
                             ELSE lu.status_id 
                         END 

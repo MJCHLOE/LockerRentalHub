@@ -38,6 +38,7 @@ try {
         switch($row['rental_status']) {
             case 'pending': $statusClass = 'text-warning'; break;
             case 'approved': $statusClass = 'text-success'; break;
+            case 'active': $statusClass = 'text-success'; break;
             case 'denied': $statusClass = 'text-danger'; break;
             case 'cancelled': $statusClass = 'text-secondary'; break;
             case 'completed': $statusClass = 'text-info'; break;
@@ -62,7 +63,7 @@ try {
                     echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")'>Deny</button>";
                     break;
                     
-                case 'approved':
+                case 'active':
                     echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
                     
                     if ($_SESSION['role'] === 'Admin') {
