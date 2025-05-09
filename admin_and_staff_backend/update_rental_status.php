@@ -34,7 +34,7 @@ try {
         }
 
         // Step 3: Update locker table
-        $stmt = $conn->prepare("UPDATE locker SET status = ? WHERE locker_id = ?");
+        $stmt = $conn->prepare("UPDATE locker_units SET status = ? WHERE locker_id = ?");
         $stmt->bind_param("ss", $locker_status, $locker_id);
         $stmt->execute();
         $stmt->close();
