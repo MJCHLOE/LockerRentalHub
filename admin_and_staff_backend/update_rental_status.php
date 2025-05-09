@@ -33,7 +33,7 @@ try {
     $conn->begin_transaction();
     
     // Get current rental information and locker_id
-    $stmt = $conn->prepare("SELECT locker_id, rental_status FROM rental WHERE rental_id = ?");
+    $stmt = $conn->prepare("SELECT locker_id, rental_status, payment_status FROM rental WHERE rental_id = ?");
     $stmt->bind_param("i", $rental_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -45,6 +45,7 @@ try {
     $rental_info = $result->fetch_assoc();
     $locker_id = $rental_info['locker_id'];
     $current_status = $rental_info['rental_status'];
+    $current_payment_status = $rental_info['payment_status'];
     $stmt->close();
     
     // Don't process if status hasn't changed
@@ -53,9 +54,24 @@ try {
         exit;
     }
     
-    // Update rental status
-    $stmt = $conn->prepare("UPDATE rental SET rental_status = ? WHERE rental_id = ?");
-    $stmt->bind_param("si", $new_status, $rental_id);
+    // Determine if payment status should be updated
+    $update_payment = false;
+    $new_payment_status = $current_payment_status;
+    
+    // If rental is being approved, automatically set payment status to paid
+    if ($new_status === 'approved' && $current_status === 'pending') {
+        $update_payment = true;
+        $new_payment_status = 'paid';
+    }
+    
+    // Prepare SQL based on whether payment status needs updating
+    if ($update_payment) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status = ? WHERE rental_id = ?");
+        $stmt->bind_param("ssi", $new_status, $new_payment_status, $rental_id);
+    } else {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ? WHERE rental_id = ?");
+        $stmt->bind_param("si", $new_status, $rental_id);
+    }
     $stmt->execute();
     $stmt->close();
     
@@ -88,6 +104,12 @@ try {
     // Log the action in system_logs
     $action = "Update Rental";
     $description = "Updated rental #$rental_id status from '$current_status' to '$new_status'";
+    
+    // Add payment status change to log description if applicable
+    if ($update_payment) {
+        $description .= " and payment status to 'paid'";
+    }
+    
     $entity_type = "rental";
     $entity_id = $rental_id;
     
@@ -135,7 +157,13 @@ try {
     
     $response['success'] = true;
     $response['message'] = "Rental status updated successfully";
+    if ($update_payment) {
+        $response['message'] .= " and payment marked as paid";
+    }
     $response['new_status'] = $new_status;
+    if ($update_payment) {
+        $response['payment_status'] = $new_payment_status;
+    }
     $response['locker_status_id'] = $locker_status_id;
 
 } catch (Exception $e) {
