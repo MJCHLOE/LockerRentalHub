@@ -105,12 +105,13 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                 <table class="table table-dark table-bordered">
                     <thead>
                         <tr>
-                            <th>Locker ID</th>
-                            <th>Size</th>
-                            <th>Rental Date</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Price/Month</th>
+                        <th>Locker</th>
+                        <th>Size</th>
+                        <th>Rental Date</th>
+                        <th>Rent Ended Date</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Price</th>
                         </tr>
                     </thead>
                     <tbody id="rentalHistoryTable">

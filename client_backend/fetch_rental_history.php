@@ -10,6 +10,7 @@ try {
     $query = "SELECT r.rental_id, 
                      r.locker_id,
                      r.rental_date,
+                     r.rent_ended_date,
                      r.rental_status,
                      r.payment_status,
                      lu.price_per_month,
@@ -40,18 +41,28 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+            
+            // Display rent ended date or "None" if null
+            echo "<td>";
+            if (!is_null($row['rent_ended_date'])) {
+                echo date('Y-m-d H:i', strtotime($row['rent_ended_date']));
+            } else {
+                echo "None";
+            }
+            echo "</td>";
+            
             echo "<td class='{$statusClass}'>{$row['rental_status']}</td>";
             echo "<td>{$row['payment_status']}</td>";
             echo "<td>₱{$row['price_per_month']}</td>";
             echo "</tr>";
         }
     } else {
-        echo "<tr><td colspan='6' class='text-center'>No rental history found</td></tr>";
+        echo "<tr><td colspan='7' class='text-center'>No rental history found</td></tr>";
     }
 
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='6' class='text-center'>Error: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='7' class='text-center'>Error: " . $e->getMessage() . "</td></tr>";
 }
 ?>

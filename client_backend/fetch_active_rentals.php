@@ -1,56 +1,94 @@
 <?php
+session_start(); // Make sure session is started
 require '../db/database.php';
-session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    die('Unauthorized access');
-}
+// Check if user is admin or staff
+$isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || $_SESSION['role'] === 'Staff');
 
 try {
     $query = "SELECT r.rental_id, 
+                     CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
                      r.rental_date,
+                     r.rent_ended_date,
                      r.rental_status,
-                     r.payment_status,
-                     lu.price_per_month,
-                     ls.size_name
+                     r.payment_status
               FROM rental r
-              JOIN lockerunits lu ON r.locker_id = lu.locker_id
-              JOIN lockersizes ls ON lu.size_id = ls.size_id
-              WHERE r.user_id = ? 
-              AND r.rental_status = 'active'  -- Only show approved rentals
+              JOIN users u ON r.user_id = u.user_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $_SESSION['user_id']);
     $stmt->execute();
     
+    // Get the result
     $result = $stmt->get_result();
     
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>{$row['locker_id']}</td>";
-            echo "<td>{$row['size_name']}</td>";
-            echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-            echo "<td><span class='badge badge-success'>Active</span></td>";
-            echo "<td><span class='badge badge-" . ($row['payment_status'] == 'paid' ? 'success' : 'warning') . "'>" 
-                 . ucfirst($row['payment_status']) . "</span></td>";
-            echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
-            echo "<td>
-                    <button class='btn btn-danger btn-sm' onclick='terminateRental({$row['rental_id']})'>
-                        Terminate
-                    </button>
-                  </td>";
-            echo "</tr>";
+    // Fetch data using mysqli_fetch_assoc
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
+        echo "<td>{$row['rental_id']}</td>";
+        echo "<td>{$row['client_name']}</td>";
+        echo "<td>{$row['locker_id']}</td>";
+        echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+        
+        // Display rent ended date or "None" if null
+        echo "<td>";
+        if (!is_null($row['rent_ended_date'])) {
+            echo date('Y-m-d H:i', strtotime($row['rent_ended_date']));
+        } else {
+            echo "None";
         }
-    } else {
-        echo "<tr><td colspan='7' class='text-center'>No active rentals found</td></tr>";
+        echo "</td>";
+        
+        // Add specific classes for different statuses
+        $statusClass = '';
+        switch($row['rental_status']) {
+            case 'pending': $statusClass = 'text-warning'; break;
+            case 'approved': $statusClass = 'text-success'; break;
+            case 'active': $statusClass = 'text-success'; break;
+            case 'denied': $statusClass = 'text-danger'; break;
+            case 'cancelled': $statusClass = 'text-secondary'; break;
+            case 'completed': $statusClass = 'text-info'; break;
+        }
+        
+        echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
+        
+        // Payment status with class
+        $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
+        echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
+        
+        
+        echo "<td>";
+        
+        // Add buttons based on rental status and user role
+        if ($isAdminOrStaff) {
+            switch($row['rental_status']) {
+                case 'pending':
+                    echo "<button class='btn btn-sm btn-success mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")'>Approve</button>";
+                    echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")'>Deny</button>";
+                    break;
+                case 'approved':
+                    echo "<button class='btn btn-sm btn-primary mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"active\")'>Activate</button>";
+                    echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                    break;
+                case 'active':
+                    echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
+                    
+                    if ($_SESSION['role'] === 'Admin') {
+                        echo "<button class='btn btn-sm btn-secondary ml-1' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                    }
+                    break;
+            }
+        }
+        
+        echo "</td>";
+        echo "</tr>";
     }
 
+    // Close the statement
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='7' class='text-center'>Error: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 }
 ?>

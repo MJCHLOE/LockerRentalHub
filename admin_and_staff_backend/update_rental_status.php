@@ -64,10 +64,19 @@ try {
         $new_payment_status = 'paid';
     }
     
-    // Prepare SQL based on whether payment status needs updating
-    if ($update_payment) {
+    // Check if we need to set the rent_ended_date
+    $set_end_date = in_array($new_status, ['completed', 'denied', 'cancelled']);
+    
+    // Prepare SQL based on whether payment status and/or end date needs updating
+    if ($update_payment && $set_end_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status = ?, rent_ended_date = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("ssi", $new_status, $new_payment_status, $rental_id);
+    } elseif ($update_payment) {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status = ? WHERE rental_id = ?");
         $stmt->bind_param("ssi", $new_status, $new_payment_status, $rental_id);
+    } elseif ($set_end_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, rent_ended_date = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("si", $new_status, $rental_id);
     } else {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ? WHERE rental_id = ?");
         $stmt->bind_param("si", $new_status, $rental_id);
@@ -108,6 +117,11 @@ try {
     // Add payment status change to log description if applicable
     if ($update_payment) {
         $description .= " and payment status to 'paid'";
+    }
+    
+    // Add rent ended date to log description if applicable
+    if ($set_end_date) {
+        $description .= " and marked rental as ended";
     }
     
     $entity_type = "rental";
@@ -159,6 +173,9 @@ try {
     $response['message'] = "Rental status updated successfully";
     if ($update_payment) {
         $response['message'] .= " and payment marked as paid";
+    }
+    if ($set_end_date) {
+        $response['message'] .= " and rent ended date set";
     }
     $response['new_status'] = $new_status;
     if ($update_payment) {
