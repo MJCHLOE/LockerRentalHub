@@ -12,12 +12,8 @@ try {
                      r.rental_date,
                      r.rental_status,
                      r.payment_status,
-                     r.processed_by,
-                     CONCAT(p.firstname, ' ', p.lastname) as processor_name,
-                     p.role as processor_role
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
-              LEFT JOIN users p ON r.processed_by = p.user_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
