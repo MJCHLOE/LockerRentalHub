@@ -1,11 +1,15 @@
 <?php
 session_start();
 require_once '../db/database.php';
-require_once 'log_actions.php'; // Adjust path if needed
+require_once '../admin_backend/log_actions.php'; // Make sure this file exists and is working
 
 header('Content-Type: application/json');
 
-// Check if user is authorized (Admin or Staff)
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Check session
 if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['Admin', 'Staff'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit;
@@ -23,13 +27,11 @@ if (!$rental_id || !$new_status) {
 try {
     $conn->begin_transaction();
 
-    // 1. Fetch current rental data
-    $stmt = $conn->prepare("
-        SELECT r.rental_status, r.locker_id, u.firstname, u.lastname 
-        FROM rental r
-        JOIN users u ON r.user_id = u.user_id
-        WHERE r.rental_id = ?
-    ");
+    // Fetch rental data
+    $stmt = $conn->prepare("SELECT r.rental_status, r.locker_id, u.firstname, u.lastname 
+                            FROM rental r
+                            JOIN users u ON r.user_id = u.user_id
+                            WHERE r.rental_id = ?");
     $stmt->bind_param("i", $rental_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -43,7 +45,7 @@ try {
     $locker_id = $rental['locker_id'];
     $client_name = "{$rental['firstname']} {$rental['lastname']}";
 
-    // 2. Validate allowed status transitions
+    // Validate status transition
     $allowedTransitions = [
         'pending' => ['approved', 'denied', 'cancelled'],
         'approved' => ['active', 'cancelled'],
@@ -56,27 +58,27 @@ try {
         throw new Exception("Invalid status transition from '{$current_status}' to '{$new_status}'");
     }
 
-    // 3. Update rental status (only this field)
+    // Update rental status
     $stmt = $conn->prepare("UPDATE rental SET rental_status = ? WHERE rental_id = ?");
     $stmt->bind_param("si", $new_status, $rental_id);
     $stmt->execute();
 
-    // 4. Update locker status based on new rental status
+    // Update locker status if applicable
     $lockerStatusMap = [
-        'approved' => 2, // Occupied
+        'approved' => 2,
         'active' => 2,
-        'cancelled' => 1, // Vacant
+        'cancelled' => 1,
         'denied' => 1,
         'completed' => 1
     ];
 
-    if (isset($lockerStatusMap[$new_status])) {
+    if (!empty($locker_id) && isset($lockerStatusMap[$new_status])) {
         $stmt = $conn->prepare("UPDATE lockerunits SET status_id = ? WHERE locker_id = ?");
         $stmt->bind_param("is", $lockerStatusMap[$new_status], $locker_id);
         $stmt->execute();
     }
 
-    // 5. Log the action
+    // Log the change
     $logger = $_SESSION['role'] === 'Admin' ? new AdminLogger($conn) : new StaffLogger($conn);
     $logger->logRentalStatusChange(
         $rental_id,
@@ -91,13 +93,17 @@ try {
 
     echo json_encode([
         'success' => true,
-        'message' => "Rental #{$rental_id} status updated from '{$current_status}' to '{$new_status}'",
-        'new_status' => $new_status
+        'message' => "Rental #{$rental_id} status updated to '{$new_status}'"
     ]);
 
 } catch (Exception $e) {
     $conn->rollback();
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage(),
+        'line' => $e->getLine(),
+        'file' => $e->getFile()
+    ]);
 }
 
 $conn->close();
