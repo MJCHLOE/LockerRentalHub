@@ -42,11 +42,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         
         // Delete from role-specific table
         if ($userData['role'] === 'Admin') {
-            $stmt = $conn->prepare("DELETE FROM Admins WHERE user_id = ?");
+            $stmt = $conn->prepare("DELETE FROM admins WHERE user_id = ?");
         } elseif ($userData['role'] === 'Staff') {
-            $stmt = $conn->prepare("DELETE FROM Staff WHERE user_id = ?");
+            $stmt = $conn->prepare("DELETE FROM staff WHERE user_id = ?");
         } else { // Client
-            $stmt = $conn->prepare("DELETE FROM Clients WHERE user_id = ?");
+            $stmt = $conn->prepare("DELETE FROM clients WHERE user_id = ?");
         }
         
         $stmt->bind_param("i", $user_id);
@@ -54,11 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         if (!$result) {
             throw new Exception("Error deleting from role table");
         }
-        
-        // Update any processed rentals to set processed_by to NULL
-        $stmt = $conn->prepare("UPDATE rental SET processed_by = NULL WHERE processed_by = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
         
         // Delete from users table
         $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
