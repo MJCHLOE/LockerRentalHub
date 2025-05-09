@@ -4,21 +4,57 @@ session_start();
 require '../db/database.php';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST["username"]);
-    $passwordInput = trim($_POST["password"]);
-    $firstname = trim($_POST["firstname"]);
-    $lastname = trim($_POST["lastname"]);
-    $email = trim($_POST["email"]);
-    $phone_number = trim($_POST["phone_number"]);
+    // Check if the connection is valid
+    if (!$conn) {
+        die("Connection failed: " . mysqli_connect_error());
+    }
 
-    // Hash the password using password_hash
+    // Sanitize inputs
+    $username = mysqli_real_escape_string($conn, strtolower(trim($_POST["username"])));
+    $passwordInput = trim($_POST["password"]);
+    $firstname = mysqli_real_escape_string($conn, trim($_POST["firstname"]));
+    $lastname = mysqli_real_escape_string($conn, trim($_POST["lastname"]));
+    $email = mysqli_real_escape_string($conn, strtolower(trim($_POST["email"])));
+    $phone_number = mysqli_real_escape_string($conn, trim($_POST["phone_number"]));
+
+    // Check if username exists
+    $checkUsername = $conn->prepare("SELECT username FROM users WHERE username = ?");
+    $checkUsername->bind_param("s", $username);
+    $checkUsername->execute();
+    $usernameResult = $checkUsername->get_result();
+
+    if ($usernameResult->num_rows > 0) {
+        echo "<script>alert('Username already exists!'); window.location.href='../RegisterPage.html';</script>";
+        $checkUsername->close();
+        $conn->close();
+        exit();
+    }
+    $checkUsername->close();
+
+    // Check if email exists
+    $checkEmail = $conn->prepare("SELECT email FROM users WHERE email = ?");
+    $checkEmail->bind_param("s", $email);
+    $checkEmail->execute();
+    $emailResult = $checkEmail->get_result();
+
+    if ($emailResult->num_rows > 0) {
+        echo "<script>alert('Email already registered!'); window.location.href='../RegisterPage.html';</script>";
+        $checkEmail->close();
+        $conn->close();
+        exit();
+    }
+    $checkEmail->close();
+
+    // Hash the password
     $hashedPassword = password_hash($passwordInput, PASSWORD_BCRYPT);
 
     // Prepare SQL to insert new user
     $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
 
     if (!$stmt) {
-        die("Prepare failed (Registration): (" . $conn->errno . ") " . $conn->error);
+        echo "<script>alert('Prepare failed: " . $conn->error . "'); window.location.href='../RegisterPage.html';</script>";
+        $conn->close();
+        exit();
     }
 
     $stmt->bind_param("ssssss", $username, $hashedPassword, $firstname, $lastname, $email, $phone_number);
@@ -30,7 +66,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $stmt->close();
+    $conn->close();
 }
-
-$conn->close();
 ?>
