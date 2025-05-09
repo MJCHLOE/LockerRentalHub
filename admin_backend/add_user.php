@@ -1,32 +1,36 @@
 <?php
-session_start();
-require '../db/database.php';
-require_once 'log_actions.php';
+    session_start();
+    require '../db/database.php';
+    require_once 'log_actions.php';
 
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
-}
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+        exit;
+    }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $newUsername = mysqli_real_escape_string($conn, strtolower(trim($_POST['username'])));
-    $newPassword = trim($_POST['password']);
-    $newFirstname = mysqli_real_escape_string($conn, trim($_POST['firstname']));
-    $newLastname = mysqli_real_escape_string($conn, trim($_POST['lastname']));
-    $newEmail = mysqli_real_escape_string($conn, strtolower(trim($_POST['email'])));
-    $newPhone = mysqli_real_escape_string($conn, trim($_POST['phone_number']));
-    $newRole = mysqli_real_escape_string($conn, trim($_POST['role']));
+    // Get form data
+    $newUsername = $_POST['username'];
+    $newPassword = $_POST['password'];
+    $newFirstname = $_POST['firstname'];
+    $newLastname = $_POST['lastname'];
+    $newEmail = $_POST['email'];
+    $newPhone = $_POST['phone_number'];
+    $newRole = $_POST['role'];
 
+    // Basic validation
     if (!empty($newUsername) && !empty($newPassword) && !empty($newFirstname) && 
         !empty($newLastname) && !empty($newEmail) && !empty($newPhone) && !empty($newRole)) {
         
+        // Hash the password (for security)
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
         try {
+            // Start transaction
             $conn->begin_transaction();
 
-            // Insert into Users table
-            $sql = "INSERT INTO Users (username, password, firstname, lastname, email, phone_number, role) 
+            // Insert user with new fields
+            $sql = "INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) 
                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sssssss", $newUsername, $hashedPassword, $newFirstname, 
@@ -41,25 +45,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "Added new {$newRole}: {$newFirstname} {$newLastname} (Username: {$newUsername})",
                     'user',
                     $newUserId,
-                    $_SESSION['user_id']
+                    $_SESSION['user_id'] // Add the current user's ID
                 );
 
+                // Commit transaction
                 $conn->commit();
-                echo "<script>alert('User added successfully!'); window.location.href='../admin/dashboard.php';</script>";
+                
+                echo json_encode(['success' => true, 'message' => 'User added successfully']);
             } else {
                 throw new Exception($conn->error);
             }
 
+            $stmt->close();
         } catch (Exception $e) {
+            // Rollback transaction on error
             $conn->rollback();
-            echo "<script>alert('Error: " . $e->getMessage() . "'); window.location.href='../admin/dashboard.php';</script>";
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
-        
-        $stmt->close();
     } else {
-        echo "<script>alert('All fields are required.'); window.location.href='../admin/dashboard.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
     }
-}
-
-$conn->close();
+    // Redirect back to dashboard
+    header("Location: ../admin/dashboard.php#lockers");
+    exit();
+    $conn->close();
 ?>
