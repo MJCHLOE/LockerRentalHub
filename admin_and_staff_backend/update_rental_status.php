@@ -11,12 +11,20 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['ro
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rental_id = $_POST['rental_id'];
-    $new_status = $_POST['status'];
+    // Parse JSON input for JavaScript fetch API
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$input) {
+        // Fallback to traditional form POST if JSON parsing fails
+        $input = $_POST;
+    }
+    
+    $rental_id = $input['rental_id'];
+    $new_status = $input['status'];
     $staff_id = $_SESSION['user_id'];
     
     // Get payment status if provided (for admin payment updates)
-    $payment_status = isset($_POST['payment_status']) ? $_POST['payment_status'] : null;
+    $payment_status = isset($input['payment_status']) ? $input['payment_status'] : null;
     
     try {
         $conn->begin_transaction();
@@ -32,6 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare($setUserVar);
         $stmt->bind_param("i", $staff_id);
         $stmt->execute();
+
+        // Validate that the status exists in the rentalstatus table
+        $validateStatus = "SELECT COUNT(*) as count FROM rentalstatus WHERE status_name = ?";
+        $stmt = $conn->prepare($validateStatus);
+        $stmt->bind_param("s", $new_status);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $statusExists = $result->fetch_assoc()['count'] > 0;
+        
+        if (!$statusExists && $new_status !== 'active') {
+            throw new Exception("Invalid rental status: $new_status");
+        }
 
         // Update rental status
         if ($payment_status !== null) {
@@ -88,6 +108,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare($insertLog);
             $stmt->bind_param("issi", $staff_id, $action, $description, $rental_id);
             $stmt->execute();
+            
+            // Get log ID and map to appropriate role-based log tables
+            $log_id = $conn->insert_id;
+            
+            if ($_SESSION['role'] === 'Admin') {
+                // Get admin_id from the user_id
+                $getAdminId = "SELECT admin_id FROM admins WHERE user_id = ?";
+                $stmt = $conn->prepare($getAdminId);
+                $stmt->bind_param("i", $staff_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $adminInfo = $result->fetch_assoc();
+                
+                if ($adminInfo) {
+                    $admin_id = $adminInfo['admin_id'];
+                    $insertAdminLog = "INSERT INTO admin_logs (log_id, admin_id) VALUES (?, ?)";
+                    $stmt = $conn->prepare($insertAdminLog);
+                    $stmt->bind_param("ii", $log_id, $admin_id);
+                    $stmt->execute();
+                }
+            } elseif ($_SESSION['role'] === 'Staff') {
+                // Get staff_id from the user_id
+                $getStaffId = "SELECT staff_id FROM staff WHERE user_id = ?";
+                $stmt = $conn->prepare($getStaffId);
+                $stmt->bind_param("i", $staff_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $staffInfo = $result->fetch_assoc();
+                
+                if ($staffInfo) {
+                    $staff_id = $staffInfo['staff_id'];
+                    $insertStaffLog = "INSERT INTO staff_logs (log_id, staff_id) VALUES (?, ?)";
+                    $stmt = $conn->prepare($insertStaffLog);
+                    $stmt->bind_param("ii", $log_id, $staff_id);
+                    $stmt->execute();
+                }
+            }
         }
 
         $conn->commit();

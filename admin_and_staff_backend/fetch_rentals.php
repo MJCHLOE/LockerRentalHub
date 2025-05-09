@@ -6,6 +6,7 @@ require '../db/database.php';
 $isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || $_SESSION['role'] === 'Staff');
 
 try {
+    // Join with rentalstatus table to utilize the predefined statuses
     $query = "SELECT r.rental_id, 
                      CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
@@ -13,10 +14,14 @@ try {
                      r.rental_status,
                      r.payment_status,
                      r.processed_by,
-                     CONCAT(p.firstname, ' ', p.lastname) as processor_name
+                     CONCAT(p.firstname, ' ', p.lastname) as processor_name,
+                     ls.size_name as locker_size,
+                     lu.price_per_month
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
               LEFT JOIN users p ON r.processed_by = p.user_id
+              JOIN lockerunits lu ON r.locker_id = lu.locker_id
+              JOIN lockersizes ls ON lu.size_id = ls.size_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -30,7 +35,7 @@ try {
         echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
         echo "<td>{$row['rental_id']}</td>";
         echo "<td>{$row['client_name']}</td>";
-        echo "<td>{$row['locker_id']}</td>";
+        echo "<td>{$row['locker_id']} ({$row['locker_size']} - ₱{$row['price_per_month']})</td>";
         echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
         
         // Add specific classes for different statuses
