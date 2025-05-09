@@ -21,24 +21,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
 
+        // When approving a rental, automatically set payment status to 'paid'
+        if ($new_status === 'approved') {
+            $payment_status = 'paid';
+        }
+
+        // Set the current user ID for the trigger to use
+        $setUserVar = "SET @current_user_id = ?";
+        $stmt = $conn->prepare($setUserVar);
+        $stmt->bind_param("i", $staff_id);
+        $stmt->execute();
+
         // Update rental status
-        if ($payment_status !== null && $_SESSION['role'] === 'Admin') {
-            // Admin is updating both rental status and payment status
+        if ($payment_status !== null) {
+            // Update both rental status and payment status
             $updateRental = "UPDATE rental 
                             SET rental_status = ?,
-                                processed_by = ?,
                                 payment_status = ?
                             WHERE rental_id = ?";
             $stmt = $conn->prepare($updateRental);
-            $stmt->bind_param("sisi", $new_status, $staff_id, $payment_status, $rental_id);
+            $stmt->bind_param("ssi", $new_status, $payment_status, $rental_id);
         } else {
             // Standard update without payment status change
             $updateRental = "UPDATE rental 
-                            SET rental_status = ?,
-                                processed_by = ?
+                            SET rental_status = ?
                             WHERE rental_id = ?";
             $stmt = $conn->prepare($updateRental);
-            $stmt->bind_param("sis", $new_status, $staff_id, $rental_id);
+            $stmt->bind_param("si", $new_status, $rental_id);
         }
         $stmt->execute();
 
@@ -46,8 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $updateLocker = "UPDATE lockerunits lu 
                         JOIN rental r ON lu.locker_id = r.locker_id 
                         SET lu.status_id = CASE 
-                            WHEN ? = 'approved' THEN 3 -- Occupied
-                            WHEN ? IN ('denied', 'cancelled', 'completed') THEN 1 -- Vacant
+                            WHEN ? = 'approved' THEN 2 -- Occupied (status_id = 2 from your DB schema)
+                            WHEN ? IN ('denied', 'cancelled', 'completed') THEN 1 -- Vacant (status_id = 1)
                             ELSE lu.status_id 
                         END 
                         WHERE r.rental_id = ?";
@@ -55,15 +64,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("ssi", $new_status, $new_status, $rental_id);
         $stmt->execute();
 
-        // If admin is updating payment status for an approved rental, add a payment record
-        if ($payment_status !== null && $_SESSION['role'] === 'Admin' && $payment_status == 'paid' && $new_status == 'approved') {
-            // Get rental details to calculate payment amount
-            $getRental = "SELECT rental_fee, start_date, end_date FROM rental WHERE rental_id = ?";
-            $stmt = $conn->prepare($getRental);
-            $stmt->bind_param("i", $rental_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
+        // Log the action in system_logs
+        $getLockerInfo = "SELECT locker_id, user_id FROM rental WHERE rental_id = ?";
+        $stmt = $conn->prepare($getLockerInfo);
+        $stmt->bind_param("i", $rental_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rentalInfo = $result->fetch_assoc();
+        
+        if ($rentalInfo) {
+            $locker_id = $rentalInfo['locker_id'];
+            $user_id = $rentalInfo['user_id'];
             
+            $action = "RENTAL_STATUS_UPDATE";
+            $description = "Rental Status Update: Changed status of Locker #{$locker_id} rental to '{$new_status}'";
+            if ($payment_status) {
+                $description .= " with payment status '{$payment_status}'";
+            }
+            
+            $insertLog = "INSERT INTO system_logs (user_id, action, description, entity_type, entity_id) 
+                          VALUES (?, ?, ?, 'rental', ?)";
+            $stmt = $conn->prepare($insertLog);
+            $stmt->bind_param("issi", $staff_id, $action, $description, $rental_id);
+            $stmt->execute();
         }
 
         $conn->commit();
