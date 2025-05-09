@@ -15,7 +15,7 @@ $testUser = [
 ];
 
 // Database connection
-require_once "db/database.php";
+require "db/database.php";
 
 try {
     // Test 1: Database Connection
@@ -24,6 +24,32 @@ try {
         throw new Exception("Connection failed: " . $conn->connect_error);
     }
     echo "<p style='color: green'>✓ Database connection successful!</p>";
+
+    // Check if users table exists
+    $result = $conn->query("SHOW TABLES LIKE 'users'");
+    if ($result->num_rows > 0) {
+        echo "<p style='color: green'>✓ Users table exists!</p>";
+        
+        // Show table structure
+        $result = $conn->query("DESCRIBE users");
+        echo "<h3>Users Table Structure:</h3>";
+        echo "<ul>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<li>{$row['Field']} - {$row['Type']}</li>";
+        }
+        echo "</ul>";
+    } else {
+        throw new Exception("Users table does not exist in the database!");
+    }
+
+    // Test a simple SELECT
+    $result = $conn->query("SELECT COUNT(*) as count FROM users");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        echo "<p>Current number of users in database: {$row['count']}</p>";
+    } else {
+        throw new Exception("Cannot query users table: " . $conn->error);
+    }
 
     // Test 2: Password Hashing
     echo "<h3>2. Testing Password Hashing</h3>";
@@ -36,7 +62,7 @@ try {
 
     // Test 3: User Registration
     echo "<h3>3. Testing User Registration</h3>";
-    $stmt = $conn->prepare("INSERT INTO Users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
     
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
