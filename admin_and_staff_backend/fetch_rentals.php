@@ -41,20 +41,12 @@ try {
             case 'completed': $statusClass = 'text-info'; break;
         }
         
-        
+        echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
         
         // Payment status with class
         $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
         echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
         
-        // Display processor name with role in parentheses if available
-        if (!empty($row['processor_name'])) {
-            echo "<td>{$row['processor_name']} ({$row['processor_role']})</td>";
-        } else {
-            echo "<td>N/A</td>";
-        }
-        
-        echo "<td>";
         
         // Add buttons based on rental status and user role
         if ($isAdminOrStaff) {
