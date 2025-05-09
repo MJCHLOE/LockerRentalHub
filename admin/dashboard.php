@@ -417,13 +417,13 @@
                placeholder="Search by ID, Client, or Locker ID" onkeyup="searchRentals()">
         
         <div class="btn-group" role="group">
-    <button type="button" class="btn btn-primary active filter-rental-btn" data-filter="all">All Rentals</button>
-    <button type="button" class="btn btn-warning filter-rental-btn" data-filter="pending">Pending</button>
-    <button type="button" class="btn btn-success filter-rental-btn" data-filter="approved">Active</button>
-    <button type="button" class="btn btn-danger filter-rental-btn" data-filter="denied">Denied</button>
-    <button type="button" class="btn btn-secondary filter-rental-btn" data-filter="cancelled">Cancelled</button>
-    <button type="button" class="btn btn-info filter-rental-btn" data-filter="completed">Completed</button>
-</div>
+            <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
+            <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
+            <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Active</button>
+            <button type="button" class="btn btn-danger" onclick="filterRentals('denied')">Denied</button>
+            <button type="button" class="btn btn-secondary" onclick="filterRentals('cancelled')">Cancelled</button>
+            <button type="button" class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
+        </div>
     </div>
 
       <!-- Rentals Table -->
