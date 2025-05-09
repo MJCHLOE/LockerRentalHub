@@ -191,7 +191,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                         <h6 class="font-weight-bold mb-3">Payment Instructions:</h6>
                         <ul class="list-unstyled mb-0">
                             <li class="mb-2">• Please proceed to the rental spot's cashier for payment</li>
-                            <li class="mb-2">• Payment must be completed within 24 hours of approval</li>
+                            <li class="mb-2">• Payment must be completed within approval</li>
                             <li class="mb-2">• Your rental status will remain 'Pending Payment' until paid</li>
                             <li>• The locker will be reserved for you during this period</li>
                         </ul>
