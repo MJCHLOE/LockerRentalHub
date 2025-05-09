@@ -9,12 +9,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['ro
     exit();
 }
 
-// Check if required parameters are set
-if (!isset($_POST['rental_id']) || !isset($_POST['status'])) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
-    exit();
-}
+
 
 $rental_id = intval($_POST['rental_id']);
 $new_status = $_POST['status'];
