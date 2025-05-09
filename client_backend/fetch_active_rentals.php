@@ -18,7 +18,7 @@ try {
               JOIN lockerunits lu ON r.locker_id = lu.locker_id
               JOIN lockersizes ls ON lu.size_id = ls.size_id
               WHERE r.user_id = ? 
-              AND r.rental_status = 'approved'  -- Only show approved rentals
+              AND r.rental_status = 'active'  -- Only show approved rentals
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
