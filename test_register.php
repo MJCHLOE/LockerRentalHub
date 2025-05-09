@@ -1,5 +1,4 @@
 <?php
-// Display all errors for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -37,7 +36,7 @@ try {
 
     // Test 3: User Registration
     echo "<h3>3. Testing User Registration</h3>";
-    $stmt = $conn->prepare("INSERT INTO users (username, password, role, firstname, lastname, email, phone_number) VALUES (?, ?, 'Client', ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
     
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
@@ -67,8 +66,9 @@ try {
             // Clean up - delete test user
             $delete_stmt = $conn->prepare("DELETE FROM users WHERE username = ?");
             $delete_stmt->bind_param("s", $testUser["username"]);
-            $delete_stmt->execute();
-            echo "<p style='color: blue'>ℹ Test user cleaned up from database</p>";
+            if ($delete_stmt->execute()) {
+                echo "<p style='color: blue'>ℹ Test user cleaned up from database</p>";
+            }
         } else {
             throw new Exception("User verification failed");
         }
