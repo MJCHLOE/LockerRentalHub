@@ -8,18 +8,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $passwordInput = trim($_POST["password"]);
     $firstname = trim($_POST["firstname"]);
     $lastname = trim($_POST["lastname"]);
+    $email = trim($_POST["email"]);
+    $phone_number = trim($_POST["phone_number"]);
 
     // Hash the password using password_hash
     $hashedPassword = password_hash($passwordInput, PASSWORD_BCRYPT);
 
     // Prepare SQL to insert new user
-    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, role) VALUES (?, ?, ?, ?, 'Client')");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
 
     if (!$stmt) {
         die("Prepare failed (Registration): (" . $conn->errno . ") " . $conn->error);
     }
 
-    $stmt->bind_param("ssss", $username, $hashedPassword, $firstname, $lastname);
+    $stmt->bind_param("ssssss", $username, $hashedPassword, $firstname, $lastname, $email, $phone_number);
 
     if ($stmt->execute()) {
         echo "<script>alert('Registration successful!'); window.location.href='../LoginPage.html';</script>";
