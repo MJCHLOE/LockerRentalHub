@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $conn->begin_transaction();
 
-        // Update rental status - ⚠️ Fixed: Removed extra comma before WHERE
+        // Update rental status
         $updateRental = "UPDATE rental 
                         SET rental_status = ?,
                             processed_by = ?
