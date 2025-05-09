@@ -445,46 +445,6 @@
               </tbody>
           </table>
       </div>
-
-      <!-- Payment Status Modal -->
-      <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="paymentModalLabel">Update Payment Status</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form id="paymentForm">
-                <input type="hidden" id="paymentRentalId" name="rental_id">
-                
-                <div class="form-group">
-                  <label>Current Payment Status:</label>
-                  <span id="currentPaymentStatus" class="font-weight-bold ml-2"></span>
-                </div>
-                
-                <div class="form-group">
-                  <label for="newPaymentStatus">New Payment Status:</label>
-                  <select class="form-control" id="newPaymentStatus" name="payment_status" required>
-                    <option value="unpaid">Unpaid</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                </div>
-                
-                <div class="d-flex justify-content-end">
-                  <button type="button" class="btn btn-secondary mr-2" data-dismiss="modal">Cancel</button>
-                  <button type="submit" class="btn btn-primary">Update Payment</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Toast Container for Notifications -->
-      <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 1060;"></div>
   </section>
     </div>
   </div>
