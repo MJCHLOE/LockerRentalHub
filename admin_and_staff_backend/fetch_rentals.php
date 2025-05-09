@@ -11,10 +11,10 @@ try {
                      r.locker_id,
                      r.rental_date,
                      r.rental_status,
-                     r.payment_status,
+                     r.payment_status
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
-              ORDER BY r.rental_date DESC;"
+              ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
     $stmt->execute();
