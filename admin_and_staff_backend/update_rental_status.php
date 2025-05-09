@@ -64,16 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
             $result = $stmt->get_result();
             
-            if ($rentalData = $result->fetch_assoc()) {
-                $rental_fee = $rentalData['rental_fee'];
-                
-                // Insert payment record
-                $insertPayment = "INSERT INTO payments (rental_id, amount, payment_date, payment_method, processed_by) 
-                                VALUES (?, ?, NOW(), 'Admin processed', ?)";
-                $stmt = $conn->prepare($insertPayment);
-                $stmt->bind_param("idi", $rental_id, $rental_fee, $staff_id);
-                $stmt->execute();
-            }
         }
 
         $conn->commit();
