@@ -37,7 +37,7 @@ try {
 
     // Test 3: User Registration
     echo "<h3>3. Testing User Registration</h3>";
-    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, role, firstname, lastname, email, phone_number) VALUES (?, ?, 'Client', ?, ?, ?, ?)");
     
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
