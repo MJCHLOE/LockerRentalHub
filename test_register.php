@@ -14,20 +14,60 @@ $testUser = [
     "phone_number" => "1234567890"
 ];
 
+// Database connection
 require_once "db/database.php";
 
 try {
-    // Start transaction
-    $conn->begin_transaction();
+    // Test 1: Database Connection
+    echo "<h3>1. Testing Database Connection</h3>";
+    if ($conn->connect_error) {
+        throw new Exception("Connection failed: " . $conn->connect_error);
+    }
+    echo "<p style='color: green'>✓ Database connection successful!</p>";
 
-    // First insert into users table
+    // Check if users table exists
+    $result = $conn->query("SHOW TABLES LIKE 'users'");
+    if ($result->num_rows > 0) {
+        echo "<p style='color: green'>✓ Users table exists!</p>";
+        
+        // Show table structure
+        $result = $conn->query("DESCRIBE users");
+        echo "<h3>Users Table Structure:</h3>";
+        echo "<ul>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<li>{$row['Field']} - {$row['Type']}</li>";
+        }
+        echo "</ul>";
+    } else {
+        throw new Exception("Users table does not exist in the database!");
+    }
+
+    // Test a simple SELECT
+    $result = $conn->query("SELECT COUNT(*) as count FROM users");
+    if ($result) {
+        $row = $result->fetch_assoc();
+        echo "<p>Current number of users in database: {$row['count']}</p>";
+    } else {
+        throw new Exception("Cannot query users table: " . $conn->error);
+    }
+
+    // Test 2: Password Hashing
+    echo "<h3>2. Testing Password Hashing</h3>";
+    $hashedPassword = password_hash($testUser["password"], PASSWORD_BCRYPT);
+    if (password_verify($testUser["password"], $hashedPassword)) {
+        echo "<p style='color: green'>✓ Password hashing working correctly!</p>";
+    } else {
+        throw new Exception("Password hashing verification failed");
+    }
+
+    // Test 3: User Registration
+    echo "<h3>3. Testing User Registration</h3>";
     $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
     
     if (!$stmt) {
         throw new Exception("Prepare failed: " . $conn->error);
     }
 
-    $hashedPassword = password_hash($testUser["password"], PASSWORD_BCRYPT);
     $stmt->bind_param("ssssss", 
         $testUser["username"],
         $hashedPassword,
@@ -38,43 +78,56 @@ try {
     );
 
     if ($stmt->execute()) {
-        echo "<p style='color: green'>✓ User table insert successful!</p>";
+        echo "<p style='color: green'>✓ Test user registration successful!</p>";
         
-        // Get the inserted user_id
-        $user_id = $conn->insert_id;
+        // Verify the user was actually inserted
+        $verify_stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+        $verify_stmt->bind_param("s", $testUser["username"]);
+        $verify_stmt->execute();
+        $result = $verify_stmt->get_result();
         
-        // Then insert into clients table
-        $fullname = $testUser["firstname"] . " " . $testUser["lastname"];
-        $client_stmt = $conn->prepare("INSERT INTO clients (user_id, full_name) VALUES (?, ?)");
-        $client_stmt->bind_param("is", $user_id, $fullname);
-        
-        if ($client_stmt->execute()) {
-            echo "<p style='color: green'>✓ Client table insert successful!</p>";
-            $conn->commit();
-            echo "<p style='color: green'>✓ Transaction committed successfully!</p>";
+        if ($result->num_rows > 0) {
+            echo "<p style='color: green'>✓ User verification successful!</p>";
+            
+            // Clean up - delete test user
+            $delete_stmt = $conn->prepare("DELETE FROM users WHERE username = ?");
+            $delete_stmt->bind_param("s", $testUser["username"]);
+            if ($delete_stmt->execute()) {
+                echo "<p style='color: blue'>ℹ Test user cleaned up from database</p>";
+            }
         } else {
-            throw new Exception("Client insert failed: " . $client_stmt->error);
+            throw new Exception("User verification failed");
         }
     } else {
-        throw new Exception("User insert failed: " . $stmt->error);
+        throw new Exception("User registration failed: " . $stmt->error);
     }
 
 } catch (Exception $e) {
-    if (isset($conn)) {
-        $conn->rollback();
-    }
     echo "<p style='color: red; font-weight: bold'>✗ ERROR: " . $e->getMessage() . "</p>";
 } finally {
     if (isset($stmt)) $stmt->close();
-    if (isset($client_stmt)) $client_stmt->close();
-    if (isset($conn)) $conn->close();
+    if (isset($verify_stmt)) $verify_stmt->close();
+    if (isset($delete_stmt)) $delete_stmt->close();
+    $conn->close();
 }
 
 // Display test parameters
 echo "<h3>Test Parameters:</h3>";
 echo "<ul>";
 foreach ($testUser as $key => $value) {
-    echo "<li>$key: " . ($key === "password" ? str_repeat("*", strlen($value)) : $value) . "</li>";
+    if ($key === "password") {
+        echo "<li>$key: " . str_repeat("*", strlen($value)) . "</li>";
+    } else {
+        echo "<li>$key: $value</li>";
+    }
 }
+echo "</ul>";
+
+// Display server info
+echo "<h3>PHP & Server Information:</h3>";
+echo "<ul>";
+echo "<li>PHP Version: " . phpversion() . "</li>";
+echo "<li>Server Software: " . $_SERVER['SERVER_SOFTWARE'] . "</li>";
+echo "<li>Script Path: " . $_SERVER['SCRIPT_FILENAME'] . "</li>";
 echo "</ul>";
 ?>
