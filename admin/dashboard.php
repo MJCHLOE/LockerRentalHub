@@ -504,14 +504,14 @@
       </div>
 
       <div class="form-group">
-        <label for="editEmail" style="color: black;">Email</label>
-        <input type="email" class="form-control" id="editEmail" name="email" required>
+        <label for="editEmail" style="color: black;">Email (leave blank to keep current email)</label>
+        <input type="email" class="form-control" id="editEmail" name="email">
       </div>
 
       <div class="form-group">
-        <label for="editPhone" style="color: black;">Phone Number</label>
+        <label for="editPhone" style="color: black;">Phone Number (leave blank to keep current phone number)</label>
         <input type="tel" class="form-control" id="editPhone" name="phone_number" 
-               pattern="[0-9]{11}" placeholder="09XXXXXXXXX" required>
+               pattern="[0-9]{11}" placeholder="09XXXXXXXXX">
       </div>
 
       <div class="form-group">
