@@ -40,7 +40,7 @@ function filterRole(role) {
     document.getElementById('filter-' + role.toLowerCase()).classList.add('active');
     
     // Show loading indicator
-    document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></td></tr>';
+    document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></td></tr>';
     
     // Perform AJAX request
     $.ajax({
@@ -51,7 +51,7 @@ function filterRole(role) {
         document.getElementById('usersTableBody').innerHTML = response;
       },
       error: function() {
-        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error loading users. Please try again.</td></tr>';
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading users. Please try again.</td></tr>';
       }
     });
   }
@@ -119,13 +119,32 @@ function filterRole(role) {
     form.submit();
   }
   
-  // Delete user function
+  // Delete user function - IMPROVED
   function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      // Show loading indicator
-      const row = document.querySelector(`tr[data-id="${userId}"]`);
-      const oldHtml = row.innerHTML;
-      row.innerHTML = '<td colspan="6" class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></td>';
+      // Identify the row to be deleted
+      const row = document.querySelector(`tr[data-id="${userId}"]`) || 
+                  document.querySelector(`tr td:first-child:contains('User #${userId}')`).parentNode;
+      
+      // If we still can't find the row, try another approach
+      if (!row) {
+        const allRows = document.querySelectorAll('#usersTableBody tr');
+        for (let i = 0; i < allRows.length; i++) {
+          if (allRows[i].innerHTML.includes(`'deleteUser(${userId})'`) || 
+              allRows[i].innerHTML.includes(`"deleteUser(${userId})"`)) {
+            row = allRows[i];
+            break;
+          }
+        }
+      }
+      
+      // Store original content in case of error
+      const oldHtml = row ? row.innerHTML : null;
+      
+      // Show loading indicator if row was found
+      if (row) {
+        row.innerHTML = '<td colspan="7" class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></td>';
+      }
       
       // Send AJAX request to delete the user
       $.ajax({
@@ -135,19 +154,41 @@ function filterRole(role) {
         dataType: 'json',
         success: function(response) {
           if (response.status === 'success') {
-            // Remove the row from the table
-            row.remove();
+            // Remove the row from the table if found
+            if (row) {
+              row.remove();
+            } else {
+              // If row wasn't found, refresh the entire table
+              filterRole(document.querySelector('.filter-btn.active').textContent.trim());
+            }
             alert(response.message);
           } else {
-            // Restore the row and show error
-            row.innerHTML = oldHtml;
-            alert(response.message);
+            // Restore the row and show error if row was found
+            if (row && oldHtml) {
+              row.innerHTML = oldHtml;
+            }
+            alert(response.message || 'Error deleting user.');
           }
         },
-        error: function() {
-          // Restore the row and show error
-          row.innerHTML = oldHtml;
-          alert('Error deleting user. Please try again.');
+        error: function(xhr) {
+          console.error('Delete error:', xhr.responseText);
+          // Restore the row and show error if row was found
+          if (row && oldHtml) {
+            row.innerHTML = oldHtml;
+          }
+          
+          let errorMsg = 'Error deleting user. Please try again.';
+          try {
+            // Try to parse error message from response
+            const response = JSON.parse(xhr.responseText);
+            if (response && response.message) {
+              errorMsg = response.message;
+            }
+          } catch (e) {
+            // Use default error message if parsing fails
+          }
+          
+          alert(errorMsg);
         }
       });
     }
@@ -157,4 +198,10 @@ function filterRole(role) {
   $(document).ready(function() {
     // Set the "All" button as active by default
     document.getElementById('filter-all').classList.add('active');
+    
+    // Custom jQuery selector for contains (case-insensitive)
+    jQuery.expr[':'].contains = function(a, i, m) {
+      return jQuery(a).text().toUpperCase()
+          .indexOf(m[3].toUpperCase()) >= 0;
+    };
   });

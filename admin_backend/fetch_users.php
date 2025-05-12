@@ -1,5 +1,4 @@
 <?php
-
 require '../db/database.php';
 
 // Modified query to include role-specific IDs
@@ -34,7 +33,8 @@ $result = $conn->query($sql);
 // Check if there are users
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        echo "<tr>";
+        // Add data-id attribute to the row for easier targeting
+        echo "<tr data-id=\"{$row['user_id']}\">";
         // Display User ID and role-specific ID with parentheses and reduced opacity
         echo "<td>" . htmlspecialchars("User #{$row['user_id']}") . 
              ($row['role_specific_id'] ? "<br><span style='opacity: 0.7'>(" . htmlspecialchars($row['role_specific_id']) . ")</span>" : "") . "</td>";
