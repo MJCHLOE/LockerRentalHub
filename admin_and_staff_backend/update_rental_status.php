@@ -33,7 +33,10 @@ try {
     $conn->begin_transaction();
     
     // Get current rental information and locker_id
-    $stmt = $conn->prepare("SELECT locker_id, rental_status, payment_status FROM rental WHERE rental_id = ?");
+    $stmt = $conn->prepare("SELECT r.locker_id, r.rental_status, ps.status_name as payment_status, r.payment_status_id 
+                          FROM rental r
+                          JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id 
+                          WHERE r.rental_id = ?");
     $stmt->bind_param("i", $rental_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -46,6 +49,7 @@ try {
     $locker_id = $rental_info['locker_id'];
     $current_status = $rental_info['rental_status'];
     $current_payment_status = $rental_info['payment_status'];
+    $current_payment_status_id = $rental_info['payment_status_id'];
     $stmt->close();
     
     // Don't process if status hasn't changed
@@ -56,12 +60,12 @@ try {
     
     // Determine if payment status should be updated
     $update_payment = false;
-    $new_payment_status = $current_payment_status;
+    $new_payment_status_id = $current_payment_status_id;
     
-    // If rental is being approved, automatically set payment status to paid
+    // If rental is being approved, automatically set payment status to paid (2)
     if ($new_status === 'approved' && $current_status === 'pending') {
         $update_payment = true;
-        $new_payment_status = 'paid';
+        $new_payment_status_id = 2; // ID for 'paid' in paymentstatus table
     }
     
     // Check if we need to set the rent_ended_date
@@ -69,11 +73,11 @@ try {
     
     // Prepare SQL based on whether payment status and/or end date needs updating
     if ($update_payment && $set_end_date) {
-        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status = ?, rent_ended_date = NOW() WHERE rental_id = ?");
-        $stmt->bind_param("ssi", $new_status, $new_payment_status, $rental_id);
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ?, rent_ended_date = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
     } elseif ($update_payment) {
-        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status = ? WHERE rental_id = ?");
-        $stmt->bind_param("ssi", $new_status, $new_payment_status, $rental_id);
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ? WHERE rental_id = ?");
+        $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
     } elseif ($set_end_date) {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, rent_ended_date = NOW() WHERE rental_id = ?");
         $stmt->bind_param("si", $new_status, $rental_id);
@@ -166,6 +170,15 @@ try {
         $staff_log_stmt->close();
     }
     
+    // Get the payment status name for the response
+    $payment_stmt = $conn->prepare("SELECT status_name FROM paymentstatus WHERE payment_status_id = ?");
+    $payment_stmt->bind_param("i", $new_payment_status_id);
+    $payment_stmt->execute();
+    $payment_result = $payment_stmt->get_result();
+    $payment_row = $payment_result->fetch_assoc();
+    $payment_status_name = $payment_row['status_name'];
+    $payment_stmt->close();
+    
     // Commit the transaction
     $conn->commit();
     
@@ -179,7 +192,7 @@ try {
     }
     $response['new_status'] = $new_status;
     if ($update_payment) {
-        $response['payment_status'] = $new_payment_status;
+        $response['payment_status'] = $payment_status_name;
     }
     $response['locker_status_id'] = $locker_status_id;
 
