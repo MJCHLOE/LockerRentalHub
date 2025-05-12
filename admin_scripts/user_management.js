@@ -77,6 +77,8 @@ function filterRole(role) {
           $('#editUsername').val(user.username);
           $('#editFirstname').val(user.firstname);
           $('#editLastname').val(user.lastname);
+          $('#editEmail').val(user.email);
+          $('#editPhoneNumber').val(user.phone_number);
           $('#editRole').val(user.role);
           
           // Clear the password field (it's optional for updates)
@@ -90,6 +92,8 @@ function filterRole(role) {
           $('#editUsername').val(user.username);
           $('#editFirstname').val(user.firstname);
           $('#editLastname').val(user.lastname);
+          $('#editEmail').val(user.email);
+          $('#editPhoneNumber').val(user.phone_number);
           $('#editRole').val(user.role);
         } else {
           $('#editModalBody').html(`<div class="alert alert-danger">${response.message}</div>`);

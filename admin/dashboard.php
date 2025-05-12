@@ -510,7 +510,7 @@
 
       <div class="form-group">
         <label for="editPhone" style="color: black;">Phone Number (leave blank to keep current phone number)</label>
-        <input type="tel" class="form-control" id="editPhone" name="phone_number" 
+        <input type="tel" class="form-control" id="editPhoneNumber" name="phone_number" 
                pattern="[0-9]{11}" placeholder="09XXXXXXXXX">
       </div>
 

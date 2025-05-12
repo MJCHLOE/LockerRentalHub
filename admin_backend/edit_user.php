@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $user_id = $_GET['id'];
     
     // Fetch user data
-    $stmt = $conn->prepare("SELECT user_id, username, firstname, lastname, role FROM users WHERE user_id = ?");
+    $stmt = $conn->prepare("SELECT user_id, username, firstname, lastname,  email, phone_number, role FROM users WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
