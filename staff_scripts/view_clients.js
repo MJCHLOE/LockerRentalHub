@@ -10,6 +10,12 @@ $(document).ready(function() {
     // Set up search functionality with debounce to optimize performance
     const debouncedSearch = debounce(searchClients, 300); // 300ms delay
     $('#searchInput').on('input', debouncedSearch);
+
+    // Custom jQuery selector for contains (case-insensitive)
+    jQuery.expr[':'].contains = function(a, i, m) {
+        return jQuery(a).text().toUpperCase()
+            .indexOf(m[3].toUpperCase()) >= 0;
+    };
 });
 
 /**
@@ -29,6 +35,7 @@ function debounce(func, wait) {
 
 /**
  * Search clients based on input text
+ * Improved implementation based on user_management.js
  */
 function searchClients() {
     let input = document.getElementById('searchInput');
@@ -42,12 +49,13 @@ function searchClients() {
         let fullName = tr[i].getElementsByTagName('td')[2];
         let email = tr[i].getElementsByTagName('td')[3];
         let phone = tr[i].getElementsByTagName('td')[4];
-        let role = tr[i].getElementsByTagName('td')[5];
         
-        if (id && username && fullName && email && phone && role) {
-            let txtValue = id.textContent + username.textContent + 
-                          fullName.textContent + email.textContent + 
-                          phone.textContent + role.textContent;
+        if (id && username && fullName && email && phone) {
+            let txtValue = id.textContent + ' ' + 
+                          username.textContent + ' ' + 
+                          fullName.textContent + ' ' + 
+                          email.textContent + ' ' + 
+                          phone.textContent;
             
             if (txtValue.toLowerCase().indexOf(filter) > -1) {
                 tr[i].style.display = '';
@@ -56,57 +64,39 @@ function searchClients() {
             }
         }
     }
-    }
-    
-    // If no matches were found and this isn't an empty search, show a message
-    if (matchedRows.length === 0 && searchInput !== '') {
-        const noMatchRow = document.createElement('tr');
-        noMatchRow.innerHTML = `<td colspan="5" class="text-center">No clients found matching "${searchInput}"</td>`;
-        noMatchRow.classList.add('no-match-row');
-        clientsTable.appendChild(noMatchRow);
-    } else {
-        // Remove any existing "no match" message
-        const noMatchRows = clientsTable.getElementsByClassName('no-match-row');
-        while (noMatchRows.length > 0) {
-            noMatchRows[0].remove();
-        }
-    }
-    
-    // Reinitialize pagination if it exists
-    if (typeof initPagination === 'function') {
-        initPagination('#clientsTableBody', 10); // Assuming 10 items per page
-    }
+}
 
 /**
- * Refresh the clients table with updated data
+ * Refresh the clients table with updated data and reapply search
  */
 function refreshClientsTable() {
+    // Show loading indicator
+    $('#clientsTableBody').html('<tr><td colspan="5" class="text-center"><div class="spinner-border text-light" role="status"><span class="sr-only">Loading...</span></div></td></tr>');
+    
     $.ajax({
         url: '../staff_backend/fetch_clients.php',
         method: 'GET',
         success: function(response) {
             $('#clientsTableBody').html(response);
             
-            // Get the current search value and apply the search filter
-            const searchInput = document.getElementById('searchInput').value;
-            if (searchInput.trim() !== '') {
+            // Re-apply search filter after table update if search field has content
+            if ($('#searchInput').val().trim() !== '') {
                 searchClients();
-            }
-            
-            // Reinitialize pagination if it exists
-            if (typeof initPagination === 'function') {
-                initPagination('#clientsTableBody', 10); // Assuming 10 items per page
             }
         },
         error: function(xhr, status, error) {
             console.error('Error fetching clients:', error);
+            $('#clientsTableBody').html('<tr><td colspan="5" class="text-center text-danger">Error loading clients. Please try again.</td></tr>');
         }
     });
 }
 
-// Refresh clients table every 30 seconds, but only if no search is active
-setInterval(function() {
-    if ($('#searchInput').val() === '') {
-        refreshClientsTable();
-    }
-}, 30000);
+/**
+ * Function to manually trigger search (can be attached to a button if needed)
+ */
+function triggerClientSearch() {
+    searchClients();
+}
+
+// Refresh clients table every 30 seconds
+setInterval(refreshClientsTable, 30000);
