@@ -40,13 +40,13 @@ if (isset($_GET['success'])) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                    <a class="nav-link" href="#view-lockers">View Clients</a>
+                    <a class="nav-link" href="dashboard.php">View Clients</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="lockers.php">View Lockers</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#manage-rentals">Manage Rentals</a>
+                    <a class="nav-link" href="manage_rentals.php">Manage Rentals</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../backend/logout.php">Logout</a>
@@ -56,75 +56,6 @@ if (isset($_GET['success'])) {
     </nav>
 
     <div class="container-fluid mt-5">
-        
-        <!-- Manage Clients Section -->
-        <section id="clients" class="my-4">
-            <h3>View Clients</h3>
-            <p>View client information.</p>
-
-            <!-- Search function -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by ID, Username, Name, Email, or Phone">
-            </div>
-
-            <!-- Displaying all clients -->
-            <div class="table-container">
-                <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clientsTableBody">
-                            <?php include '../staff_backend/fetch_clients.php'; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination will be added here by JavaScript -->
-            </div>
-        </section>
-
-        <!-- View Lockers Section -->
-        <section id="view-lockers" class="my-4">
-            <h3>View Lockers</h3>
-            <p>Current locker status and availability</p>
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="lockerSearchInput" class="form-control w-25" 
-                       placeholder="Search by Locker ID or Size">
-                
-                <div class="btn-group">
-                    <button class="btn btn-primary filter-btn active" onclick="filterLockerStatus('All')">All</button>
-                    <button class="btn btn-success filter-btn" onclick="filterLockerStatus('Vacant')">Vacant</button>
-                    <button class="btn btn-info filter-btn" onclick="filterLockerStatus('Occupied')">Occupied</button>
-                    <button class="btn btn-warning filter-btn" onclick="filterLockerStatus('Maintenance')">Maintenance</button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Locker ID</th>
-                                <th>Size</th>
-                                <th>Status</th>
-                                <th>Price/Month</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lockersTableBody">
-                            <!-- Populated via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination will be added here by JavaScript -->
-            </div>
-        </section>
 
         <!-- Manage Rentals Section -->
         <section id="manage-rentals" class="my-4">
