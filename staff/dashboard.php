@@ -40,13 +40,13 @@ if (isset($_GET['success'])) {
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-                    <a class="nav-link" href="#view-lockers">View Clients</a>
+                    <a class="nav-link" href="dashboard.php">View Clients</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="lockers.php">View Lockers</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#manage-rentals">Manage Rentals</a>
+                    <a class="nav-link" href="manage_rentals.php">Manage Rentals</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="../backend/logout.php">Logout</a>
@@ -89,88 +89,6 @@ if (isset($_GET['success'])) {
             </div>
         </section>
 
-        <!-- View Lockers Section -->
-        <section id="view-lockers" class="my-4">
-            <h3>View Lockers</h3>
-            <p>Current locker status and availability</p>
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="lockerSearchInput" class="form-control w-25" 
-                       placeholder="Search by Locker ID or Size">
-                
-                <div class="btn-group">
-                    <button class="btn btn-primary filter-btn active" onclick="filterLockerStatus('All')">All</button>
-                    <button class="btn btn-success filter-btn" onclick="filterLockerStatus('Vacant')">Vacant</button>
-                    <button class="btn btn-info filter-btn" onclick="filterLockerStatus('Occupied')">Occupied</button>
-                    <button class="btn btn-warning filter-btn" onclick="filterLockerStatus('Maintenance')">Maintenance</button>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Locker ID</th>
-                                <th>Size</th>
-                                <th>Status</th>
-                                <th>Price/Month</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lockersTableBody">
-                            <!-- Populated via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination will be added here by JavaScript -->
-            </div>
-        </section>
-
-        <!-- Manage Rentals Section -->
-        <section id="manage-rentals" class="my-4">
-            <h3>Manage Rentals</h3>
-            <p>Process and manage locker rentals.</p>
-
-            <!-- Search and Filter Controls -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="rentalSearchInput" class="form-control w-50" 
-                       placeholder="Search by ID, Client, or Locker ID">
-                
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
-                    <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
-                    <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Active</button>
-                    <button type="button" class="btn btn-danger" onclick="filterRentals('denied')">Denied</button>
-                    <button type="button" class="btn btn-secondary" onclick="filterRentals('cancelled')">Cancelled</button>
-                    <button type="button" class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
-                </div>
-            </div>
-
-            <!-- Rentals Table -->
-            <div class="table-container">
-                <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                            <th>Rental ID</th>
-                            <th>Client</th>
-                            <th>Locker</th>
-                            <th>Rental Date</th>
-                            <th>Rent Ended Date</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rentalsTableBody">
-                            <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- Pagination will be added here by JavaScript -->
-            </div>
-        </section>
-    </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>

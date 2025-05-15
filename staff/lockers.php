@@ -94,27 +94,6 @@ if (isset($_GET['success'])) {
             </div>
         </section>
 
-        <!-- Manage Rentals Section -->
-        <section id="manage-rentals" class="my-4">
-            <h3>Manage Rentals</h3>
-            <p>Process and manage locker rentals.</p>
-
-            <!-- Search and Filter Controls -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="rentalSearchInput" class="form-control w-50" 
-                       placeholder="Search by ID, Client, or Locker ID">
-                
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
-                    <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
-                    <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Active</button>
-                    <button type="button" class="btn btn-danger" onclick="filterRentals('denied')">Denied</button>
-                    <button type="button" class="btn btn-secondary" onclick="filterRentals('cancelled')">Cancelled</button>
-                    <button type="button" class="btn btn-info" onclick="filterRentals('completed')">Completed</button>
-                </div>
-            </div>
-
-
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
