@@ -5,7 +5,7 @@ session_start();
 $staffSessionKey = md5('Staff_' . $_SESSION['user_id']);
 
 // Check if user is logged in and is staff using both regular and role-specific session
-if (!isset($_SESSION[$staffSessionKey]) || 
+if (!isset($_SESSION[$staffSessionKey] ) || 
     !isset($_SESSION['role']) || 
     $_SESSION['role'] !== 'Staff') {
     header("Location: ../LoginPage.html");
@@ -38,6 +38,9 @@ if (isset($_GET['success'])) {
         </a>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                    <a class="nav-link" href="#clients">View Lockers</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#view-lockers">View Lockers</a>
                 </li>
@@ -65,22 +68,20 @@ if (isset($_GET['success'])) {
 
             <!-- Displaying all clients -->
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <div class="table-container">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Username</th>
-                                <th>Full Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clientsTableBody">
-                            <?php include '../staff_backend/fetch_clients.php'; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientsTableBody">
+                        <?php include '../staff_backend/fetch_clients.php'; ?>
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -102,21 +103,19 @@ if (isset($_GET['success'])) {
             </div>
 
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <div class="table-container">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Locker ID</th>
-                                <th>Size</th>
-                                <th>Status</th>
-                                <th>Price/Month</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lockersTableBody">
-                            <!-- Populated via AJAX -->
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Locker ID</th>
+                            <th>Size</th>
+                            <th>Status</th>
+                            <th>Price/Month</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lockersTableBody">
+                        <!-- Populated via AJAX -->
+                    </tbody>
+                </table>
             </div>
         </section>
 
@@ -142,25 +141,23 @@ if (isset($_GET['success'])) {
 
             <!-- Rentals Table -->
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <div class="table-container">
-                    <table class="table table-dark table-bordered">
-                        <thead>
-                            <tr>
-                            <th>Rental ID</th>
-                            <th>Client</th>
-                            <th>Locker</th>
-                            <th>Rental Date</th>
-                            <th>Rent Ended Date</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rentalsTableBody">
-                            <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <table class="table table-dark table-bordered">
+                    <thead>
+                        <tr>
+                        <th>Rental ID</th>
+                        <th>Client</th>
+                        <th>Locker</th>
+                        <th>Rental Date</th>
+                        <th>Rent Ended Date</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rentalsTableBody">
+                        <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
+                    </tbody>
+                </table>
             </div>
         </section>
     </div>
