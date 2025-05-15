@@ -81,9 +81,6 @@ if (isset($_GET['success'])) {
                         </tbody>
                     </table>
                 </div>
-                <nav aria-label="Clients table pagination">
-                    <ul class="pagination justify-content-center mt-3" id="clientsPagination"></ul>
-                </nav>
             </div>
         </section>
 
@@ -120,9 +117,6 @@ if (isset($_GET['success'])) {
                         </tbody>
                     </table>
                 </div>
-                <nav aria-label="Lockers table pagination">
-                    <ul class="pagination justify-content-center mt-3" id="lockersPagination"></ul>
-                </nav>
             </div>
         </section>
 
@@ -167,9 +161,6 @@ if (isset($_GET['success'])) {
                         </tbody>
                     </table>
                 </div>
-                <nav aria-label="Rentals table pagination">
-                    <ul class="pagination justify-content-center mt-3" id="rentalsPagination"></ul>
-                </nav>
             </div>
         </section>
     </div>
@@ -180,94 +171,5 @@ if (isset($_GET['success'])) {
     <script src="../admin_and_staff_scripts/rental_management.js"></script>
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            const rowsPerPage = 15;
-            const tables = [
-                { tbodyId: 'clientsTableBody', paginationId: 'clientsPagination' },
-                { tbodyId: 'lockersTableBody', paginationId: 'lockersPagination' },
-                { tbodyId: 'rentalsTableBody', paginationId: 'rentalsPagination' }
-            ];
-
-            function setupPagination(tbodyId, paginationId) {
-                const $tbody = $(`#${tbodyId}`);
-                const $pagination = $(`#${paginationId}`);
-                let currentPage = 1;
-
-                function paginate() {
-                    const $rows = $tbody.find('tr:visible');
-                    const totalRows = $rows.length;
-                    const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-                    // Hide all rows
-                    $rows.hide();
-
-                    // Show rows for current page
-                    const start = (currentPage - 1) * rowsPerPage;
-                    const end = start + rowsPerPage;
-                    $rows.slice(start, end).show();
-
-                    // Generate pagination controls
-                    $pagination.empty();
-                    if (totalPages <= 1) return;
-
-                    // Previous button
-                    $pagination.append(`
-                        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-                            <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
-                        </li>
-                    `);
-
-                    // Page numbers (show up to 5 pages, centered around current page)
-                    let startPage = Math.max(1, currentPage - 2);
-                    let endPage = Math.min(totalPages, startPage + 4);
-                    if (endPage - startPage < 4) {
-                        startPage = Math.max(1, endPage - 4);
-                    }
-
-                    for (let i = startPage; i <= endPage; i++) {
-                        $pagination.append(`
-                            <li class="page-item ${i === currentPage ? 'active' : ''}">
-                                <a class="page-link" href="#" data-page="${i}">${i}</a>
-                            </li>
-                        `);
-                    }
-
-                    // Next button
-                    $pagination.append(`
-                        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-                            <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
-                        </li>
-                    `);
-                }
-
-                // Initial pagination
-                paginate();
-
-                // Handle page clicks
-                $pagination.on('click', '.page-link', function(e) {
-                    e.preventDefault();
-                    const page = parseInt($(this).data('page'));
-                    if (page && page !== currentPage) {
-                        currentPage = page;
-                        paginate();
-                    }
-                });
-
-                // Re-paginate after table updates (search or filter)
-                $tbody.on('DOMSubtreeModified', function() {
-                    setTimeout(paginate, 0);
-                });
-            }
-
-            // Initialize pagination for each table
-            tables.forEach(table => {
-                if ($(`#${table.tbodyId}`).length && $(`#${table.paginationId}`).length) {
-                    setupPagination(table.tbodyId, table.paginationId);
-                }
-            });
-        });
-    </script>
 </body>
 </html>

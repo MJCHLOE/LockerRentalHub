@@ -56,8 +56,6 @@ section {
 }
 
 .table-container {
-  max-height: 250px; /* Approx. 5 rows (~50px per row) */
-  overflow-y: auto;
   position: relative;
 }
 
@@ -73,37 +71,34 @@ section {
   background: #343a40;
 }
 
-.table-container::-webkit-scrollbar {
+.table-container tbody {
+  display: block;
+  height: 250px; /* Approx. 5 rows (~50px per row) */
+  overflow-y: scroll;
+  width: 100%;
+}
+
+.table-container tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table-container tbody::-webkit-scrollbar {
   width: 8px;
 }
 
-.table-container::-webkit-scrollbar-track {
+.table-container tbody::-webkit-scrollbar-track {
   background: #2c2c2c;
 }
 
-.table-container::-webkit-scrollbar-thumb {
+.table-container tbody::-webkit-scrollbar-thumb {
   background: #666699;
   border-radius: 4px;
 }
 
-.pagination {
-  margin-top: 1rem;
-}
-
-.pagination .page-link {
-  background-color: #343a40;
-  color: #ffffff;
-  border: 1px solid #666699;
-}
-
-.pagination .page-link:hover {
-  background-color: #666699;
-  color: #ffffff;
-}
-
-.pagination .page-item.active .page-link {
-  background-color: #666699;
-  border-color: #666699;
+.table-responsive {
+  overflow-x: auto;
 }
 
 @media (max-width: 768px) {
@@ -119,8 +114,8 @@ section {
       font-size: 1.3rem;
   }
 
-  .table-container {
-      max-height: 200px; /* Approx. 5 rows for tablets */
+  .table-container tbody {
+      height: 200px; /* Approx. 5 rows for tablets */
   }
 }
 
@@ -133,16 +128,12 @@ section {
       font-size: 0.75rem;
   }
 
-  .table-responsive {
-      overflow-x: auto;
-  }
-
   section {
       padding-left: 0.5rem;
       padding-right: 0.5rem;
   }
 
-  .table-container {
-      max-height: 150px; /* Approx. 5 rows for mobile */
+  .table-container tbody {
+      height: 150px; /* Approx. 5 rows for mobile */
   }
 }
