@@ -67,6 +67,3 @@ function refreshClientsTable() {
         }
     });
 }
-
-// Refresh clients table every 30 seconds
-setInterval(refreshClientsTable, 30000);
