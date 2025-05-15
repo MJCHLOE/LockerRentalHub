@@ -58,7 +58,7 @@ body {
   /* Scrollable Table Styles */
 .table-scrollable {
   display: block;
-  max-height: 400px; /* Adjust height as needed */
+  max-height: 100px; /* Adjust height as needed */
   overflow-y: auto;
   width: 100%;
 }

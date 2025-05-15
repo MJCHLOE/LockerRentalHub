@@ -78,7 +78,7 @@ if (isset($_GET['success'])) {
                     <th>Phone</th>
                 </tr>
                 </thead>
-                <tbody id="clientsTableBody">
+                <tbody id="clientsTableBody table-scrollable">
                 <?php include '../staff_backend/fetch_clients.php'; ?>
                 </tbody>
             </table>
