@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $passwordInput = trim($_POST["password"]);
 
     // Check user credentials
-    $stmt = $conn->prepare("SELECT user_id, username, password, role, firstname, lastname FROM users WHERE username = ?");
+    $stmt = $conn->prepare("SELECT user_id, username, password, role, firstname, lastname FROM users WHERE BINARY username = ?");
     
     if (!$stmt) {
         die("Prepare failed (Login): (" . $conn->errno . ") " . $conn->error);
