@@ -138,7 +138,24 @@
   <div class="container-fluid mt-5 pt-3">
     <div class="row">
       <!-- Main Content -->
-      <div class="col-md-12">
+    <div class="col-md-12">
+    <section id="lockers" class="my-4">
+    <h3>Manage Lockers</h3>
+    <p>Add, edit, or remove locker entries.</p>
+
+    <!-- Add New Locker Button -->
+    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addLockerModal">Add New Locker</button>
+
+    <!-- Search and Filter Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <input type="text" id="lockerSearchInput" class="form-control w-50" placeholder="Search by Locker ID or Size" onkeyup="searchLockers()">
+      <div class="btn-group" role="group" aria-label="Locker filters">
+        <button id="filter-all" class="btn btn-primary filter-btn" onclick="filterLockerStatus('All')">All</button>
+        <button id="filter-vacant" class="btn btn-success filter-btn" onclick="filterLockerStatus('Vacant')">Vacant</button>
+        <button id="filter-occupied" class="btn btn-info filter-btn" onclick="filterLockerStatus('Occupied')">Rented</button>
+        <button id="filter-maintenance" class="btn btn-warning filter-btn" onclick="filterLockerStatus('Maintenance')">In Maintenance</button>
+      </div>
+    </div>
     <!-- Locker Table -->
     <div class="table-responsive bg-dark text-white p-3 rounded">
       <table class="table table-dark table-bordered">
