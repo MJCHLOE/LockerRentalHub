@@ -68,20 +68,20 @@ if (isset($_GET['success'])) {
 
             <!-- Displaying all clients -->
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Full Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                        </tr>
-                    </thead>
-                    <tbody id="clientsTableBody">
-                        <?php include '../staff_backend/fetch_clients.php'; ?>
-                    </tbody>
-                </table>
+            <table class="table table-dark table-bordered table-scrollable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                <?php include '../staff_backend/fetch_clients.php'; ?>
+                </tbody>
+            </table>
             </div>
         </section>
 
@@ -103,19 +103,19 @@ if (isset($_GET['success'])) {
             </div>
 
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Locker ID</th>
-                            <th>Size</th>
-                            <th>Status</th>
-                            <th>Price/Month</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lockersTableBody">
-                        <!-- Populated via AJAX -->
-                    </tbody>
-                </table>
+            <table class="table table-dark table-bordered table-scrollable">
+                <thead>
+                <tr>
+                    <th>Locker ID</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Price/Month</th>
+                </tr>
+                </thead>
+                <tbody id="lockersTableBody">
+                <!-- Populated via AJAX -->
+                </tbody>
+            </table>
             </div>
         </section>
 
@@ -141,23 +141,23 @@ if (isset($_GET['success'])) {
 
             <!-- Rentals Table -->
             <div class="table-responsive bg-dark text-white p-3 rounded">
-                <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
-                        <th>Rental ID</th>
-                        <th>Client</th>
-                        <th>Locker</th>
-                        <th>Rental Date</th>
-                        <th>Rent Ended Date</th>
-                        <th>Status</th>
-                        <th>Payment</th>
-                        <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rentalsTableBody">
-                        <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-                    </tbody>
-                </table>
+            <table class="table table-dark table-bordered table-scrollable">
+                <thead>
+                <tr>
+                    <th>Rental ID</th>
+                    <th>Client</th>
+                    <th>Locker</th>
+                    <th>Rental Date</th>
+                    <th>Rent Ended Date</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="rentalsTableBody">
+                <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
+                </tbody>
+            </table>
             </div>
         </section>
     </div>

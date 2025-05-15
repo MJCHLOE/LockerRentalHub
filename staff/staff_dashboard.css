@@ -55,21 +55,50 @@ body {
     border-radius: 12px;
   }
 
-  .clientsTableBody {
-    height:500px;
-    display:block;
-    overflow-y:scroll;
-    width:100%;
-  }
+  /* Scrollable Table Styles */
+.table-scrollable {
+  display: block;
+  max-height: 400px; /* Adjust height as needed */
+  overflow-y: auto;
+  width: 100%;
+}
 
-  .tbody {
-    height: 50px !important;
-    overflow-y: scroll;	
-  }
+.table-scrollable thead {
+  position: sticky;
+  top: 0;
+  background: #343a40; /* Matches table-dark background */
+  z-index: 1;
+}
 
-  tbody {
-    width: 100%;
-  }
+.table-scrollable tbody {
+  display: block;
+  width: 100%;
+}
+
+.table-scrollable tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed; /* Ensures consistent column widths */
+}
+
+.table-scrollable td,
+.table-scrollable th {
+  width: auto; /* Let Bootstrap handle column widths */
+}
+
+/* Ensure table remains responsive */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Adjust for dark theme */
+.table-dark.table-scrollable thead {
+  color: #ffffff;
+}
+
+.table-dark.table-scrollable tbody {
+  background: #212529; /* Matches table-dark */
+}
   
   @media (max-width: 768px) {
     .main-content {
