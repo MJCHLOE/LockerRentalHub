@@ -1,7 +1,7 @@
 <?php
 // Database connection
 $host = "194.59.164.68";
-$user = "u130348899_locker;
+$user = "u130348899_locker";
 $password = "Lockerdummy12"; 
 $dbname = "u130348899_lockerdummy";
 
