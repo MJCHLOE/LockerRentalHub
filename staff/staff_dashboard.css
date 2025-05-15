@@ -55,20 +55,6 @@ body {
     border-radius: 12px;
   }
 
-  .table.table-dark.table-bordered.table-scrollable tbody {
-    display: block;
-    max-height: 400px;
-    overflow-y: auto !important;
-  }
-  .table-scrollable tbody {
-    max-height: 100px; /* Test value */
-}
-  .table.table-dark.table-bordered.table-scrollable thead,
-  .table.table-dark.table-bordered.table-scrollable tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-  }
   
   @media (max-width: 768px) {
     .main-content {
