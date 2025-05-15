@@ -96,6 +96,6 @@ if (isset($_GET['success'])) {
     <script src="../admin_and_staff_scripts/rental_management.js"></script>
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
-    <script src="../staff_scripts/pajination.js"></script>
+    
 </body>
 </html>
