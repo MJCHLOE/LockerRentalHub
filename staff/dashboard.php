@@ -70,7 +70,7 @@ if (isset($_GET['success'])) {
             <!-- Displaying all clients -->
             <div class="table-container">
                 <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table-responsive table-dark table-bordered">
+                    <table class="table table-dark table-bordered">
                         <thead>
                             <tr>
                                 <th>ID</th>
