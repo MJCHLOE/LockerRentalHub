@@ -61,6 +61,15 @@ body {
     overflow-y:scroll;
     width:100%;
   }
+
+  .tbody {
+    height: 50px !important;
+    overflow-y: scroll;	
+  }
+
+  tbody {
+    width: 100%;
+  }
   
   @media (max-width: 768px) {
     .main-content {
