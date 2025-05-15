@@ -50,7 +50,7 @@
           <a class="nav-link" href="#clients"><iconify-icon icon="mdi:account-group-outline"></iconify-icon> Users</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#lockers"><iconify-icon icon="mdi:locker-multiple"></iconify-icon> Lockers</a>
+          <a class="nav-link" href="lockers.php"><iconify-icon icon="mdi:locker-multiple"></iconify-icon> Lockers</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#analytics"><iconify-icon icon="mdi:chart-bar"></iconify-icon> Analytics</a>
