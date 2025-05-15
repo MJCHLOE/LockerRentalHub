@@ -64,7 +64,7 @@ if (isset($_GET['success'])) {
 
             <!-- Search function -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by ID, Username, Name, Email, or Phone">
+                <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by ID, Username, Name, Email, or Phone" onkeyup="searchClients()">
             </div>
 
             <!-- Displaying all clients -->
