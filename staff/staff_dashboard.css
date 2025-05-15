@@ -5,131 +5,143 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-  }
-  
-  html {
+}
+
+html {
     scroll-behavior: smooth;
-  }
-  
-  section {
+}
+
+section {
     margin-top: 56px; /* Adjust this value based on your navbar height */
     padding-top: 56px; /* Same value to maintain spacing */
-  }
-  
-  .navbar {
+}
+
+.navbar {
     z-index: 1000;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-  }
-  
-  .navbar-brand iconify-icon {
+}
+
+.navbar-brand iconify-icon {
     margin-right: 5px;
-  }
-  
-  .navbar-nav .nav-item {
+}
+
+.navbar-nav .nav-item {
     padding-left: 1rem;
-  }
-  
-  .navbar-nav .nav-item .nav-link {
+}
+
+.navbar-nav .nav-item .nav-link {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-  
-  .nav-link:hover {
+}
+
+.nav-link:hover {
     text-decoration: none;
     color: #e0e0e0;
-  }
-  
-  .main-content {
+}
+
+.main-content {
     padding: 80px 2rem 2rem;
-  }
-  
-  .table th, .table td {
+}
+
+.table th, .table td {
     vertical-align: middle;
-  }
-  
-  .rounded {
+}
+
+.rounded {
     border-radius: 12px;
-  }
-
-  /* Scrollable Table Styles */
-.table-scrollable {
-  display: block;
-  max-height: 100px; /* Adjust height as needed */
-  overflow-y: auto;
-  width: 100%;
 }
 
-.table-scrollable thead {
-  position: sticky;
-  top: 0;
-  background: #343a40; /* Matches table-dark background */
-  z-index: 1;
+/* Scrollable Table Body Styles for Specific tbody IDs */
+#clientsTableBody, #lockersTableBody, #rentalsTableBody {
+    display: block;
+    max-height: 350px; /* Adjust as needed */
+    overflow-y: auto;
+    width: 100%;
+    background: #212529; /* Matches table-dark */
 }
 
-.table-scrollable tbody {
-  display: block;
-  width: 100%;
+.table-dark thead {
+    position: sticky;
+    top: 0;
+    background: #343a40; /* Matches table-dark header */
+    color: #ffffff;
+    z-index: 1;
 }
 
-.table-scrollable tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed; /* Ensures consistent column widths */
+.table-dark tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed; /* Ensures consistent column widths */
 }
 
-.table-scrollable td,
-.table-scrollable th {
-  width: auto; /* Let Bootstrap handle column widths */
+.table-dark th, .table-dark td {
+    border-color: #454d55; /* Matches table-dark borders */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Ensure table remains responsive */
 .table-responsive {
-  overflow-x: auto;
+    overflow-x: auto;
 }
 
-/* Adjust for dark theme */
-.table-dark.table-scrollable thead {
-  color: #ffffff;
+/* Scrollbar styling for consistency */
+#clientsTableBody::-webkit-scrollbar,
+#lockersTableBody::-webkit-scrollbar,
+#rentalsTableBody::-webkit-scrollbar {
+    width: 8px;
 }
 
-.table-dark.table-scrollable tbody {
-  background: #212529; /* Matches table-dark */
+#clientsTableBody::-webkit-scrollbar-track,
+#lockersTableBody::-webkit-scrollbar-track,
+#rentalsTableBody::-webkit-scrollbar-track {
+    background: #343a40;
 }
-  
-  @media (max-width: 768px) {
+
+#clientsTableBody::-webkit-scrollbar-thumb,
+#lockersTableBody::-webkit-scrollbar-thumb,
+#rentalsTableBody::-webkit-scrollbar-thumb {
+    background: #6c757d;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
     .main-content {
-      padding: 6rem 1rem 1rem;
+        padding: 6rem 1rem 1rem;
     }
-  
+
     .nav-link {
-      font-size: 0.9rem;
+        font-size: 0.9rem;
     }
-  
+
     h3 {
-      font-size: 1.3rem;
+        font-size: 1.3rem;
     }
-  }
-  
-  @media (max-width: 576px) {
+
+    #clientsTableBody, #lockersTableBody, #rentalsTableBody {
+        max-height: 250px; /* Smaller height for mobile */
+    }
+}
+
+@media (max-width: 576px) {
     .navbar-brand {
-      font-size: 1rem;
+        font-size: 1rem;
     }
-  
+
     .btn-sm {
-      font-size: 0.75rem;
+        font-size: 0.75rem;
     }
-  
+
     .table-responsive {
-      overflow-x: auto;
+        overflow-x: auto;
     }
-  
+
     section {
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
     }
-  }
-  
+}
