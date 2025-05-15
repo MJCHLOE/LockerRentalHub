@@ -32,29 +32,28 @@ function debounce(func, wait) {
  */
 function searchClients() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const clientsTable = document.getElementById('clientsTableBody');
-    const rows = clientsTable.getElementsByTagName('tr');
-
-    for (let row of rows) {
-        const cells = row.getElementsByTagName('td');
-        let found = false;
-
-        // Search through each cell in the row
-        for (let cell of cells) {
-            const text = (cell.textContent || cell.innerText).trim().toLowerCase();
-            if (text.indexOf(searchInput) > -1) {
-                found = true;
-                break;
+    
+    // Use the same fetch_clients.php file but with a search parameter
+    $.ajax({
+        url: '../staff_backend/fetch_clients.php',
+        method: 'GET',
+        data: { search: searchInput },
+        success: function(response) {
+            $('#clientsTableBody').html(response);
+            
+            // Reinitialize pagination if it exists
+            if (typeof initPagination === 'function') {
+                initPagination('#clientsTableBody', 10); // Assuming 10 items per page
             }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error searching clients:', error);
         }
-
-        // Show/hide row based on search result
-        row.style.display = found ? '' : 'none';
-    }
+    });
 }
 
 /**
- * Refresh the clients table with updated data and reapply search
+ * Refresh the clients table with updated data
  */
 function refreshClientsTable() {
     $.ajax({
@@ -62,7 +61,11 @@ function refreshClientsTable() {
         method: 'GET',
         success: function(response) {
             $('#clientsTableBody').html(response);
-            searchClients(); // Re-apply search filter after table update
+            
+            // Reinitialize pagination if it exists
+            if (typeof initPagination === 'function') {
+                initPagination('#clientsTableBody', 10); // Assuming 10 items per page
+            }
         },
         error: function(xhr, status, error) {
             console.error('Error fetching clients:', error);
@@ -70,5 +73,9 @@ function refreshClientsTable() {
     });
 }
 
-// Refresh clients table every 30 seconds
-setInterval(refreshClientsTable, 30000);
+// Refresh clients table every 30 seconds, but only if no search is active
+setInterval(function() {
+    if ($('#searchInput').val() === '') {
+        refreshClientsTable();
+    }
+}, 30000);
