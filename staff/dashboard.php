@@ -28,6 +28,7 @@ if (isset($_GET['success'])) {
     <title>Staff Dashboard - Locker Rental Hub</title>
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="staff_dashboard.css">
+    <link rel="stylesheet" href="pagination.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
 <body>
@@ -38,9 +39,6 @@ if (isset($_GET['success'])) {
         </a>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                    <a class="nav-link" href="#clients">View Lockers</a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#view-lockers">View Lockers</a>
                 </li>
@@ -63,25 +61,28 @@ if (isset($_GET['success'])) {
 
             <!-- Search function -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by ID, Username, Name, Email, or Phone" onkeyup="searchClients()">
+                <input type="text" id="searchInput" class="form-control w-50" placeholder="Search by ID, Username, Name, Email, or Phone">
             </div>
 
             <!-- Displaying all clients -->
-            <div class="table-responsive bg-dark text-white p-3 rounded">
-            <table class="table table-dark table-bordered table-scrollable">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                </tr>
-                </thead>
-                <tbody id="clientsTableBody">
-                <?php include '../staff_backend/fetch_clients.php'; ?>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <div class="table-responsive bg-dark text-white p-3 rounded">
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody">
+                            <?php include '../staff_backend/fetch_clients.php'; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination will be added here by JavaScript -->
             </div>
         </section>
 
@@ -102,20 +103,23 @@ if (isset($_GET['success'])) {
                 </div>
             </div>
 
-            <div class="table-responsive bg-dark text-white p-3 rounded">
-            <table class="table table-dark table-bordered table-scrollable">
-                <thead>
-                <tr>
-                    <th>Locker ID</th>
-                    <th>Size</th>
-                    <th>Status</th>
-                    <th>Price/Month</th>
-                </tr>
-                </thead>
-                <tbody id="lockersTableBody">
-                <!-- Populated via AJAX -->
-                </tbody>
-            </table>
+            <div class="table-container">
+                <div class="table-responsive bg-dark text-white p-3 rounded">
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Locker ID</th>
+                                <th>Size</th>
+                                <th>Status</th>
+                                <th>Price/Month</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lockersTableBody">
+                            <!-- Populated via AJAX -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination will be added here by JavaScript -->
             </div>
         </section>
 
@@ -127,7 +131,7 @@ if (isset($_GET['success'])) {
             <!-- Search and Filter Controls -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <input type="text" id="rentalSearchInput" class="form-control w-50" 
-                       placeholder="Search by ID, Client, or Locker ID" onkeyup="searchRentals()">
+                       placeholder="Search by ID, Client, or Locker ID">
                 
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
@@ -140,24 +144,27 @@ if (isset($_GET['success'])) {
             </div>
 
             <!-- Rentals Table -->
-            <div class="table-responsive bg-dark text-white p-3 rounded">
-            <table class="table table-dark table-bordered table-scrollable">
-                <thead>
-                <tr>
-                    <th>Rental ID</th>
-                    <th>Client</th>
-                    <th>Locker</th>
-                    <th>Rental Date</th>
-                    <th>Rent Ended Date</th>
-                    <th>Status</th>
-                    <th>Payment</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="rentalsTableBody">
-                <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <div class="table-responsive bg-dark text-white p-3 rounded">
+                    <table class="table table-dark table-bordered">
+                        <thead>
+                            <tr>
+                            <th>Rental ID</th>
+                            <th>Client</th>
+                            <th>Locker</th>
+                            <th>Rental Date</th>
+                            <th>Rent Ended Date</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rentalsTableBody">
+                            <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination will be added here by JavaScript -->
             </div>
         </section>
     </div>
@@ -168,5 +175,6 @@ if (isset($_GET['success'])) {
     <script src="../admin_and_staff_scripts/rental_management.js"></script>
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
+    <script src="../staff_scripts/pagination.js"></script>
 </body>
 </html>

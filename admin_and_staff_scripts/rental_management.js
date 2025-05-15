@@ -1,24 +1,36 @@
 function searchRentals() {
     const searchInput = document.getElementById('rentalSearchInput').value.toLowerCase();
     const rows = document.getElementById('rentalsTableBody').getElementsByTagName('tr');
+    const filteredRows = [];
 
     Array.from(rows).forEach(row => {
         const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchInput) ? '' : 'none';
+        if (text.includes(searchInput)) {
+            filteredRows.push(row);
+        }
     });
+    
+    // Update pagination with filtered rows
+    if (window.rentalsPaginator) {
+        window.rentalsPaginator.updateRows(filteredRows);
+    }
 }
 
 function filterRentals(status) {
     const rows = document.getElementById('rentalsTableBody').getElementsByTagName('tr');
+    const filteredRows = [];
     
     Array.from(rows).forEach(row => {
         const rowStatus = row.querySelector('[data-status]')?.dataset.status;
         if (status === 'all' || rowStatus === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+            filteredRows.push(row);
         }
     });
+    
+    // Update pagination with filtered rows
+    if (window.rentalsPaginator) {
+        window.rentalsPaginator.updateRows(filteredRows);
+    }
 
     // Update active button state
     document.querySelectorAll('.btn-group button').forEach(btn => {
@@ -81,3 +93,11 @@ function updateRentalStatus(rentalId, newStatus) {
     });
 }
 
+// Initialize when document is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener for search input
+    const searchInput = document.getElementById('rentalSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchRentals);
+    }
+});
