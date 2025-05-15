@@ -54,6 +54,13 @@ body {
   .rounded {
     border-radius: 12px;
   }
+
+  .clientsTableBody {
+    height:500px;
+    display:block;
+    overflow-y:scroll;
+    width:100%;
+  }
   
   @media (max-width: 768px) {
     .main-content {
