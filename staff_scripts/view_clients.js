@@ -7,23 +7,25 @@ $(document).ready(function() {
     // Initial load of clients
     refreshClientsTable();
 
-    // Debounce function to limit search frequency
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    // Set up search functionality with debounce
+    // Set up search functionality with debounce to optimize performance
     const debouncedSearch = debounce(searchClients, 300); // 300ms delay
     $('#searchInput').on('input', debouncedSearch);
 });
+
+/**
+ * Debounce function to limit search frequency
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 
 /**
  * Search clients based on input text
@@ -52,7 +54,7 @@ function searchClients() {
 }
 
 /**
- * Refresh the clients table with updated data
+ * Refresh the clients table with updated data and reapply search
  */
 function refreshClientsTable() {
     $.ajax({
@@ -67,3 +69,6 @@ function refreshClientsTable() {
         }
     });
 }
+
+// Refresh clients table every 30 seconds
+setInterval(refreshClientsTable, 30000);
