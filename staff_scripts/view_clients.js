@@ -31,49 +31,31 @@ function debounce(func, wait) {
  * Search clients based on input text
  */
 function searchClients() {
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    
-    // Get all rows from the table
-    const clientsTable = document.getElementById('clientsTableBody');
-    const rows = clientsTable.getElementsByTagName('tr');
-    
-    // Track which rows match the search
-    let matchedRows = [];
-    let noMatchCount = 0;
-    
-    // Loop through all table rows to find matches
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const cells = row.getElementsByTagName('td');
-        let found = false;
+    let input = document.getElementById('searchInput');
+    let filter = input.value.toLowerCase();
+    let tbody = document.getElementById('clientsTableBody');
+    let tr = tbody.getElementsByTagName('tr');
+
+    for (let i = 0; i < tr.length; i++) {
+        let id = tr[i].getElementsByTagName('td')[0];
+        let username = tr[i].getElementsByTagName('td')[1];
+        let fullName = tr[i].getElementsByTagName('td')[2];
+        let email = tr[i].getElementsByTagName('td')[3];
+        let phone = tr[i].getElementsByTagName('td')[4];
+        let role = tr[i].getElementsByTagName('td')[5];
         
-        // Skip header rows or rows with no cells
-        if (cells.length === 0) continue;
-        
-        // Check if this is a "No clients found" message row
-        if (cells.length === 1 && cells[0].getAttribute('colspan')) {
-            row.style.display = 'none';
-            continue;
-        }
-        
-        // Search through all cells in the row
-        for (let j = 0; j < cells.length; j++) {
-            const cellText = cells[j].textContent || cells[j].innerText;
+        if (id && username && fullName && email && phone && role) {
+            let txtValue = id.textContent + username.textContent + 
+                          fullName.textContent + email.textContent + 
+                          phone.textContent + role.textContent;
             
-            if (cellText.toLowerCase().indexOf(searchInput) > -1) {
-                found = true;
-                break;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
             }
         }
-        
-        // Show/hide row based on search result
-        if (found || searchInput === '') {
-            row.style.display = '';
-            matchedRows.push(row);
-        } else {
-            row.style.display = 'none';
-            noMatchCount++;
-        }
+    }
     }
     
     // If no matches were found and this isn't an empty search, show a message
@@ -94,7 +76,6 @@ function searchClients() {
     if (typeof initPagination === 'function') {
         initPagination('#clientsTableBody', 10); // Assuming 10 items per page
     }
-}
 
 /**
  * Refresh the clients table with updated data
