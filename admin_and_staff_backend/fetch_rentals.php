@@ -12,10 +12,9 @@ try {
                      r.rental_date,
                      r.rent_ended_date,
                      r.rental_status,
-                     ps.status_name as payment_status
+                     r.payment_status
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
-              JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -57,7 +56,6 @@ try {
         // Payment status with class
         $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
         echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
-        
         
         echo "<td>";
         
