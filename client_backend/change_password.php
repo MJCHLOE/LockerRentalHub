@@ -8,15 +8,15 @@ $clientSessionKey = md5('Client_' . $_SESSION['user_id']);
 if (!isset($_SESSION[$clientSessionKey]) || 
     !isset($_SESSION['role']) || 
     $_SESSION['role'] !== 'Client') {
-    echo "<script>alert('Unauthorized access.'); window.location.href='../../home.php';</script>";
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
     exit();
 }
 
 require_once '../db/database.php';
-require_once 'log_actions.php'; 
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -25,18 +25,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $newPassword = $_POST['new_password'];
     $confirmPassword = $_POST['confirm_password'];
 
+    // Validation
     if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-        echo "<script>alert('All fields are required.'); window.location.href='../client/home.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
         exit();
     }
 
     if ($newPassword !== $confirmPassword) {
-        echo "<script>alert('New passwords do not match.'); window.location.href='../client/home.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'New passwords do not match.']);
         exit();
     }
 
     if (strlen($newPassword) < 6) {
-        echo "<script>alert('New password must be at least 6 characters.'); window.location.href='../client/home.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'New password must be at least 6 characters.']);
         exit();
     }
 
@@ -49,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     if (!$storedHash || !password_verify($currentPassword, $storedHash)) {
-        echo "<script>alert('Current password is incorrect.'); window.location.href='../client/home.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
         exit();
     }
 
@@ -60,17 +61,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("si", $hashedPassword, $userId);
 
     if ($stmt->execute()) {
-        // Log the password change
-        $logger = new SystemLogger($conn);
-        $logger->logAction(
-            'Change Password',
-            "User changed their password",
-            'user',
-            $userId
-        );
-        echo "<script>alert('Password changed successfully!'); window.location.href='../client/home.php';</script>";
+        // Log the password change if you have a logging system
+        if (file_exists('../backend/log_actions.php')) {
+            require_once '../backend/log_actions.php';
+            $logger = new SystemLogger($conn);
+            $logger->logAction(
+                'Change Password',
+                "Client changed their password",
+                'client',
+                $userId
+            );
+        }
+        echo json_encode(['success' => true, 'message' => 'Password changed successfully!']);
     } else {
-        echo "<script>alert('Failed to update password. Please try again later.'); window.location.href='../../home.php';</script>";
+        echo json_encode(['success' => false, 'message' => 'Failed to update password. Please try again later.']);
     }
     $stmt->close();
 }
