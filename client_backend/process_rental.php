@@ -31,14 +31,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         }
 
         // Insert into rental table
-        $insertQuery = "INSERT INTO rental (user_id, locker_id, rental_date, rental_status, payment_status, payment_status_id) 
-                       VALUES (?, ?, NOW(), 'pending', 'unpaid', 1)";
+        $insertQuery = "INSERT INTO rental (user_id, locker_id, rental_date, rental_status, payment_status_id) 
+                       VALUES (?, ?, NOW(), 'pending', 'unpaid')";
         $stmt = $conn->prepare($insertQuery);
-        $stmt->bind_param("iss", $user_id, $locker_id); // Adjusted to 3 parameters (i for user_id, s for locker_id, s for payment_status_id as a number)
+        $stmt->bind_param("is", $user_id, $locker_id);
         $stmt->execute();
 
         // Update locker status to 'Reserved'
-        $updateQuery = "UPDATE lockerunits SET status_id = 4 WHERE locker_id = ?"; // Changed to 4 (Reserved) as per previous fix
+        $updateQuery = "UPDATE lockerunits SET status_id = 2 WHERE locker_id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
