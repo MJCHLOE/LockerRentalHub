@@ -31,7 +31,7 @@
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css" />
   <!-- Custom Styles -->
   <link rel="stylesheet" href="admin_dashboard.css" />
-
+  <link rel="stylesheet" href="pagination.css" />
   <!-- Iconify CDN -->
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
@@ -133,7 +133,6 @@
       </div>
     </div>
   </div>
-  </div>
 
   <div class="container-fluid mt-5 pt-3">
     <div class="row">
@@ -211,23 +210,31 @@
       </div>
 
       <!-- Displaying all users details -->  
-      <div class="table-responsive bg-dark text-white p-3 rounded">
-        <table class="table table-dark table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <?php include '../admin_backend/fetch_users.php'; ?>
-          </tbody>
-        </table>
+      <div class="table-container">
+        <div class="table-responsive bg-dark text-white p-3 rounded">
+          <table class="table table-dark table-bordered">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <?php include '../admin_backend/fetch_users.php'; ?>
+            </tbody>
+          </table>
+        </div>
+        <!-- Pagination will be added here by JavaScript -->
+        <div class="pagination-container">
+          <nav aria-label="Users pagination">
+            <ul class="pagination" id="usersPagination"></ul>
+          </nav>
+        </div>
       </div>
     </section>
 
@@ -250,22 +257,29 @@
     </div>
 
     <!-- Locker Table -->
-    <div class="table-responsive bg-dark text-white p-3 rounded">
-      <table class="table table-dark table-bordered">
-        <thead>
-          <tr>
-            <th>Locker ID</th>
-            <th>Size</th>
-            <th>Status</th>
-            <th>Price per Month</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="lockersTableBody">
-          <!-- Locker rows will be populated dynamically via PHP -->
-          <?php include '../admin_backend/fetch_lockers.php'; ?>
-        </tbody>
-      </table>
+    <div class="table-container">
+      <div class="table-responsive bg-dark text-white p-3 rounded">
+        <table class="table table-dark table-bordered">
+          <thead>
+            <tr>
+              <th>Locker ID</th>
+              <th>Size</th>
+              <th>Status</th>
+              <th>Price per Month</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="lockersTableBody">
+            <?php include '../admin_backend/fetch_lockers.php'; ?>
+          </tbody>
+        </table>
+      </div>
+      <!-- Pagination will be added here by JavaScript -->
+      <div class="pagination-container">
+        <nav aria-label="Lockers pagination">
+          <ul class="pagination" id="lockersPagination"></ul>
+        </nav>
+      </div>
     </div>
   </section>
 
@@ -389,21 +403,29 @@
     </div>
 
     <!-- Logs Table -->
-    <div class="table-responsive bg-dark text-white p-3 rounded">
+    <div class="table-container">
+      <div class="table-responsive bg-dark text-white p-3 rounded">
         <table class="table table-dark table-bordered">
-            <thead>
-                <tr>
-                    <th>Date/Time</th>
-                    <th>Action</th>
-                    <th>Description</th>
-                    <th>User</th>
-                    <th>Entity</th>
-                </tr>
-            </thead>
-            <tbody id="logsTableBody">
-                <!-- Logs will be loaded here -->
-            </tbody>
+          <thead>
+            <tr>
+              <th>Date/Time</th>
+              <th>Action</th>
+              <th>Description</th>
+              <th>User</th>
+              <th>Entity</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody">
+            <!-- Logs will be loaded here -->
+          </tbody>
         </table>
+      </div>
+      <!-- Pagination will be added here by JavaScript -->
+      <div class="pagination-container">
+        <nav aria-label="Logs pagination">
+          <ul class="pagination" id="logsPagination"></ul>
+        </nav>
+      </div>
     </div>
 </section>
 
@@ -428,24 +450,32 @@
     </div>
 
       <!-- Rentals Table -->
-      <div class="table-responsive bg-dark text-white p-3 rounded">
+      <div class="table-container">
+        <div class="table-responsive bg-dark text-white p-3 rounded">
           <table class="table table-dark table-bordered">
-              <thead>
-                  <tr>
-                  <th>Rental ID</th>
-                  <th>Client</th>
-                  <th>Locker ID</th>
-                  <th>Rental Date</th>
-                  <th>Rent Ended Date</th>
-                  <th>Status</th>
-                  <th>Payment</th>
-                  <th>Actions</th>
-                  </tr>
-              </thead>
-              <tbody id="rentalsTableBody">
-                  <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-              </tbody>
+            <thead>
+              <tr>
+                <th>Rental ID</th>
+                <th>Client</th>
+                <th>Locker ID</th>
+                <th>Rental Date</th>
+                <th>Rent Ended Date</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rentalsTableBody">
+              <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
+            </tbody>
           </table>
+        </div>
+        <!-- Pagination will be added here by JavaScript -->
+        <div class="pagination-container">
+          <nav aria-label="Rentals pagination">
+            <ul class="pagination" id="rentalsPagination"></ul>
+          </nav>
+        </div>
       </div>
   </section>
     </div>
