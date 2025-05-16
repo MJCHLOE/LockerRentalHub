@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     } else {
         $_SESSION['error_message'] = 'Failed to update password. Please try again later.';
-        header('Location: change_password.php');
+        header('Location: home.php');
     }
     $stmt->close();
 }
