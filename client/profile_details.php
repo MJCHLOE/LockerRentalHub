@@ -186,6 +186,60 @@ $userDetails = $result->fetch_assoc();
         </div>
     </div>
 
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="../client_backend/change_password.php" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" value="<?php echo $_.docSession['user_id']; ?>">
+
+                        <!-- Current Password -->
+                        <div class="form-group">
+                            <label for="currentPassword" style="color: black;">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('currentPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-group">
+                            <label for="newPassword" style="color: black;">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="6">
+                            <small class="text-muted" style="color: black;">Minimum 6 characters.</small>
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('newPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+
+                        <!-- Confirm New Password -->
+                        <div class="form-group">
+                            <label for="confirmPassword" style="color: black;">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('confirmPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="color: black;">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="color: black;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -193,5 +247,15 @@ $userDetails = $result->fetch_assoc();
     <script src="../client_scripts/dashboard.js"></script>
     <script src="../client_scripts/dropdown.js"></script>
     <script src="../client_scripts/profile_management.js"></script>
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            var field = document.getElementById(fieldId);
+            if (field.type === "password") {
+                field.type = "text";
+            } else {
+                field.type = "password";
+            }
+        }
+    </script>
 </body>
 </html>
