@@ -141,3 +141,27 @@
 .pagination .page-link:focus {
     box-shadow: none;
 }
+
+/* Add to locker_grids.css or client_dashboard.css */
+.modal-payment-instructions {
+    background-color: #17a2b8; /* Info background color */
+    color: #fff;
+    border-top: 1px solid #ddd;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 1rem;
+}
+
+.modal-payment-instructions h6 {
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.modal-payment-instructions ul li {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.modal-payment-instructions ul li:last-child {
+    margin-bottom: 0;
+}

@@ -280,19 +280,19 @@ if ($totalLockers > 0 && $page > $totalPages) {
                         <p style="color: #000;"><strong>Size:</strong> <span id="modalLockerSize"></span></p>
                         <p style="color: #000;"><strong>Price:</strong> ₱<span id="modalLockerPrice"></span>/month</p>
                     </div>
-                    <div class="rental-terms alert alert-info">
-                        <h6 class="font-weight-bold mb-3">Payment Instructions:</h6>
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2">• Please proceed to the rental spot's cashier for payment</li>
-                            <li class="mb-2">• Payment must be completed within approval</li>
-                            <li class="mb-2">• Your rental status will remain 'Pending Payment' until paid</li>
-                            <li>• The locker will be reserved for you during this period</li>
-                        </ul>
-                    </div>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="confirmRental">Submit Request</button>
+                </div>
+                <div class="modal-payment-instructions p-3 bg-info text-white">
+                    <h6 class="font-weight-bold mb-3">Payment Instructions:</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">• Please proceed to the rental spot's cashier for payment</li>
+                        <li class="mb-2">• Payment must be completed within approval</li>
+                        <li class="mb-2">• Your rental status will remain 'Pending Payment' until paid</li>
+                        <li>• The locker will be reserved for you during this period</li>
+                    </ul>
                 </div>
             </div>
         </div>
