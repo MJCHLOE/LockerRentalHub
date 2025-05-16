@@ -11,12 +11,14 @@ try {
                      r.locker_id,
                      r.rental_date,
                      r.rental_status,
-                     r.payment_status_id,
+                     r.payment_status,
                      lu.price_per_month,
                      ls.size_name
               FROM rental r
               JOIN lockerunits lu ON r.locker_id = lu.locker_id
               JOIN lockersizes ls ON lu.size_id = ls.size_id
+              JOIN payment_status ps ON r.payment_status_id = ps.payment_status_id
+              WHERE r.locker_id IN (SELECT locker_id FROM lockerunits WHERE user_id = ?)
               WHERE r.user_id = ? 
               AND r.rental_status = 'active'  -- Only show approved rentals
               ORDER BY r.rental_date DESC";
@@ -34,8 +36,8 @@ try {
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td><span class='badge badge-success'>Active</span></td>";
-            echo "<td><span class='badge badge-" . ($row['payment_status_id'] == 'paid' ? 'success' : 'warning') . "'>" 
-                 . ucfirst($row['payment_status_id']) . "</span></td>";
+            echo "<td><span class='badge badge-" . ($row['payment_status'] == 'paid' ? 'success' : 'warning') . "'>" 
+                 . ucfirst($row['payment_status']) . "</span></td>";
             echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
             echo "<td>
                     <button class='btn btn-danger btn-sm' onclick='terminateRental({$row['rental_id']})'>
