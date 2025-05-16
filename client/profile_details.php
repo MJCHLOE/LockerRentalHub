@@ -194,11 +194,11 @@ $userDetails = $result->fetch_assoc();
                     <div class="modal-header">
                         <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" name="user_id" value="<?php echo $_.docSession['user_id']; ?>">
+                        <input type="hidden" name="user_id" value="<?php echo $_SESSION['user_id']; ?>">
 
                         <!-- Current Password -->
                         <div class="form-group">
@@ -248,6 +248,24 @@ $userDetails = $result->fetch_assoc();
     <script src="../client_scripts/dropdown.js"></script>
     <script src="../client_scripts/profile_management.js"></script>
     <script>
+        $(document).ready(function() {
+            // Fix dropdown toggle after item click
+            $('.dropdown-item').on('click', function(e) {
+                // Prevent propagation for modal triggers to keep dropdown open
+                if ($(this).attr('data-toggle') === 'modal') {
+                    e.stopPropagation();
+                }
+            });
+
+            // Ensure dropdown toggle works
+            $('#accountDropdown').on('click', function(e) {
+                e.preventDefault();
+                $(this).parent().toggleClass('show');
+                $(this).attr('aria-expanded', $(this).parent().hasClass('show'));
+                $(this).next('.dropdown-menu').toggleClass('show');
+            });
+        });
+
         function togglePasswordVisibility(fieldId) {
             var field = document.getElementById(fieldId);
             if (field.type === "password") {
