@@ -226,25 +226,29 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     $visiblePages = 5; // Number of visible page links
                     $start = max(1, $page - floor($visiblePages / 2));
                     $end = min($totalPages, $start + $visiblePages - 1);
-                    
+                    $start = max(1, $end - $visiblePages + 1); // Adjust start if end is near totalPages
+
+                    // Always show the first page and ellipsis if necessary
                     if ($start > 1) {
-                        echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => 1])).'">1</a></li>';
+                        echo '<li class="page-item"><a class="page-link" href="?' . http_build_query(array_merge($_GET, ['page' => 1])) . '">1</a></li>';
                         if ($start > 2) {
                             echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                         }
                     }
-                    
-                    for ($i = $start; $i <= $end; $i++): ?>
-                        <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
-                            <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
-                        </li>
-                    <?php endfor; ?>
-                    
+
+                    // Display the range of pages
+                    for ($i = $start; $i <= $end; $i++) {
+                        echo '<li class="page-item ' . ($i == $page ? 'active' : '') . '">';
+                        echo '<a class="page-link" href="?' . http_build_query(array_merge($_GET, ['page' => $i])) . '">' . $i . '</a>';
+                        echo '</li>';
+                    }
+
+                    // Always show the last page and ellipsis if necessary
                     if ($end < $totalPages) {
                         if ($end < $totalPages - 1) {
                             echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
                         }
-                        echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => $totalPages])).'">'.$totalPages.'</a></li>';
+                        echo '<li class="page-item"><a class="page-link" href="?' . http_build_query(array_merge($_GET, ['page' => $totalPages])) . '">' . $totalPages . '</a></li>';
                     }
                     ?>
                     
