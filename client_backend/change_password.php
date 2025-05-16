@@ -1,17 +1,6 @@
 <?php
 session_start();
 
-// Generate a unique session identifier for client
-$clientSessionKey = md5('Client_' . $_SESSION['user_id']);
-
-// Check if user is logged in and is client
-if (!isset($_SESSION[$clientSessionKey]) || 
-    !isset($_SESSION['role']) || 
-    $_SESSION['role'] !== 'Client') {
-    echo "<script>alert('Unauthorized access.'); window.location.href='../../home.php';</script>";
-    exit();
-}
-
 require_once '../db/database.php';
 require_once 'log_actions.php'; 
 
