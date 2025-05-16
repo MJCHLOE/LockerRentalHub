@@ -195,6 +195,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../client_scripts/dashboard.js"></script>
     <script src="../client_scripts/dropdown.js"></script>
+    <script src="../client_scripts/password_modal.js"></script>
     
     <script>
     $(document).ready(function() {
