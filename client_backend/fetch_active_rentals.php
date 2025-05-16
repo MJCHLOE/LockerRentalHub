@@ -34,8 +34,8 @@ try {
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td><span class='badge badge-success'>Active</span></td>";
-            echo "<td><span class='badge badge-" . ($row['payment_status'] == 'paid' ? 'success' : 'warning') . "'>" 
-                 . ucfirst($row['payment_status']) . "</span></td>";
+            echo "<td><span class='badge badge-" . ($row['payment_status_id'] == 'paid' ? 'success' : 'warning') . "'>" 
+                 . ucfirst($row['payment_status_id']) . "</span></td>";
             echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
             echo "<td>
                     <button class='btn btn-danger btn-sm' onclick='terminateRental({$row['rental_id']})'>
