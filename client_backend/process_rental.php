@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         }
 
         // Insert into rental table
-        $insertQuery = "INSERT INTO rental (user_id, locker_id, rental_date, rental_status, payment_status) 
+        $insertQuery = "INSERT INTO rental (user_id, locker_id, rental_date, rental_status, payment_status_id) 
                        VALUES (?, ?, NOW(), 'pending', 'unpaid')";
         $stmt = $conn->prepare($insertQuery);
         $stmt->bind_param("is", $user_id, $locker_id);
