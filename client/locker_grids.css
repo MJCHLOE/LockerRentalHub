@@ -98,3 +98,23 @@
 .rental-terms li {
     margin-bottom: 0.5rem;
 }
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination a {
+    margin: 0 5px;
+    padding: 5px 10px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #333;
+    border-radius: 5px;
+}
+
+.pagination a.active {
+    background-color: #666;
+}

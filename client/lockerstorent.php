@@ -19,6 +19,46 @@ $_SESSION[$clientSessionKey]['last_activity'] = time();
 // Get client's first name from role-specific session
 $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ? 
             $_SESSION[$clientSessionKey]['firstname'] : 'Client';
+
+// Pagination settings
+$lockersPerPage = 8;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $lockersPerPage;
+
+// Filter parameters
+$sizeFilter = isset($_GET['size']) ? $_GET['size'] : '';
+$statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
+
+// Build WHERE clause
+$whereClauses = [];
+if ($sizeFilter != '') {
+    $sizeFilter = $conn->real_escape_string($sizeFilter);
+    $whereClauses[] = "ls.size_name = '$sizeFilter'";
+}
+if ($statusFilter != '') {
+    $statusFilter = $conn->real_escape_string($statusFilter);
+    $whereClauses[] = "lst.status_name = '$statusFilter'";
+}
+$whereSql = '';
+if (!empty($whereClauses)) {
+    $whereSql = 'WHERE ' . implode(' AND ', $whereClauses);
+}
+
+// Count total lockers with filters
+$countQuery = "SELECT COUNT(*) as total FROM lockerunits l
+               JOIN lockersizes ls ON l.size_id = ls.size_id
+               JOIN lockerstatuses lst ON l.status_id = lst.status_id
+               $whereSql";
+$countResult = $conn->query($countQuery);
+$totalLockers = $countResult->fetch_assoc()['total'];
+$totalPages = ceil($totalLockers / $lockersPerPage);
+
+// Handle invalid page numbers
+if ($totalLockers > 0 && $page > $totalPages) {
+    header("Location: ?" . http_build_query(array_merge($_GET, ['page' => $totalPages])));
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -33,7 +73,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
 <body>
-    <!-- Add this button before the sidebar -->
+    <!-- Sidebar Toggle Button -->
     <button id="sidebarToggle" class="sidebar-toggle">
         <iconify-icon icon="mdi:menu" width="24"></iconify-icon>
     </button>
@@ -46,7 +86,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
         </div>
 
         <nav>
-            <a href="home.php" >
+            <a href="home.php">
                 <iconify-icon icon="mdi:home"></iconify-icon>
                 Home
             </a>
@@ -103,18 +143,18 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             <div class="row">
                 <div class="col-md-3">
                     <select class="form-control" id="sizeFilter">
-                        <option value="">All Sizes</option>
-                        <option value="Small">Small</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Large">Large</option>
+                        <option value="" <?php if ($sizeFilter == '') echo 'selected'; ?>>All Sizes</option>
+                        <option value="Small" <?php if ($sizeFilter == 'Small') echo 'selected'; ?>>Small</option>
+                        <option value="Medium" <?php if ($sizeFilter == 'Medium') echo 'selected'; ?>>Medium</option>
+                        <option value="Large" <?php if ($sizeFilter == 'Large') echo 'selected'; ?>>Large</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <select class="form-control" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="Vacant">Vacant</option>
-                        <option value="Occupied">Occupied</option>
-                        <option value="Maintenance">Maintenance</option>
+                        <option value="" <?php if ($statusFilter == '') echo 'selected'; ?>>All Status</option>
+                        <option value="Vacant" <?php if ($statusFilter == 'Vacant') echo 'selected'; ?>>Vacant</option>
+                        <option value="Occupied" <?php if ($statusFilter == 'Occupied') echo 'selected'; ?>>Occupied</option>
+                        <option value="Maintenance" <?php if ($statusFilter == 'Maintenance') echo 'selected'; ?>>Maintenance</option>
                     </select>
                 </div>
             </div>
@@ -127,7 +167,9 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                       FROM lockerunits l
                       JOIN lockersizes ls ON l.size_id = ls.size_id
                       JOIN lockerstatuses lst ON l.status_id = lst.status_id
-                      ORDER BY l.locker_id";
+                      $whereSql
+                      ORDER BY l.locker_id
+                      LIMIT $lockersPerPage OFFSET $offset";
 
             $result = $conn->query($query);
 
@@ -168,6 +210,24 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             }
             ?>
         </div>
+
+        <!-- Pagination Controls -->
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">Previous</a>
+                <?php endif; ?>
+                
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
+                       <?php if ($i == $page) echo 'class="active"'; ?>><?php echo $i; ?></a>
+                <?php endfor; ?>
+                
+                <?php if ($page < $totalPages): ?>
+                    <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">Next</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Rental Request Modal -->
@@ -212,21 +272,16 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     <script src="../client_scripts/dropdown.js"></script>
     
     <script>
-        // Filter functionality
         $(document).ready(function() {
+            // Update filters to reload page with parameters
             $('#sizeFilter, #statusFilter').on('change', function() {
-                const selectedSize = $('#sizeFilter').val();
-                const selectedStatus = $('#statusFilter').val();
-
-                $('.locker-card').each(function() {
-                    const size = $(this).data('size');
-                    const status = $(this).data('status');
-                    
-                    const sizeMatch = !selectedSize || size === selectedSize;
-                    const statusMatch = !selectedStatus || status === selectedStatus;
-
-                    $(this).toggle(sizeMatch && statusMatch);
-                });
+                const size = $('#sizeFilter').val();
+                const status = $('#statusFilter').val();
+                const params = new URLSearchParams();
+                if (size) params.append('size', size);
+                if (status) params.append('status', status);
+                params.append('page', 1);
+                window.location.search = params.toString();
             });
 
             // Update click handler for locker cards
@@ -240,28 +295,21 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                 }
             });
 
-            // Update the AJAX call in lockerstorent.php
+            // Handle rental confirmation
             $('#confirmRental').click(function() {
                 const lockerId = $('#modalLockerId').text();
-                
-                // Show loading state
                 $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
                 
-                // Send rental request to backend
                 $.ajax({
                     url: '../client_backend/process_rental.php',
                     method: 'POST',
-                    data: {
-                        locker_id: lockerId
-                    },
+                    data: { locker_id: lockerId },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             $('#rentalRequestModal').modal('hide');
                             showAlert('success', 'Rental request submitted! Please proceed to the cashier for payment.');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2000);
+                            setTimeout(() => location.reload(), 2000);
                         } else {
                             showAlert('danger', 'Error: ' + response.message);
                         }
@@ -271,37 +319,27 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                         console.error(error);
                     },
                     complete: function() {
-                        // Reset button state
                         $('#confirmRental').prop('disabled', false).text('Submit Request');
                     }
                 });
             });
         });
 
-        // Replace the existing rentLocker function with this:
         function rentLocker(lockerId) {
             const lockerCard = $(`[data-locker-id="${lockerId}"]`);
             const status = lockerCard.data('status');
-            
             if (status !== 'Vacant') {
                 alert('This locker is not available for rent.');
                 return;
             }
-            
-            // Get locker details from the card
             const size = lockerCard.data('size');
             const price = lockerCard.find('.price').text().replace('₱', '').replace('/month', '').trim();
-            
-            // Update modal with locker details
             $('#modalLockerId').text(lockerId);
             $('#modalLockerSize').text(size);
             $('#modalLockerPrice').text(price);
-            
-            // Show the modal
             $('#rentalRequestModal').modal('show');
         }
 
-        // Add this function for showing alerts
         function showAlert(type, message) {
             const alertHtml = `
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -311,19 +349,9 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                     </button>
                 </div>
             `;
-            
-            // Remove any existing alerts
             $('.alert:not(.rental-terms)').remove();
-            
-            // Add the new alert at the top of main-content
             $('.main-content').prepend(alertHtml);
-            
-            // Auto dismiss after 3 seconds
-            setTimeout(function() {
-                $('.alert:not(.rental-terms)').fadeOut('slow', function() {
-                    $(this).remove();
-                });
-            }, 3000);
+            setTimeout(() => $('.alert:not(.rental-terms)').fadeOut('slow', function() { $(this).remove(); }), 3000);
         }
     </script>
 </body>
