@@ -35,7 +35,7 @@
 
 /* Make sure tables don't have massive vertical scrolling */
 .table-responsive {
-    max-height: calc(5 * 53px + 53px); /* Approx height for 5 rows + header */
+    max-height: calc(5 * 60px + 60px); /* Approx height for 5 rows + header */
     overflow-y: auto;
 }
 
