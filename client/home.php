@@ -233,24 +233,6 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             field.type = "password";
         }
     }
-
-    $(document).ready(function() {
-    $('#changePasswordForm').submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: '../client_backend/change_password.php',
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-                // Assuming the backend returns the script tags
-                $('body').append(response); // Append the alert script
-            },
-            error: function() {
-                alert('Error connecting to server.');
-            }
-        });
-    });
-});
     </script>
 </body>
 </html>
