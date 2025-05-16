@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             'user',
             $userId
         );
-        echo "<script>alert('Password changed successfully!'); window.location.href='../../home.php';</script>";
+        echo "<script>alert('Password changed successfully!'); window.location.href='./client/home.php';</script>";
     } else {
         echo "<script>alert('Failed to update password. Please try again later.'); window.location.href='../../home.php';</script>";
     }
