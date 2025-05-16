@@ -8,14 +8,16 @@ $clientSessionKey = md5('Client_' . $_SESSION['user_id']);
 if (!isset($_SESSION[$clientSessionKey]) || 
     !isset($_SESSION['role']) || 
     $_SESSION['role'] !== 'Client') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access.']);
+    $_SESSION['error_message'] = 'Unauthorized access.';
+    header('Location: ../backend/logout.php');
     exit();
 }
 
 require_once '../db/database.php';
 
 if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
+    $_SESSION['error_message'] = 'Database connection failed.';
+    header('Location: ../index.php');
     exit();
 }
 
@@ -27,17 +29,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validation
     if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
+        $_SESSION['error_message'] = 'All fields are required.';
+        header('Location: change_password.php');
         exit();
     }
 
     if ($newPassword !== $confirmPassword) {
-        echo json_encode(['success' => false, 'message' => 'New passwords do not match.']);
+        $_SESSION['error_message'] = 'New passwords do not match.';
+        header('Location: change_password.php');
         exit();
     }
 
     if (strlen($newPassword) < 6) {
-        echo json_encode(['success' => false, 'message' => 'New password must be at least 6 characters.']);
+        $_SESSION['error_message'] = 'New password must be at least 6 characters.';
+        header('Location: change_password.php');
         exit();
     }
 
@@ -50,7 +55,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     if (!$storedHash || !password_verify($currentPassword, $storedHash)) {
-        echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
+        $_SESSION['error_message'] = 'Current password is incorrect.';
+        header('Location: change_password.php');
         exit();
     }
 
@@ -72,11 +78,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $userId
             );
         }
-        echo json_encode(['success' => true, 'message' => 'Password changed successfully!']);
+        
+        // Set success message and redirect to logout
+        $_SESSION['success_message'] = 'Password changed successfully! Please login with your new password.';
+        $stmt->close();
+        $conn->close();
+        header('Location: ../backend/logout.php');
+        exit();
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to update password. Please try again later.']);
+        $_SESSION['error_message'] = 'Failed to update password. Please try again later.';
+        header('Location: change_password.php');
     }
     $stmt->close();
 }
 $conn->close();
+header('Location: change_password.php');
+exit();
 ?>
