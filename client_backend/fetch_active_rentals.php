@@ -11,7 +11,7 @@ try {
                      r.locker_id,
                      r.rental_date,
                      r.rental_status,
-                     r.payment_status_id,
+                     r.payment_status,
                      lu.price_per_month,
                      ls.size_name
               FROM rental r
