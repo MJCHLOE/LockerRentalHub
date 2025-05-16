@@ -99,22 +99,43 @@
     margin-bottom: 0.5rem;
 }
 
-/* Pagination */
+/* Amazon-like Pagination Styling */
 .pagination {
     display: flex;
     justify-content: center;
     margin-top: 20px;
 }
 
-.pagination a {
+.pagination .page-item {
     margin: 0 5px;
-    padding: 5px 10px;
-    text-decoration: none;
-    color: #fff;
-    background-color: #333;
-    border-radius: 5px;
 }
 
-.pagination a.active {
-    background-color: #666;
+.pagination .page-link {
+    color: #333;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.pagination .page-link:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.pagination .page-link:focus {
+    box-shadow: none;
 }
