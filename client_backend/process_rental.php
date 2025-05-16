@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         $stmt->execute();
 
         // Update locker status to 'Reserved'
-        $updateQuery = "UPDATE lockerunits SET status_id = 2 WHERE locker_id = ?";
+        $updateQuery = "UPDATE lockerunits SET status_id = 4 WHERE locker_id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
