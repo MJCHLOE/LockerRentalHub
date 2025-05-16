@@ -128,6 +128,8 @@
 
 .pagination .page-item.disabled .page-link {
     color: #ccc;
+    background-color: #fff;
+    border-color: #ddd;
     cursor: not-allowed;
 }
 

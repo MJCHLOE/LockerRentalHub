@@ -211,28 +211,47 @@ if ($totalLockers > 0 && $page > $totalPages) {
             ?>
         </div>
 
-        <!-- Pagination Controls -->
+       <!-- Pagination Controls -->
         <?php if ($totalPages > 1): ?>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
                     <!-- Previous Button -->
                     <li class="page-item <?php if ($page <= 1) echo 'disabled'; ?>">
                         <a class="page-link" href="<?php if ($page > 1) echo '?' . http_build_query(array_merge($_GET, ['page' => $page - 1])); else echo '#'; ?>" aria-label="Previous">
-                            <span aria-hidden="true">&laquo; Previous</span>
+                            <span aria-hidden="true">« Previous</span>
                         </a>
                     </li>
                     
-                    <!-- Page Number Buttons -->
-                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <?php
+                    $visiblePages = 5; // Number of visible page links
+                    $start = max(1, $page - floor($visiblePages / 2));
+                    $end = min($totalPages, $start + $visiblePages - 1);
+                    
+                    if ($start > 1) {
+                        echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => 1])).'">1</a></li>';
+                        if ($start > 2) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                    }
+                    
+                    for ($i = $start; $i <= $end; $i++): ?>
                         <li class="page-item <?php if ($i == $page) echo 'active'; ?>">
                             <a class="page-link" href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
                         </li>
                     <?php endfor; ?>
                     
+                    if ($end < $totalPages) {
+                        if ($end < $totalPages - 1) {
+                            echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                        }
+                        echo '<li class="page-item"><a class="page-link" href="?'.http_build_query(array_merge($_GET, ['page' => $totalPages])).'">'.$totalPages.'</a></li>';
+                    }
+                    ?>
+                    
                     <!-- Next Button -->
                     <li class="page-item <?php if ($page >= $totalPages) echo 'disabled'; ?>">
                         <a class="page-link" href="<?php if ($page < $totalPages) echo '?' . http_build_query(array_merge($_GET, ['page' => $page + 1])); else echo '#'; ?>" aria-label="Next">
-                            <span aria-hidden="true">Next &raquo;</span>
+                            <span aria-hidden="true">Next »</span>
                         </a>
                     </li>
                 </ul>
