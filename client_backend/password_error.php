@@ -64,8 +64,8 @@ $errorMessage = $_SESSION['error_message'];
             You will be redirected to the home page in <span id="seconds">5</span> seconds...
         </div>
         <div class="actions">
-            <a href="home.php?action=change_password">Try Again</a>
-            <a href="home.php">Go to Home</a>
+            <a href="../client/home.php?action=change_password">Try Again</a>
+            <a href="../client/home.php">Go to Home</a>
         </div>
     </div>
 
@@ -78,7 +78,7 @@ $errorMessage = $_SESSION['error_message'];
             
             if (seconds <= 0) {
                 clearInterval(countdown);
-                window.location.href = 'home.php';
+                window.location.href = '../client/home.php';
             }
         }, 1000);
     </script>
