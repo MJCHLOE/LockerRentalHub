@@ -7,6 +7,19 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
+    // First query to get payment status names
+    $paymentQuery = "SELECT payment_status_id, payment_status FROM payment_status";
+    $paymentStmt = $conn->prepare($paymentQuery);
+    $paymentStmt->execute();
+    $paymentResult = $paymentStmt->get_result();
+    
+    $paymentStatuses = [];
+    while ($row = $paymentResult->fetch_assoc()) {
+        $paymentStatuses[$row['payment_status_id']] = $row['payment_status'];
+    }
+    $paymentStmt->close();
+    
+    // Main query to get rental history
     $query = "SELECT r.rental_id, 
                      r.locker_id,
                      r.rental_date,
@@ -37,6 +50,10 @@ try {
                 case 'cancelled': $statusClass = 'text-warning'; break;
             }
             
+            // Get payment status from the array or set default
+            $paymentStatus = isset($paymentStatuses[$row['payment_status_id']]) ? 
+                            $paymentStatuses[$row['payment_status_id']] : 'Unknown';
+            
             echo "<tr>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
@@ -52,7 +69,7 @@ try {
             echo "</td>";
             
             echo "<td class='{$statusClass}'>{$row['rental_status']}</td>";
-            echo "<td>{$row['payment_status']}</td>";
+            echo "<td>{$paymentStatus}</td>";
             echo "<td>₱{$row['price_per_month']}</td>";
             echo "</tr>";
         }

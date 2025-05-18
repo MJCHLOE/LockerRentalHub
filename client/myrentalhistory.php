@@ -191,6 +191,31 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                 field.type = "password";
             }
         }
+
+        $(document).ready(function() {
+        // Function to load rental history data
+        function loadRentalHistory() {
+            // Show loading indicator
+            $("#rentalHistoryTable").html('<tr><td colspan="7" class="text-center">Loading rental history...</td></tr>');
+            
+            // Make AJAX request to fetch rental history
+            $.ajax({
+                url: '../client_backend/fetch_rental_history.php',
+                type: 'GET',
+                dataType: 'html',
+                success: function(response) {
+                    $("#rentalHistoryTable").html(response);
+                },
+                error: function(xhr, status, error) {
+                    $("#rentalHistoryTable").html('<tr><td colspan="7" class="text-center">Error loading rental history. Please try again later.</td></tr>');
+                    console.error("Error loading rental history:", error);
+                }
+            });
+        }
+        
+        // Load rental history when page loads
+        loadRentalHistory();
+    });
     </script>
 </body>
 </html>
