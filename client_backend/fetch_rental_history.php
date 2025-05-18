@@ -7,17 +7,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    // First query to get payment status names
-    $paymentQuery = "SELECT payment_status_id, payment_status FROM payment_status";
-    $paymentStmt = $conn->prepare($paymentQuery);
-    $paymentStmt->execute();
-    $paymentResult = $paymentStmt->get_result();
-    
-    $paymentStatuses = [];
-    while ($row = $paymentResult->fetch_assoc()) {
-        $paymentStatuses[$row['payment_status_id']] = $row['payment_status'];
-    }
-    $paymentStmt->close();
+    // Define payment status manually since we don't have a payment_status table
+    $paymentStatuses = [
+        0 => 'Unpaid',
+        1 => 'Pending',
+        2 => 'Paid'
+    ];
     
     // Main query to get rental history
     $query = "SELECT r.rental_id, 
