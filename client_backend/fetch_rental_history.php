@@ -12,7 +12,7 @@ try {
                      r.rental_date,
                      r.rent_ended_date,
                      r.rental_status,
-                     r.payment_status,
+                     r.payment_status_id,
                      lu.price_per_month,
                      ls.size_name
               FROM rental r
