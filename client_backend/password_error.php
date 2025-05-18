@@ -64,7 +64,7 @@ $errorMessage = $_SESSION['error_message'];
             You will be redirected to the home page in <span id="seconds">5</span> seconds...
         </div>
         <div class="actions">
-            <a href="change_password.php">Try Again</a>
+            <a href="home.php?action=change_password">Try Again</a>
             <a href="home.php">Go to Home</a>
         </div>
     </div>
