@@ -36,13 +36,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($newPassword !== $confirmPassword) {
         $_SESSION['error_message'] = 'New passwords do not match.';
-        header('Location: change_password.php');
+        header('Location: home.php');
         exit();
     }
 
     if (strlen($newPassword) < 6) {
         $_SESSION['error_message'] = 'New password must be at least 6 characters.';
-        header('Location: change_password.php');
+        header('Location: home.php');
         exit();
     }
 
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!$storedHash || !password_verify($currentPassword, $storedHash)) {
         $_SESSION['error_message'] = 'Current password is incorrect.';
-        header('Location: change_password.php');
+        header('Location: home.php');
         exit();
     }
 
@@ -79,11 +79,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             );
         }
         
-        // Set success message and redirect to logout
+        // Set success message and redirect to password success page
         $_SESSION['success_message'] = 'Password changed successfully! Please login with your new password.';
         $stmt->close();
         $conn->close();
-        header('Location: ../backend/logout.php');
+        header('Location: password_success.php');
         exit();
     } else {
         $_SESSION['error_message'] = 'Failed to update password. Please try again later.';
@@ -92,6 +92,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 }
 $conn->close();
-header('Location: change_password.php');
+header('Location: home.php');
 exit();
 ?>
