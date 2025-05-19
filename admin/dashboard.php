@@ -461,8 +461,8 @@
                 <th>Rental Date</th>
                 <th>Rent Ended Date</th>
                 <th>Status</th>
-                <th>Payment</th>
                 <th>Actions</th>
+                <th>Payment</th>
               </tr>
             </thead>
             <tbody id="rentalsTableBody">
