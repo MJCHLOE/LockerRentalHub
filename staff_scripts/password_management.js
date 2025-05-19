@@ -94,7 +94,7 @@ function initChangePasswordModal() {
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
+                            <h5 class="modal-title" id="changePasswordModalLabel" style="color: white;">Change Password</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -105,7 +105,7 @@ function initChangePasswordModal() {
                                 
                                 <!-- Current Password -->
                                 <div class="form-group">
-                                    <label for="currentPassword" style="color: black;">Current Password</label>
+                                    <label for="currentPassword" style="color: white;">Current Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" id="currentPassword" name="current_password" required style="color: black;">
                                         <div class="input-group-append">
@@ -119,7 +119,7 @@ function initChangePasswordModal() {
                                 
                                 <!-- New Password -->
                                 <div class="form-group">
-                                    <label for="newPassword" style="color: black;">New Password</label>
+                                    <label for="newPassword" style="color: white;">New Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="6" style="color: black;">
                                         <div class="input-group-append">
@@ -128,13 +128,13 @@ function initChangePasswordModal() {
                                             </button>
                                         </div>
                                     </div>
-                                    <small class="form-text text-muted" style="color: black !important;">Minimum 6 characters.</small>
+                                    <small class="form-text text-muted" style="color: lightgray !important;">Minimum 6 characters.</small>
                                     <small id="newPasswordError" class="form-text text-danger password-error" style="color: red !important;"></small>
                                 </div>
                                 
                                 <!-- Confirm New Password -->
                                 <div class="form-group">
-                                    <label for="confirmPassword" style="color: black;">Confirm New Password</label>
+                                    <label for="confirmPassword" style="color: white;">Confirm New Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required style="color: black;">
                                         <div class="input-group-append">
@@ -148,7 +148,7 @@ function initChangePasswordModal() {
                                 
                                 <div class="modal-footer">
                                     <button type="submit" class="btn btn-primary" id="changePasswordBtn">Change Password</button>
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
                                 </div>
                             </form>
                         </div>
@@ -163,25 +163,43 @@ function initChangePasswordModal() {
         $('head').append(`
             <style>
                 #changePasswordModal * {
-                    color: black;
+                    color: white;
                 }
                 #changePasswordModal .text-danger {
                     color: red !important;
                 }
                 #changePasswordModal .text-muted {
-                    color: darkgray !important;
+                    color: lightgray !important;
                 }
                 #changePasswordModal .modal-content {
-                    background-color: white;
+                    background-color: black;
+                }
+                #changePasswordModal .modal-header {
+                    border-bottom: 1px solid #333;
+                }
+                #changePasswordModal .modal-footer {
+                    border-top: 1px solid #333;
                 }
                 #changePasswordModal input {
                     color: black !important;
+                    background-color: #ddd;
                 }
                 #changePasswordModal .alert-success {
-                    color: darkgreen !important;
+                    color: lightgreen !important;
+                    background-color: #003300;
+                    border-color: #004400;
                 }
                 #changePasswordModal .alert-danger {
-                    color: darkred !important;
+                    color: lightpink !important;
+                    background-color: #330000;
+                    border-color: #440000;
+                }
+                #changePasswordModal .close {
+                    color: white;
+                    text-shadow: 0 1px 0 black;
+                }
+                #changePasswordModal .close:hover {
+                    color: lightgray;
                 }
             </style>
         `);
@@ -211,9 +229,9 @@ function togglePasswordVisibility(fieldId) {
  * @param {string} message - Alert message
  */
 function showPasswordChangeAlert(type, message) {
-    let textColor = 'black';
-    if (type === 'danger') textColor = 'darkred';
-    if (type === 'success') textColor = 'darkgreen';
+    let textColor = 'white';
+    if (type === 'danger') textColor = 'lightpink';
+    if (type === 'success') textColor = 'lightgreen';
     
     const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show mt-3" role="alert" style="color: ${textColor} !important;">
