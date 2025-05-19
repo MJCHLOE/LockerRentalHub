@@ -46,7 +46,7 @@ $profilePicFile = "../profile_pics/user_{$userId}.jpg";
 if (file_exists($profilePicFile)) {
     $profilePicSrc = "/profile_pics/user_{$userId}.jpg";
 } else {
-    $profilePicSrc = "../profile_pics/default.jpg";
+    $profilePicSrc = "/profile_pics/default.jpg";
 }
 ?>
 
