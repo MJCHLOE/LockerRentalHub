@@ -7,8 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Staff') {
     exit();
 }
 
-require_once '../db/database.php';
-require_once 'log_actions.php'; 
+require_once '../db/database.php'; 
 
 // Check database connection
 if (!isset($conn) || $conn->connect_error) {
