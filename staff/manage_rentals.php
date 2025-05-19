@@ -155,7 +155,7 @@ if (isset($_GET['success'])) {
             <!-- Rentals Table -->
             <div class="table-container">
                 <div class="table-responsive bg-dark text-white p-3 rounded">
-                    <table class="table table-dark table-bordered">
+                     <table class="table table-dark table-bordered">
                         <thead>
                             <tr>
                                 <th>Rental ID</th>
@@ -163,6 +163,7 @@ if (isset($_GET['success'])) {
                                 <th>Client Name</th>
                                 <th>Locker ID</th>
                                 <th>Rental Date</th>
+                                <th>Date of Approval</th>
                                 <th>Rent Ended Date</th>
                                 <th>Status</th>
                                 <th>Payment</th>
