@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
     $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
     if ($check !== false) {
         if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $targetFile)) {
-            echo json_encode(['success' => true, 'newSrc' => "/profile_pics/user_{$userId}.jpg"]);
+            echo json_encode(['success' => true, 'newSrc' => "../client/profile_pics/user_{$userId}.jpg"]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Error moving uploaded file']);
         }
