@@ -40,6 +40,14 @@ $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 $userDetails = $result->fetch_assoc();
+
+// Determine profile picture source
+$profilePicFile = "../profile_pics/user_{$userId}.jpg";
+if (file_exists($profilePicFile)) {
+    $profilePicSrc = "/profile_pics/user_{$userId}.jpg";
+} else {
+    $profilePicSrc = "https://www.vecteezy.com/vector-art/27708418-default-avatar-profile-icon-vector-in-flat-style";
+}
 ?>
 
 <!DOCTYPE html>
@@ -121,6 +129,15 @@ $userDetails = $result->fetch_assoc();
             <h2>Profile Details</h2>
             <div class="card bg-dark text-white">
                 <div class="card-body">
+                    <!-- Profile Picture Section -->
+                    <div class="profile-picture-section mb-4">
+                        <h5 class="text-info">Profile Picture</h5>
+                        <div class="profile-picture">
+                            <img id="profile-pic" src="<?php echo $profilePicSrc; ?>" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
+                        </div>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="openProfilePicUpload()">Change Picture</button>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8">
                             <div class="profile-info">
@@ -240,6 +257,32 @@ $userDetails = $result->fetch_assoc();
         </div>
     </div>
 
+    <!-- Profile Picture Upload Modal -->
+    <div class="modal fade" id="profilePicUploadModal" tabindex="-1" role="dialog" aria-labelledby="profilePicUploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profilePicUploadModalLabel">Upload Profile Picture</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="profilePicUploadForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="profilePicFile">Select Image</label>
+                            <input type="file" class="form-control-file" id="profilePicFile" name="profile_pic" accept="image/*" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="uploadProfilePic()">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -251,7 +294,6 @@ $userDetails = $result->fetch_assoc();
         $(document).ready(function() {
             // Fix dropdown toggle after item click
             $('.dropdown-item').on('click', function(e) {
-                // Prevent propagation for modal triggers to keep dropdown open
                 if ($(this).attr('data-toggle') === 'modal') {
                     e.stopPropagation();
                 }
@@ -273,6 +315,32 @@ $userDetails = $result->fetch_assoc();
             } else {
                 field.type = "password";
             }
+        }
+
+        function openProfilePicUpload() {
+            $('#profilePicUploadModal').modal('show');
+        }
+
+        function uploadProfilePic() {
+            var formData = new FormData($('#profilePicUploadForm')[0]);
+            $.ajax({
+                url: 'upload_profile_pic.php',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        $('#profile-pic').attr('src', response.newSrc);
+                        $('#profilePicUploadModal').modal('hide');
+                    } else {
+                        alert('Error uploading picture: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error uploading picture');
+                }
+            });
         }
     </script>
 </body>
