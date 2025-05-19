@@ -86,19 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         // Check if the query executed successfully
         if ($stmt->errno === 0) {
-            // Log the password change action
-            try {
-                $logger = new SystemLogger($conn);
-                $logger->logAction(
-                    'Change Password',
-                    "Staff member changed their password",
-                    'user',
-                    $userId
-                );
-            } catch (Exception $logException) {
-                // Continue even if logging fails
-                error_log("Failed to log password change: " . $logException->getMessage());
-            }
             
             echo json_encode(['success' => true, 'message' => 'Password changed successfully!']);
         } else {
