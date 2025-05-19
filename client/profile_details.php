@@ -41,13 +41,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $userDetails = $result->fetch_assoc();
 
-// Determine profile picture source
-$profilePicFile = "/profile_pics/user_{$userId}.jpg";
-if (file_exists($profilePicFile)) {
-    $profilePicSrc = "/profile_pics/user_{$userId}.jpg";
-} else {
-    $profilePicSrc = "/profile_pics/default.jpg";
-}
+// Define profile picture path
+$profilePicPath = "/profile_pics/user_{$userId}.jpg";
+$profilePicUrl = file_exists($profilePicPath) ? $profilePicPath : "/profile_pics/default.jpg";
 ?>
 
 <!DOCTYPE html>
@@ -59,6 +55,47 @@ if (file_exists($profilePicFile)) {
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="client_dashboard.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        .profile-pic-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-pic-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            width: 100%;
+            height: 0;
+            transition: .5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-pic-container:hover .profile-pic-overlay {
+            height: 40px;
+        }
+        .profile-pic-text {
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        #upload-success-alert, #upload-error-alert {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar Toggle Button -->
@@ -129,16 +166,26 @@ if (file_exists($profilePicFile)) {
             <h2>Profile Details</h2>
             <div class="card bg-dark text-white">
                 <div class="card-body">
-                    <!-- Profile Picture Section -->
-                    <div class="profile-picture-section mb-4">
-                        <h5 class="text-info">Profile Picture</h5>
-                        <div class="profile-picture">
-                            <img id="profile-pic" src="<?php echo $profilePicSrc; ?>" alt="Profile Picture" style="width: 150px; height: 150px; border-radius: 50%;">
-                        </div>
-                        <button class="btn btn-sm btn-primary mt-2" onclick="openProfilePicUpload()">Change Picture</button>
-                    </div>
-
                     <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="profile-pic-container mx-auto">
+                                <img id="profile-pic" src="<?php echo htmlspecialchars($profilePicUrl); ?>" alt="Profile Picture" class="profile-pic">
+                                <div class="profile-pic-overlay">
+                                    <div class="profile-pic-text" onclick="document.getElementById('profile-pic-upload').click()">
+                                        <iconify-icon icon="mdi:camera" width="16"></iconify-icon> Change Photo
+                                    </div>
+                                </div>
+                            </div>
+                            <form id="profile-pic-form" enctype="multipart/form-data">
+                                <input type="file" id="profile-pic-upload" name="profile_pic" style="display:none;" accept="image/*">
+                            </form>
+                            <div id="upload-success-alert" class="alert alert-success" role="alert">
+                                Profile picture updated successfully!
+                            </div>
+                            <div id="upload-error-alert" class="alert alert-danger" role="alert">
+                                Error uploading profile picture.
+                            </div>
+                        </div>
                         <div class="col-md-8">
                             <div class="profile-info">
                                 <div class="info-group mb-4">
@@ -257,32 +304,6 @@ if (file_exists($profilePicFile)) {
         </div>
     </div>
 
-    <!-- Profile Picture Upload Modal -->
-    <div class="modal fade" id="profilePicUploadModal" tabindex="-1" role="dialog" aria-labelledby="profilePicUploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="profilePicUploadModalLabel">Upload Profile Picture</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="profilePicUploadForm" enctype="multipart/form-data">
-                        <div class="form-group">
-                            <label for="profilePicFile">Select Image</label>
-                            <input type="file" class="form-control-file" id="profilePicFile" name="profile_pic" accept="image/*" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="uploadProfilePic()">Upload</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -294,6 +315,7 @@ if (file_exists($profilePicFile)) {
         $(document).ready(function() {
             // Fix dropdown toggle after item click
             $('.dropdown-item').on('click', function(e) {
+                // Prevent propagation for modal triggers to keep dropdown open
                 if ($(this).attr('data-toggle') === 'modal') {
                     e.stopPropagation();
                 }
@@ -306,6 +328,33 @@ if (file_exists($profilePicFile)) {
                 $(this).attr('aria-expanded', $(this).parent().hasClass('show'));
                 $(this).next('.dropdown-menu').toggleClass('show');
             });
+
+            // Handle profile picture upload
+            $('#profile-pic-upload').change(function() {
+                if (this.files && this.files[0]) {
+                    var formData = new FormData($('#profile-pic-form')[0]);
+                    
+                    $.ajax({
+                        url: '../client_backend/upload_profile_pic.php',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            if (response.success) {
+                                // Update the profile picture with the new one
+                                $('#profile-pic').attr('src', response.newSrc + '?t=' + new Date().getTime());
+                                $('#upload-success-alert').fadeIn().delay(3000).fadeOut();
+                            } else {
+                                $('#upload-error-alert').text(response.message).fadeIn().delay(3000).fadeOut();
+                            }
+                        },
+                        error: function() {
+                            $('#upload-error-alert').text('Server error occurred').fadeIn().delay(3000).fadeOut();
+                        }
+                    });
+                }
+            });
         });
 
         function togglePasswordVisibility(fieldId) {
@@ -315,32 +364,6 @@ if (file_exists($profilePicFile)) {
             } else {
                 field.type = "password";
             }
-        }
-
-        function openProfilePicUpload() {
-            $('#profilePicUploadModal').modal('show');
-        }
-
-        function uploadProfilePic() {
-            var formData = new FormData($('#profilePicUploadForm')[0]);
-            $.ajax({
-                url: 'upload_profile_pic.php',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        $('#profile-pic').attr('src', response.newSrc);
-                        $('#profilePicUploadModal').modal('hide');
-                    } else {
-                        alert('Error uploading picture: ' + response.message);
-                    }
-                },
-                error: function() {
-                    alert('Error uploading picture');
-                }
-            });
         }
     </script>
 </body>

@@ -35,4 +35,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
 } else {
     echo json_encode(['success' => false, 'message' => 'No file uploaded']);
 }
-?>
