@@ -42,7 +42,7 @@ $result = $stmt->get_result();
 $userDetails = $result->fetch_assoc();
 
 // Determine profile picture source
-$profilePicFile = "../profile_pics/user_{$userId}.jpg";
+$profilePicFile = "/profile_pics/user_{$userId}.jpg";
 if (file_exists($profilePicFile)) {
     $profilePicSrc = "/profile_pics/user_{$userId}.jpg";
 } else {
