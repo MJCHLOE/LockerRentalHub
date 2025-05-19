@@ -48,12 +48,86 @@ if (isset($_GET['success'])) {
                 <li class="nav-item">
                     <a class="nav-link" href="manage_rentals.php">Manage Rentals</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../backend/logout.php">Logout</a>
+                <!-- My Account Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown">
+                        My Account
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="accountDropdown">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#changePasswordModal">Change Password</a>
+                        <a class="dropdown-item" href="../backend/logout.php">Logout</a>
+                    </div>
                 </li>
             </ul>
         </div>
     </nav>
+
+    <!-- Change Password Modal directly in HTML -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="passwordChangeForm">
+                        <div class="password-alert"></div>
+                        
+                        <!-- Current Password -->
+                        <div class="form-group">
+                            <label for="currentPassword" style="color: black;">Current Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="currentPassword" name="current_password" required style="color: black;">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="currentPassword">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small id="currentPasswordError" class="form-text text-danger password-error" style="color: red !important;"></small>
+                        </div>
+                        
+                        <!-- New Password -->
+                        <div class="form-group">
+                            <label for="newPassword" style="color: black;">New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="6" style="color: black;">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="newPassword">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted" style="color: black !important;">Minimum 6 characters.</small>
+                            <small id="newPasswordError" class="form-text text-danger password-error" style="color: red !important;"></small>
+                        </div>
+                        
+                        <!-- Confirm New Password -->
+                        <div class="form-group">
+                            <label for="confirmPassword" style="color: black;">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required style="color: black;">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="confirmPassword">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <small id="confirmPasswordError" class="form-text text-danger password-error" style="color: red !important;"></small>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="changePasswordBtn">Change Password</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid mt-5">
 
@@ -112,5 +186,135 @@ if (isset($_GET['success'])) {
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
     <script src="../staff_scripts/pajination.js"></script>
+
+    <!-- Password management script -->
+    <script>
+    // Add the necessary JavaScript for password functionality
+    $(document).ready(function() {
+        // Set up form submission handler
+        $('#passwordChangeForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = $('#currentPassword').val();
+            const newPassword = $('#newPassword').val();
+            const confirmPassword = $('#confirmPassword').val();
+            
+            // Reset previous errors
+            $('.password-error').text('');
+            
+            // Client-side validation
+            if (currentPassword === '') {
+                $('#currentPasswordError').text('Please enter your current password');
+                return;
+            }
+            
+            if (newPassword === '') {
+                $('#newPasswordError').text('Please enter a new password');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                $('#newPasswordError').text('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (confirmPassword === '') {
+                $('#confirmPasswordError').text('Please confirm your new password');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                $('#confirmPasswordError').text('Passwords do not match');
+                return;
+            }
+            
+            // Show loading state
+            $('#changePasswordBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
+            
+            // Submit form via AJAX
+            $.ajax({
+                url: '../staff_backend/change_password.php',
+                type: 'POST',
+                data: {
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Show success message
+                        showPasswordChangeAlert('success', response.message);
+                        
+                        // Reset form and close modal
+                        $('#passwordChangeForm')[0].reset();
+                        $('#changePasswordModal').modal('hide');
+                    } else {
+                        // Show error message
+                        showPasswordChangeAlert('danger', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    showPasswordChangeAlert('danger', 'An error occurred. Please try again later.');
+                },
+                complete: function() {
+                    // Reset button state
+                    $('#changePasswordBtn').prop('disabled', false).text('Change Password');
+                }
+            });
+        });
+
+        // Set up password visibility toggling
+        $('.toggle-password').click(function() {
+            const targetId = $(this).data('target');
+            const passwordInput = $('#' + targetId);
+            const fieldType = passwordInput.attr('type');
+            
+            if (fieldType === 'password') {
+                passwordInput.attr('type', 'text');
+                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                passwordInput.attr('type', 'password');
+                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+    });
+
+    /**
+     * Show password change alert message
+     * @param {string} type - Alert type (success, danger, warning, info)
+     * @param {string} message - Alert message
+     */
+    function showPasswordChangeAlert(type, message) {
+        let textColor = 'black';
+        if (type === 'danger') textColor = 'red';
+        if (type === 'success') textColor = 'green';
+        
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show mt-3" role="alert" style="color: ${textColor} !important;">
+                ${message}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `;
+        
+        // Remove any existing password alerts
+        $('.password-alert').empty();
+        
+        // Add the alert to the form
+        $('.password-alert').html(alertHtml);
+        
+        // Auto dismiss after 3 seconds if it's a success message
+        if (type === 'success') {
+            setTimeout(function() {
+                $('.alert').fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 3000);
+        }
+    }
+    </script>
 </body>
 </html>
