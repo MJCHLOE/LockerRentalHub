@@ -1,8 +1,7 @@
 <?php
-session_start(); // Start session to check user role
+session_start();
 require '../db/database.php';
 
-// Only allow admin or staff to update rental status
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['Admin', 'Staff'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit;
@@ -17,9 +16,8 @@ if (!isset($data['rental_id']) || !isset($data['status'])) {
 
 $rental_id = $data['rental_id'];
 $new_status = $data['status'];
-$user_id = $_SESSION['user_id']; // Get current user ID for logging
+$user_id = $_SESSION['user_id'];
 
-// Valid rental statuses
 $valid_statuses = ['pending', 'approved', 'active', 'denied', 'cancelled', 'completed'];
 if (!in_array($new_status, $valid_statuses)) {
     echo json_encode(['success' => false, 'message' => 'Invalid status']);
@@ -29,10 +27,8 @@ if (!in_array($new_status, $valid_statuses)) {
 $response = [];
 
 try {
-    // Start transaction
     $conn->begin_transaction();
     
-    // Get current rental information and locker_id
     $stmt = $conn->prepare("SELECT r.locker_id, r.rental_status, ps.status_name as payment_status, r.payment_status_id 
                           FROM rental r
                           JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id 
@@ -52,32 +48,41 @@ try {
     $current_payment_status_id = $rental_info['payment_status_id'];
     $stmt->close();
     
-    // Don't process if status hasn't changed
     if ($current_status === $new_status) {
         echo json_encode(['success' => true, 'message' => 'No change in status']);
         exit;
     }
     
-    // Determine if payment status should be updated
     $update_payment = false;
     $new_payment_status_id = $current_payment_status_id;
+    $set_approval_date = false;
     
-    // If rental is being approved, automatically set payment status to paid (2)
     if ($new_status === 'approved' && $current_status === 'pending') {
         $update_payment = true;
-        $new_payment_status_id = 2; // ID for 'paid' in paymentstatus table
+        $new_payment_status_id = 2; // 'paid'
+        $set_approval_date = true;
     }
     
-    // Check if we need to set the rent_ended_date
     $set_end_date = in_array($new_status, ['completed', 'denied', 'cancelled']);
     
-    // Prepare SQL based on whether payment status and/or end date needs updating
-    if ($update_payment && $set_end_date) {
+    if ($update_payment && $set_approval_date && $set_end_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ?, date_approved = NOW(), rent_ended_date = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
+    } elseif ($update_payment && $set_approval_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ?, date_approved = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
+    } elseif ($update_payment && $set_end_date) {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ?, rent_ended_date = NOW() WHERE rental_id = ?");
         $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
+    } elseif ($set_approval_date && $set_end_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, date_approved = NOW(), rent_ended_date = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("si", $new_status, $rental_id);
     } elseif ($update_payment) {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, payment_status_id = ? WHERE rental_id = ?");
         $stmt->bind_param("sii", $new_status, $new_payment_status_id, $rental_id);
+    } elseif ($set_approval_date) {
+        $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, date_approved = NOW() WHERE rental_id = ?");
+        $stmt->bind_param("si", $new_status, $rental_id);
     } elseif ($set_end_date) {
         $stmt = $conn->prepare("UPDATE rental SET rental_status = ?, rent_ended_date = NOW() WHERE rental_id = ?");
         $stmt->bind_param("si", $new_status, $rental_id);
@@ -88,9 +93,7 @@ try {
     $stmt->execute();
     $stmt->close();
     
-    // Determine the appropriate locker status_id based on rental status
-    $locker_status_id = 1; // Default to Vacant (1)
-    
+    $locker_status_id = 1; // Vacant
     switch ($new_status) {
         case 'pending':
             $locker_status_id = 4; // Reserved
@@ -108,22 +111,19 @@ try {
             break;
     }
     
-    // Update locker status
     $stmt = $conn->prepare("UPDATE lockerunits SET status_id = ? WHERE locker_id = ?");
     $stmt->bind_param("is", $locker_status_id, $locker_id);
     $stmt->execute();
     $stmt->close();
     
-    // Log the action in system_logs
     $action = "Update Rental";
     $description = "Updated rental #$rental_id status from '$current_status' to '$new_status'";
-    
-    // Add payment status change to log description if applicable
     if ($update_payment) {
         $description .= " and payment status to 'paid'";
     }
-    
-    // Add rent ended date to log description if applicable
+    if ($set_approval_date) {
+        $description .= " and set approval date";
+    }
     if ($set_end_date) {
         $description .= " and marked rental as ended";
     }
@@ -137,9 +137,7 @@ try {
     $log_id = $conn->insert_id;
     $log_stmt->close();
     
-    // Add to appropriate role-specific log table
     if ($_SESSION['role'] === 'Admin') {
-        // Get admin_id from the admin table
         $admin_stmt = $conn->prepare("SELECT admin_id FROM admins WHERE user_id = ?");
         $admin_stmt->bind_param("i", $user_id);
         $admin_stmt->execute();
@@ -148,13 +146,11 @@ try {
         $admin_id = $admin_row['admin_id'];
         $admin_stmt->close();
         
-        // Insert into admin_logs
         $admin_log_stmt = $conn->prepare("INSERT INTO admin_logs (log_id, admin_id) VALUES (?, ?)");
         $admin_log_stmt->bind_param("ii", $log_id, $admin_id);
         $admin_log_stmt->execute();
         $admin_log_stmt->close();
     } elseif ($_SESSION['role'] === 'Staff') {
-        // Get staff_id from the staff table
         $staff_stmt = $conn->prepare("SELECT staff_id FROM staff WHERE user_id = ?");
         $staff_stmt->bind_param("i", $user_id);
         $staff_stmt->execute();
@@ -163,14 +159,12 @@ try {
         $staff_id = $staff_row['staff_id'];
         $staff_stmt->close();
         
-        // Insert into staff_logs
         $staff_log_stmt = $conn->prepare("INSERT INTO staff_logs (log_id, staff_id) VALUES (?, ?)");
         $staff_log_stmt->bind_param("ii", $log_id, $staff_id);
         $staff_log_stmt->execute();
         $staff_log_stmt->close();
     }
     
-    // Get the payment status name for the response
     $payment_stmt = $conn->prepare("SELECT status_name FROM paymentstatus WHERE payment_status_id = ?");
     $payment_stmt->bind_param("i", $new_payment_status_id);
     $payment_stmt->execute();
@@ -179,13 +173,15 @@ try {
     $payment_status_name = $payment_row['status_name'];
     $payment_stmt->close();
     
-    // Commit the transaction
     $conn->commit();
     
     $response['success'] = true;
     $response['message'] = "Rental status updated successfully";
     if ($update_payment) {
         $response['message'] .= " and payment marked as paid";
+    }
+    if ($set_approval_date) {
+        $response['message'] .= " and approval date set";
     }
     if ($set_end_date) {
         $response['message'] .= " and rent ended date set";
@@ -197,7 +193,6 @@ try {
     $response['locker_status_id'] = $locker_status_id;
 
 } catch (Exception $e) {
-    // Rollback transaction on error
     $conn->rollback();
     $response['success'] = false;
     $response['message'] = $e->getMessage();

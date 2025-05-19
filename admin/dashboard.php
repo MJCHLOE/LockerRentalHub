@@ -453,23 +453,24 @@
       <div class="table-container">
         <div class="table-responsive bg-dark text-white p-3 rounded">
           <table class="table table-dark table-bordered">
-            <thead>
+          <thead>
               <tr>
-                <th>Rental ID</th>
-                <th>Client ID</th>
-                <th>Client Name</th>
-                <th>Locker ID</th>
-                <th>Rental Date</th>
-                <th>Rent Ended Date</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th>Actions</th>
+                  <th>Rental ID</th>
+                  <th>Client ID</th>
+                  <th>Client Name</th>
+                  <th>Locker ID</th>
+                  <th>Rental Date</th>
+                  <th>Date of Approval</th>
+                  <th>Rent Ended Date</th>
+                  <th>Status</th>
+                  <th>Payment</th>
+                  <th>Actions</th>
               </tr>
-            </thead>
-            <tbody id="rentalsTableBody">
+          </thead>
+          <tbody id="rentalsTableBody">
               <?php include '../admin_and_staff_backend/fetch_rentals.php'; ?>
-            </tbody>
-          </table>
+          </tbody>
+      </table>
         </div>
         <!-- Pagination will be added here by JavaScript -->
         <div class="pagination-container">

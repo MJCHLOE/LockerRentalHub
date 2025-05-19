@@ -103,21 +103,22 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             <h3>My Rental History</h3>
             <div class="table-responsive bg-dark text-white p-3 rounded">
                 <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
+                <thead>
+                    <tr>
                         <th>Locker</th>
                         <th>Size</th>
                         <th>Rental Date</th>
+                        <th>Date of Approval</th>
                         <th>Rent Ended Date</th>
                         <th>Status</th>
                         <th>Payment</th>
                         <th>Price</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rentalHistoryTable">
-                        <!-- Rental history will be loaded here -->
-                    </tbody>
-                </table>
+                    </tr>
+                </thead>
+                <tbody id="rentalHistoryTable">
+                    <!-- Rental history will be loaded here -->
+                </tbody>
+            </table>
             </div>
         </section>
     </div>

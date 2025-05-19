@@ -1,8 +1,7 @@
 <?php
-session_start(); // Make sure session is started
+session_start();
 require '../db/database.php';
 
-// Check if user is admin or staff
 $isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || $_SESSION['role'] === 'Staff');
 
 try {
@@ -11,6 +10,7 @@ try {
                      CONCAT(u.firstname, ' ', u.lastname) as client_name,
                      r.locker_id,
                      r.rental_date,
+                     r.date_approved,
                      r.rent_ended_date,
                      r.rental_status,
                      r.payment_status_id,
@@ -24,31 +24,21 @@ try {
     $stmt = $conn->prepare($query);
     $stmt->execute();
     
-    // Get the result
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo "<tr><td colspan='9'>No rental records found.</td></tr>";
+        echo "<tr><td colspan='10'>No rental records found.</td></tr>";
     } else {
-        // Fetch data using mysqli_fetch_assoc
         while ($row = $result->fetch_assoc()) {
             echo "<tr data-rental-id='{$row['rental_id']}' data-user-id='{$row['user_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
             echo "<td>{$row['rental_id']}</td>";
-            echo "<td>{$row['user_id']}</td>"; // Client ID
+            echo "<td>{$row['user_id']}</td>";
             echo "<td>{$row['client_name']}</td>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
+            echo "<td>" . (!is_null($row['rent_ended_date']) ? date('Y-m-d H:i', strtotime($row['rent_ended_date'])) : "None") . "</td>";
             
-            // Display rent ended date or "None" if null
-            echo "<td>";
-            if (!is_null($row['rent_ended_date'])) {
-                echo date('Y-m-d H:i', strtotime($row['rent_ended_date']));
-            } else {
-                echo "None";
-            }
-            echo "</td>";
-            
-            // Add specific classes for different statuses
             $statusClass = '';
             switch($row['rental_status']) {
                 case 'pending': $statusClass = 'text-warning'; break;
@@ -61,13 +51,10 @@ try {
             
             echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
             
-            // Payment status with class
             $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
             echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
             
             echo "<td>";
-            
-            // Add buttons based on rental status and user role
             if ($isAdminOrStaff) {
                 switch($row['rental_status']) {
                     case 'pending':
@@ -80,27 +67,21 @@ try {
                         break;
                     case 'active':
                         echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
-                        
                         if ($_SESSION['role'] === 'Admin') {
                             echo "<button class='btn btn-sm btn-secondary ml-1' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
                         }
                         break;
                 }
             }
-            
             echo "</td>";
             echo "</tr>";
         }
     }
 
-    // Close the statement and free result set
     $result->free();
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
-} finally {
-    // No need to close connection here as it might be used elsewhere in the application
-    // If you want to close it, use: $conn->close();
+    echo "<tr><td colspan='10'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 }
 ?>

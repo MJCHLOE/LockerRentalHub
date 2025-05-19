@@ -10,6 +10,7 @@ try {
     $query = "SELECT r.rental_id, 
                      r.locker_id,
                      r.rental_date,
+                     r.date_approved,
                      r.rental_status,
                      ps.status_name AS payment_status,
                      lu.price_per_month,
@@ -30,10 +31,8 @@ try {
     
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            // Debugging: Log the payment_status value
             error_log("Payment Status for rental_id {$row['rental_id']}: " . var_export($row['payment_status'], true));
 
-            // Default payment status display if unexpected value
             $paymentStatusDisplay = ucfirst(strtolower($row['payment_status'] ?? 'unknown'));
             $paymentClass = strtolower($row['payment_status'] ?? 'unknown') === 'paid' ? 'success' : 'warning';
 
@@ -41,6 +40,7 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
+            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
             echo "<td><span class='badge badge-success'>Active</span></td>";
             echo "<td><span class='badge badge-{$paymentClass}'>{$paymentStatusDisplay}</span></td>";
             echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
@@ -52,13 +52,13 @@ try {
             echo "</tr>";
         }
     } else {
-        echo "<tr><td colspan='7' class='text-center'>No active rentals found</td></tr>";
+        echo "<tr><td colspan='8' class='text-center'>No active rentals found</td></tr>";
     }
 
     $stmt->close();
     
 } catch (Exception $e) {
     error_log("Error in fetch_active_rentals.php: " . $e->getMessage());
-    echo "<tr><td colspan='7' class='text-center'>Error: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='8' class='text-center'>Error: " . $e->getMessage() . "</td></tr>";
 }
 ?>

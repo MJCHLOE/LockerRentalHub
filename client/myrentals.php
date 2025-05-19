@@ -104,20 +104,21 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             <h3>My Pending Rentals</h3>
             <div class="table-responsive bg-dark text-white p-3 rounded">
                 <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Locker ID</th>
-                            <th>Size</th>
-                            <th>Request Date</th>
-                            <th>Status</th>
-                            <th>Price/Month</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pendingRentalsTable">
-                        <!-- Pending rentals will be loaded here -->
-                    </tbody>
-                </table>
+                <thead>
+                    <tr>
+                        <th>Locker ID</th>
+                        <th>Size</th>
+                        <th>Request Date</th>
+                        <th>Date of Approval</th>
+                        <th>Status</th>
+                        <th>Price/Month</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingRentalsTable">
+                    <!-- Pending rentals will be loaded here -->
+                </tbody>
+            </table>
             </div>
         </section>
 
@@ -125,21 +126,22 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             <h3>My Active Rentals</h3>
             <div class="table-responsive bg-dark text-white p-3 rounded">
                 <table class="table table-dark table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Locker ID</th>
-                            <th>Size</th>
-                            <th>Rental Date</th>
-                            <th>Status</th>
-                            <th>Payment</th>
-                            <th>Price/Month</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="activeRentalsTable">
-                        <!-- Active rentals will be loaded here -->
-                    </tbody>
-                </table>
+                <thead>
+                    <tr>
+                        <th>Locker ID</th>
+                        <th>Size</th>
+                        <th>Rental Date</th>
+                        <th>Date of Approval</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Price/Month</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="activeRentalsTable">
+                    <!-- Active rentals will be loaded here -->
+                </tbody>
+            </table>
             </div>
         </section>
     </div>
