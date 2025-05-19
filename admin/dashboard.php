@@ -456,13 +456,14 @@
             <thead>
               <tr>
                 <th>Rental ID</th>
-                <th>Client</th>
+                <th>Client ID</th>
+                <th>Client Name</th>
                 <th>Locker ID</th>
                 <th>Rental Date</th>
                 <th>Rent Ended Date</th>
                 <th>Status</th>
-                <th>Actions</th>
                 <th>Payment</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="rentalsTableBody">
