@@ -27,13 +27,13 @@ try {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo "<tr><td colspan='11'>No rental records found.</td></tr>";
+        echo "<tr><td colspan='9'>No rental records found.</td></tr>";
     } else {
         // Fetch data using mysqli_fetch_assoc
         while ($row = $result->fetch_assoc()) {
             echo "<tr data-rental-id='{$row['rental_id']}' data-user-id='{$row['user_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
             echo "<td>{$row['rental_id']}</td>";
-            echo "<td>{$row['user_id']}</td>"; // Display the actual user_id
+            echo "<td>{$row['user_id']}</td>"; // Client ID
             echo "<td>{$row['client_name']}</td>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
@@ -59,9 +59,6 @@ try {
             }
             
             echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
-            
-            // Display payment_status_id
-            echo "<td>{$row['payment_status_id']}</td>";
             
             // Payment status with class
             $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
@@ -100,7 +97,7 @@ try {
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='11'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 } finally {
     // No need to close connection here as it might be used elsewhere in the application
     // If you want to close it, use: $conn->close();
