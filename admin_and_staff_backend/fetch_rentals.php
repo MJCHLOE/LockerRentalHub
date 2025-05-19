@@ -18,7 +18,8 @@ try {
               FROM rental r
               JOIN users u ON r.user_id = u.user_id
               JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id
-              ORDER BY r.rental_date DESC";
+              ORDER BY FIELD(r.rental_status, 'pending', 'approved', 'active', 'denied', 'cancelled', 'completed'), 
+                       r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
     $stmt->execute();
