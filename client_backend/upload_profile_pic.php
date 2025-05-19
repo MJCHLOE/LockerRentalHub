@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
     if ($check !== false) {
         if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $targetFile)) {
             // Return web-accessible URL
-            echo json_encode(['success' => true, 'newSrc' => "/profile_pics/user_{$userId}.jpg"]);
+            echo json_encode(['success' => true, 'newSrc' => "../client/profile_pics/user_{$userId}.jpg"]);
         } else {
             $errorCode = $_FILES["profile_pic"]["error"];
             echo json_encode(['success' => false, 'message' => "Error moving uploaded file. Code: $errorCode"]);
