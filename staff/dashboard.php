@@ -37,9 +37,12 @@ if (isset($_GET['success'])) {
             <iconify-icon icon="mdi:lockers" width="24"></iconify-icon>
             Staff Dashboard
         </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
+                <li class="nav-item">
                     <a class="nav-link" href="dashboard.php">View Clients</a>
                 </li>
                 <li class="nav-item">
@@ -48,12 +51,79 @@ if (isset($_GET['success'])) {
                 <li class="nav-item">
                     <a class="nav-link" href="manage_rentals.php">Manage Rentals</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="../backend/logout.php">Logout</a>
+                <!-- My Account Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown">
+                        My Account
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="accountDropdown">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#changePasswordModal">Change Password</a>
+                        <a class="dropdown-item" href="../backend/logout.php">Logout</a>
+                    </div>
                 </li>
             </ul>
         </div>
     </nav>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="../staff_backend/change_password.php" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="password_user_id">
+
+                        <!-- Current Password -->
+                        <div class="form-group">
+                            <label for="currentPassword" style="color: black;">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                            
+                            <!-- Show Password Checkbox -->
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('currentPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-group">
+                            <label for="newPassword" style="color: black;">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" name="new_password" required minlength="6">
+                            <small class="text-muted" style="color: black;">Minimum 6 characters.</small>
+                            
+                            <!-- Show Password Checkbox -->
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('newPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+
+                        <!-- Confirm New Password -->
+                        <div class="form-group">
+                            <label for="confirmPassword" style="color: black;">Confirm New Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                            
+                            <!-- Show Password Checkbox -->
+                            <div class="form-check mt-2">
+                                <input type="checkbox" class="form-check-input" onclick="togglePasswordVisibility('confirmPassword')">
+                                <label class="form-check-label">Show Password</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" style="color: black;">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="color: black;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div class="container-fluid mt-5">
         
@@ -89,13 +159,14 @@ if (isset($_GET['success'])) {
             </div>
         </section>
 
-
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../admin_and_staff_scripts/rental_management.js"></script>
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
+    <!-- Password utility script -->
+    <script src="../admin_scripts/password_utils.js"></script>
     
 </body>
 </html>
