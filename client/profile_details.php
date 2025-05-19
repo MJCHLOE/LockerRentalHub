@@ -27,7 +27,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
 
 require_once '../db/database.php';
 
-// Fetch user details (excluding profile picture)
+// Fetch user details
 $userId = $_SESSION['user_id'];
 $sql = "SELECT u.username, u.firstname, u.lastname, u.email, u.phone_number, 
                c.full_name as client_name
@@ -40,19 +40,6 @@ $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 $userDetails = $result->fetch_assoc();
-
-// Determine profile picture path
-$uploadDir = '../Uploads/profile_pictures/';
-$possibleExtensions = ['jpg', 'jpeg', 'png'];
-$profilePicture = '../images/default_profile.png';
-
-foreach ($possibleExtensions as $ext) {
-    $potentialPath = $uploadDir . "profile_{$userId}.{$ext}";
-    if (file_exists($potentialPath)) {
-        $profilePicture = $potentialPath;
-        break;
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -64,20 +51,6 @@ foreach ($possibleExtensions as $ext) {
     <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="client_dashboard.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <style>
-        .profile-picture-container {
-            width: 150px;
-            height: 150px;
-            overflow: hidden;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-        }
-        .profile-picture {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
 </head>
 <body>
     <!-- Sidebar Toggle Button -->
@@ -149,12 +122,6 @@ foreach ($possibleExtensions as $ext) {
             <div class="card bg-dark text-white">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4 text-center">
-                            <div class="profile-picture-container">
-                                <img src="<?php echo htmlspecialchars($profilePicture); ?>" alt="Profile Picture" class="profile-picture">
-                            </div>
-                            <button class="btn btn-primary" onclick="toggleEdit('profile_picture')">Change Picture</button>
-                        </div>
                         <div class="col-md-8">
                             <div class="profile-info">
                                 <div class="info-group mb-4">
@@ -199,20 +166,15 @@ foreach ($possibleExtensions as $ext) {
                 <div class="modal-header">
                     <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="editProfileForm" enctype="multipart/form-data">
+                    <form id="editProfileForm">
                         <input type="hidden" id="edit-field-type" name="field_type">
-                        <div class="form-group" id="text-input-group">
+                        <div class="form-group">
                             <label id="edit-field-label"></label>
-                            <input type="text" class="form-control" id="edit-field-value" name="field_value">
-                        </div>
-                        <div class="form-group" id="file-input-group" style="display: none;">
-                            <label for="profile-picture-upload">Profile Picture</label>
-                            <input type="file" class="form-control-file" id="profile-picture-upload" name="profile_picture" accept="image/*">
-                            <small class="text-muted">Accepted formats: JPG, PNG. Max size: 2MB</small>
+                            <input type="text" class="form-control" id="edit-field-value" name="field_value" required>
                         </div>
                     </form>
                 </div>
@@ -232,7 +194,7 @@ foreach ($possibleExtensions as $ext) {
                     <div class="modal-header">
                         <h5 class="modal-title" id="changePasswordModalLabel" style="color: black;">Change Password</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">×</span>
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
@@ -284,10 +246,12 @@ foreach ($possibleExtensions as $ext) {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../client_scripts/dashboard.js"></script>
     <script src="../client_scripts/dropdown.js"></script>
+    <script src="../client_scripts/profile_management.js"></script>
     <script>
         $(document).ready(function() {
             // Fix dropdown toggle after item click
             $('.dropdown-item').on('click', function(e) {
+                // Prevent propagation for modal triggers to keep dropdown open
                 if ($(this).attr('data-toggle') === 'modal') {
                     e.stopPropagation();
                 }
@@ -309,60 +273,6 @@ foreach ($possibleExtensions as $ext) {
             } else {
                 field.type = "password";
             }
-        }
-
-        function toggleEdit(fieldType) {
-            const labels = {
-                username: 'Username',
-                fullname: 'Full Name',
-                email: 'Email',
-                phone: 'Phone Number',
-                profile_picture: 'Profile Picture'
-            };
-
-            $('#edit-field-type').val(fieldType);
-            $('#editProfileModalLabel').text('Edit ' + labels[fieldType]);
-            
-            if (fieldType === 'profile_picture') {
-                $('#text-input-group').hide();
-                $('#file-input-group').show();
-            } else {
-                $('#text-input-group').show();
-                $('#file-input-group').hide();
-                $('#edit-field-label').text(labels[fieldType]);
-                $('#edit-field-value').val($('#' + fieldType + '-display').text());
-            }
-
-            $('#editProfileModal').modal('show');
-        }
-
-        function saveProfileEdit() {
-            const form = $('#editProfileForm')[0];
-            const formData = new FormData(form);
-
-            $.ajax({
-                url: '../client_backend/update_profile.php',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    const data = JSON.parse(response);
-                    if (data.success) {
-                        if (formData.get('field_type') === 'profile_picture') {
-                            $('.profile-picture').attr('src', data.newPicture + '?' + new Date().getTime());
-                        } else {
-                            $('#' + formData.get('field_type') + '-display').text(data.newValue);
-                        }
-                        $('#editProfileModal').modal('hide');
-                    } else {
-                        alert(data.message);
-                    }
-                },
-                error: function() {
-                    alert('Error updating profile');
-                }
-            });
         }
     </script>
 </body>
