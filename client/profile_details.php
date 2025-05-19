@@ -46,7 +46,7 @@ $profilePicFile = "../profile_pics/user_{$userId}.jpg";
 if (file_exists($profilePicFile)) {
     $profilePicSrc = "/profile_pics/user_{$userId}.jpg";
 } else {
-    $profilePicSrc = "https://www.vecteezy.com/vector-art/27708418-default-avatar-profile-icon-vector-in-flat-style";
+    $profilePicSrc = "../profile_pics/default_profile_pic.jpg";
 }
 ?>
 
