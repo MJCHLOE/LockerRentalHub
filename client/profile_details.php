@@ -41,9 +41,24 @@ $stmt->execute();
 $result = $stmt->get_result();
 $userDetails = $result->fetch_assoc();
 
-// Define profile picture path
-$profilePicPath = "/profile_pics/user_{$userId}.jpg";
-$profilePicUrl = file_exists($profilePicPath) ? $profilePicPath : "/profile_pics/default.jpg";
+// Define profile picture path and ensure directory exists
+$userId = $_SESSION['user_id'];
+$profilePicsDir = realpath("..") . "/profile_pics";
+
+// Make sure the profile_pics directory exists with proper permissions
+if (!file_exists($profilePicsDir)) {
+    if (!mkdir($profilePicsDir, 0777, true)) {
+        error_log("Failed to create profile pics directory: $profilePicsDir");
+    } else {
+        chmod($profilePicsDir, 0777); // Set permissions
+        error_log("Created profile pics directory: $profilePicsDir");
+    }
+}
+
+$profilePicPath = "$profilePicsDir/user_{$userId}.jpg";
+$profilePicUrl = file_exists($profilePicPath) ? "/profile_pics/user_{$userId}.jpg" : "../assets/default_profile.jpg";
+error_log("Looking for profile picture at: $profilePicPath");
+error_log("Using profile picture URL: $profilePicUrl");
 ?>
 
 <!DOCTYPE html>
@@ -333,6 +348,16 @@ $profilePicUrl = file_exists($profilePicPath) ? $profilePicPath : "/profile_pics
             $('#profile-pic-upload').change(function() {
                 if (this.files && this.files[0]) {
                     var formData = new FormData($('#profile-pic-form')[0]);
+                    var reader = new FileReader();
+                    
+                    // Show preview immediately for better user experience
+                    reader.onload = function(e) {
+                        $('#profile-pic').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                    
+                    // Display loading message
+                    $('#upload-success-alert').text('Uploading...').fadeIn();
                     
                     $.ajax({
                         url: '../client_backend/upload_profile_pic.php',
@@ -341,16 +366,21 @@ $profilePicUrl = file_exists($profilePicPath) ? $profilePicPath : "/profile_pics
                         contentType: false,
                         processData: false,
                         success: function(response) {
+                            console.log('Upload response:', response);
                             if (response.success) {
-                                // Update the profile picture with the new one
+                                // Add a timestamp to prevent browser caching of the old image
                                 $('#profile-pic').attr('src', response.newSrc + '?t=' + new Date().getTime());
-                                $('#upload-success-alert').fadeIn().delay(3000).fadeOut();
+                                $('#upload-success-alert').text('Profile picture updated successfully!').fadeIn().delay(3000).fadeOut();
+                                console.log('Full image path:', response.fullPath);
                             } else {
                                 $('#upload-error-alert').text(response.message).fadeIn().delay(3000).fadeOut();
+                                console.error('Upload error:', response.message);
                             }
                         },
-                        error: function() {
-                            $('#upload-error-alert').text('Server error occurred').fadeIn().delay(3000).fadeOut();
+                        error: function(xhr, status, error) {
+                            $('#upload-error-alert').text('Server error: ' + error).fadeIn().delay(3000).fadeOut();
+                            console.error('Ajax error:', status, error);
+                            console.log('Response text:', xhr.responseText);
                         }
                     });
                 }
