@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Hash new password
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-        // Update the password
+                // Update the password
         $stmt = $conn->prepare("UPDATE users SET password = ? WHERE user_id = ?");
         if (!$stmt) {
             throw new Exception("Database prepare error: " . $conn->error);
@@ -84,7 +84,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception("Execute error: " . $stmt->error);
         }
         
-        if ($stmt->affected_rows > 0) {
+        // Check if the query executed successfully
+        if ($stmt->errno === 0) {
             // Log the password change action
             try {
                 $logger = new SystemLogger($conn);
@@ -101,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             echo json_encode(['success' => true, 'message' => 'Password changed successfully!']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'No changes were made. Password might be the same as before.']);
+            echo json_encode(['success' => false, 'message' => 'Failed to update password.']);
         }
         
         $stmt->close();
