@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Client') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
     $userId = $_SESSION['user_id'];
-    $targetDir = "/profile_pics/";
+    $targetDir = "../client/profile_pics/";
     $targetFile = $targetDir . "user_{$userId}.jpg";
     
     // Check if the file is an image
