@@ -1,90 +1,133 @@
 <?php
 session_start();
-require_once '../db/database.php';
-
 header('Content-Type: application/json');
 
-// Enable error logging
-error_log("Profile upload process started");
-
+// Check if user is logged in and is a client
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Client') {
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
+    exit();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_pic'])) {
-    $userId = $_SESSION['user_id'];
-    
-    // Get the absolute path to ensure we're writing to the correct location
-    $targetDir = realpath("..") . "/profile_pics/";
-    if (!file_exists($targetDir)) {
-        if (!mkdir($targetDir, 0777, true)) {
-            error_log("Failed to create directory: $targetDir");
-            echo json_encode(['success' => false, 'message' => "Failed to create directory"]);
-            exit;
-        }
-        chmod($targetDir, 0777); // Make sure the directory is writable
-    }
-    
-    $targetFile = $targetDir . "user_{$userId}.jpg";
-    error_log("Target file path: $targetFile");
-    
-    // Check if there was an upload error
-    if ($_FILES['profile_pic']['error'] !== UPLOAD_ERR_OK) {
-        $errorMsg = uploadErrorMessage($_FILES['profile_pic']['error']);
-        error_log("Upload error: $errorMsg");
-        echo json_encode(['success' => false, 'message' => $errorMsg]);
-        exit;
-    }
-    
-    // Check if the file is an image
-    $check = getimagesize($_FILES["profile_pic"]["tmp_name"]);
-    if ($check !== false) {
-        // Try to move the uploaded file
-        if (move_uploaded_file($_FILES["profile_pic"]["tmp_name"], $targetFile)) {
-            // Make the file readable by the web server
-            chmod($targetFile, 0644);
-            
-            error_log("File uploaded successfully to: $targetFile");
-            
-            // Return the relative URL that the browser will use to display the image
-            $relativeUrl = "/profile_pics/user_{$userId}.jpg";
-            echo json_encode(['success' => true, 'newSrc' => $relativeUrl, 'fullPath' => $targetFile]);
-        } else {
-            $errorCode = $_FILES["profile_pic"]["error"];
-            $tmpName = $_FILES["profile_pic"]["tmp_name"];
-            error_log("Failed to move file from $tmpName to $targetFile");
-            error_log("Current permissions on target directory: " . substr(sprintf('%o', fileperms($targetDir)), -4));
-            echo json_encode(['success' => false, 'message' => "Error moving uploaded file. Code: $errorCode"]);
-        }
-    } else {
-        error_log("File is not an image");
-        echo json_encode(['success' => false, 'message' => 'File is not an image']);
-    }
-} else {
-    error_log("No file uploaded or wrong request method");
-    echo json_encode(['success' => false, 'message' => 'No file uploaded']);
+// Check if file was uploaded
+if (!isset($_FILES['profile_pic']) || $_FILES['profile_pic']['error'] !== UPLOAD_ERR_OK) {
+    echo json_encode(['success' => false, 'message' => 'No file uploaded or upload error']);
+    exit();
 }
 
-// Helper function to translate error codes to messages
-function uploadErrorMessage($errorCode) {
-    switch ($errorCode) {
-        case UPLOAD_ERR_INI_SIZE:
-            return "The uploaded file exceeds the upload_max_filesize directive in php.ini";
-        case UPLOAD_ERR_FORM_SIZE:
-            return "The uploaded file exceeds the MAX_FILE_SIZE directive in the HTML form";
-        case UPLOAD_ERR_PARTIAL:
-            return "The uploaded file was only partially uploaded";
-        case UPLOAD_ERR_NO_FILE:
-            return "No file was uploaded";
-        case UPLOAD_ERR_NO_TMP_DIR:
-            return "Missing a temporary folder";
-        case UPLOAD_ERR_CANT_WRITE:
-            return "Failed to write file to disk";
-        case UPLOAD_ERR_EXTENSION:
-            return "A PHP extension stopped the file upload";
+$file = $_FILES['profile_pic'];
+$userId = $_SESSION['user_id'];
+
+// Validate file type
+$allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+$fileType = $file['type'];
+
+if (!in_array($fileType, $allowedTypes)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid file type. Only JPG, PNG, and GIF are allowed.']);
+    exit();
+}
+
+// Validate file size (5MB max)
+$maxSize = 5 * 1024 * 1024; // 5MB
+if ($file['size'] > $maxSize) {
+    echo json_encode(['success' => false, 'message' => 'File size too large. Maximum 5MB allowed.']);
+    exit();
+}
+
+// Define upload directory and ensure it exists
+$uploadDir = realpath("../") . "/profile_pics";
+
+if (!file_exists($uploadDir)) {
+    if (!mkdir($uploadDir, 0777, true)) {
+        echo json_encode(['success' => false, 'message' => 'Failed to create upload directory']);
+        exit();
+    }
+    chmod($uploadDir, 0777);
+}
+
+// Define file path - always save as .jpg for consistency
+$fileName = "user_{$userId}.jpg";
+$filePath = $uploadDir . "/" . $fileName;
+
+// Process and resize image
+try {
+    // Get image info
+    $imageInfo = getimagesize($file['tmp_name']);
+    if ($imageInfo === false) {
+        echo json_encode(['success' => false, 'message' => 'Invalid image file']);
+        exit();
+    }
+
+    // Create image resource based on type
+    switch ($imageInfo[2]) {
+        case IMAGETYPE_JPEG:
+            $sourceImage = imagecreatefromjpeg($file['tmp_name']);
+            break;
+        case IMAGETYPE_PNG:
+            $sourceImage = imagecreatefrompng($file['tmp_name']);
+            break;
+        case IMAGETYPE_GIF:
+            $sourceImage = imagecreatefromgif($file['tmp_name']);
+            break;
         default:
-            return "Unknown upload error";
+            echo json_encode(['success' => false, 'message' => 'Unsupported image type']);
+            exit();
     }
+
+    if ($sourceImage === false) {
+        echo json_encode(['success' => false, 'message' => 'Failed to process image']);
+        exit();
+    }
+
+    // Get original dimensions
+    $originalWidth = imagesx($sourceImage);
+    $originalHeight = imagesy($sourceImage);
+
+    // Calculate new dimensions (square crop)
+    $size = min($originalWidth, $originalHeight);
+    $x = ($originalWidth - $size) / 2;
+    $y = ($originalHeight - $size) / 2;
+
+    // Create new image (300x300 for profile pics)
+    $newSize = 300;
+    $newImage = imagecreatetruecolor($newSize, $newSize);
+
+    // Handle transparency for PNG/GIF
+    if ($imageInfo[2] == IMAGETYPE_PNG || $imageInfo[2] == IMAGETYPE_GIF) {
+        $transparent = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+        imagefill($newImage, 0, 0, $transparent);
+        imagesavealpha($newImage, true);
+    }
+
+    // Crop and resize
+    imagecopyresampled(
+        $newImage, $sourceImage,
+        0, 0, $x, $y,
+        $newSize, $newSize, $size, $size
+    );
+
+    // Save as JPEG
+    $success = imagejpeg($newImage, $filePath, 90);
+
+    // Clean up memory
+    imagedestroy($sourceImage);
+    imagedestroy($newImage);
+
+    if ($success) {
+        // Set proper permissions
+        chmod($filePath, 0644);
+        
+        // Return success response
+        echo json_encode([
+            'success' => true,
+            'message' => 'Profile picture updated successfully',
+            'newSrc' => "/profile_pics/user_{$userId}.jpg",
+            'fullPath' => $filePath
+        ]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to save image']);
+    }
+
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => 'Error processing image: ' . $e->getMessage()]);
 }
 ?>
