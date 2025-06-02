@@ -166,10 +166,11 @@ if ($totalLockers > 0 && $page > $totalPages) {
         <!-- Locker Grid -->
         <div class="locker-grid" id="lockerGrid">
             <?php
-            // Updated SQL query to include the count of pending reservations and previous rentals
+            // Updated SQL query to include reservation checks and previous rentals
             $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month,
                             (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
                     FROM lockerunits l
                     JOIN lockersizes ls ON l.size_id = ls.size_id
                     JOIN lockerstatuses lst ON l.status_id = lst.status_id
@@ -184,12 +185,14 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     $statusClass = "status-" . strtolower($row['status_name']);
                     $reservation_count = $row['reservation_count'];
                     $has_rented_before = $row['has_rented_before'];
+                    $has_pending_reservation = $row['has_pending_reservation'];
                     ?>
                     <div class="locker-card <?php echo $statusClass; ?>" 
                         data-size="<?php echo $row['size_name']; ?>"
                         data-status="<?php echo $row['status_name']; ?>"
                         data-locker-id="<?php echo $row['locker_id']; ?>"
-                        data-has-rented-before="<?php echo $has_rented_before; ?>">
+                        data-has-rented-before="<?php echo $has_rented_before; ?>"
+                        data-has-pending-reservation="<?php echo $has_pending_reservation; ?>">
                         <div class="locker-icon">
                             <iconify-icon icon="mdi:locker" width="48"></iconify-icon>
                         </div>
@@ -202,17 +205,36 @@ if ($totalLockers > 0 && $page > $totalPages) {
                                 <p class="reservation-count">Reserved by <?php echo $reservation_count; ?> users</p>
                             <?php endif; ?>
                             <p class="price">₱<?php echo number_format($row['price_per_month'], 2); ?>/month</p>
-                            <?php if (($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved') && $has_rented_before == 0): ?>
+                            
+                            <?php 
+                            // Check conditions for showing rent button or messages
+                            $canRent = false;
+                            $message = '';
+                            $buttonText = '';
+                            
+                            if ($has_rented_before > 0) {
+                                $message = 'You have previously rented this locker and cannot rent it again.';
+                            } elseif ($has_pending_reservation > 0) {
+                                $message = 'You already have a pending reservation for this locker.';
+                            } elseif ($row['status_name'] == 'Vacant') {
+                                $canRent = true;
+                                $buttonText = 'Rent Now';
+                            } elseif ($row['status_name'] == 'Reserved') {
+                                $canRent = true;
+                                $buttonText = 'Request Reservation';
+                            } elseif ($row['status_name'] == 'Occupied') {
+                                $message = 'This locker is currently occupied';
+                            } else {
+                                $message = 'This locker is not available';
+                            }
+                            
+                            if ($canRent): ?>
                                 <button class="btn btn-success btn-sm" 
                                         onclick="rentLocker('<?php echo $row['locker_id']; ?>')">
-                                    <?php echo ($row['status_name'] == 'Vacant') ? 'Rent Now' : 'Request Reservation'; ?>
+                                    <?php echo $buttonText; ?>
                                 </button>
-                            <?php elseif ($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved'): ?>
-                                <p class="status-message">You have previously rented this locker and cannot rent it again.</p>
-                            <?php elseif ($row['status_name'] == 'Occupied'): ?>
-                                <p class="status-message">This locker is currently occupied</p>
                             <?php else: ?>
-                                <p class="status-message">This locker is not available</p>
+                                <p class="status-message"><?php echo $message; ?></p>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -388,6 +410,8 @@ if ($totalLockers > 0 && $page > $totalPages) {
             $('.locker-card').on('click', function() {
                 const status = $(this).data('status');
                 const hasRentedBefore = $(this).data('has-rented-before');
+                const hasPendingReservation = $(this).data('has-pending-reservation');
+                
                 if (status !== 'Vacant' && status !== 'Reserved') {
                     const message = status === 'Occupied' ? 
                         'This locker is currently occupied.' : 
@@ -395,6 +419,8 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     alert(message);
                 } else if (hasRentedBefore > 0) {
                     alert('You have previously rented this locker and cannot rent it again.');
+                } else if (hasPendingReservation > 0) {
+                    alert('You already have a pending reservation for this locker.');
                 }
             });
 
@@ -432,9 +458,15 @@ if ($totalLockers > 0 && $page > $totalPages) {
             const lockerCard = $(`[data-locker-id="${lockerId}"]`);
             const status = lockerCard.data('status');
             const hasRentedBefore = lockerCard.data('has-rented-before');
+            const hasPendingReservation = lockerCard.data('has-pending-reservation');
             
             if (hasRentedBefore > 0) {
                 alert('You have previously rented this locker and cannot rent it again.');
+                return;
+            }
+            
+            if (hasPendingReservation > 0) {
+                alert('You already have a pending reservation for this locker.');
                 return;
             }
             
