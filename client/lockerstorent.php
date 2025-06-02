@@ -20,6 +20,9 @@ $_SESSION[$clientSessionKey]['last_activity'] = time();
 $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ? 
             $_SESSION[$clientSessionKey]['firstname'] : 'Client';
 
+// Get user ID
+$user_id = (int)$_SESSION['user_id'];
+
 // Pagination settings
 $lockersPerPage = 8;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -163,9 +166,10 @@ if ($totalLockers > 0 && $page > $totalPages) {
         <!-- Locker Grid -->
         <div class="locker-grid" id="lockerGrid">
             <?php
-            // Updated SQL query to include the count of pending reservations
+            // Updated SQL query to include the count of pending reservations and previous rentals
             $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before
                     FROM lockerunits l
                     JOIN lockersizes ls ON l.size_id = ls.size_id
                     JOIN lockerstatuses lst ON l.status_id = lst.status_id
@@ -179,11 +183,13 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 while ($row = $result->fetch_assoc()) {
                     $statusClass = "status-" . strtolower($row['status_name']);
                     $reservation_count = $row['reservation_count'];
+                    $has_rented_before = $row['has_rented_before'];
                     ?>
                     <div class="locker-card <?php echo $statusClass; ?>" 
                         data-size="<?php echo $row['size_name']; ?>"
                         data-status="<?php echo $row['status_name']; ?>"
-                        data-locker-id="<?php echo $row['locker_id']; ?>">
+                        data-locker-id="<?php echo $row['locker_id']; ?>"
+                        data-has-rented-before="<?php echo $has_rented_before; ?>">
                         <div class="locker-icon">
                             <iconify-icon icon="mdi:locker" width="48"></iconify-icon>
                         </div>
@@ -196,11 +202,13 @@ if ($totalLockers > 0 && $page > $totalPages) {
                                 <p class="reservation-count">Reserved by <?php echo $reservation_count; ?> users</p>
                             <?php endif; ?>
                             <p class="price">₱<?php echo number_format($row['price_per_month'], 2); ?>/month</p>
-                            <?php if ($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved'): ?>
+                            <?php if (($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved') && $has_rented_before == 0): ?>
                                 <button class="btn btn-success btn-sm" 
                                         onclick="rentLocker('<?php echo $row['locker_id']; ?>')">
                                     <?php echo ($row['status_name'] == 'Vacant') ? 'Rent Now' : 'Request Reservation'; ?>
                                 </button>
+                            <?php elseif ($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved'): ?>
+                                <p class="status-message">You have previously rented this locker and cannot rent it again.</p>
                             <?php elseif ($row['status_name'] == 'Occupied'): ?>
                                 <p class="status-message">This locker is currently occupied</p>
                             <?php else: ?>
@@ -216,7 +224,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
             ?>
         </div>
 
-       <!-- Pagination Controls -->
+        <!-- Pagination Controls -->
         <?php if ($totalPages > 1): ?>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
@@ -275,7 +283,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 <div class="modal-header bg-light">
                     <h5 class="modal-title" id="rentalRequestModalLabel" style="color: #000;">Rental Request</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -379,11 +387,14 @@ if ($totalLockers > 0 && $page > $totalPages) {
             // Update click handler for locker cards
             $('.locker-card').on('click', function() {
                 const status = $(this).data('status');
-                if (status !== 'Vacant') {
+                const hasRentedBefore = $(this).data('has-rented-before');
+                if (status !== 'Vacant' && status !== 'Reserved') {
                     const message = status === 'Occupied' ? 
                         'This locker is currently occupied.' : 
                         'You cannot rent this locker.';
                     alert(message);
+                } else if (hasRentedBefore > 0) {
+                    alert('You have previously rented this locker and cannot rent it again.');
                 }
             });
 
@@ -420,10 +431,18 @@ if ($totalLockers > 0 && $page > $totalPages) {
         function rentLocker(lockerId) {
             const lockerCard = $(`[data-locker-id="${lockerId}"]`);
             const status = lockerCard.data('status');
-            if (status !== 'Vacant') {
+            const hasRentedBefore = lockerCard.data('has-rented-before');
+            
+            if (hasRentedBefore > 0) {
+                alert('You have previously rented this locker and cannot rent it again.');
+                return;
+            }
+            
+            if (status !== 'Vacant' && status !== 'Reserved') {
                 alert('This locker is not available for rent.');
                 return;
             }
+            
             const size = lockerCard.data('size');
             const price = lockerCard.find('.price').text().replace('₱', '').replace('/month', '').trim();
             $('#modalLockerId').text(lockerId);
@@ -437,7 +456,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 <div class="alert alert-${type} alert-dismissible fade show" role="alert">
                     ${message}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">×</span>
                     </button>
                 </div>
             `;
