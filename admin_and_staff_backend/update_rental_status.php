@@ -93,14 +93,6 @@ try {
     $stmt->execute();
     $stmt->close();
     
-    // Automatically decline other pending reservations for the same locker when approving one
-    if ($new_status === 'approved') {
-        $deny_stmt = $conn->prepare("UPDATE rental SET rental_status = 'denied' WHERE locker_id = ? AND rental_id != ? AND rental_status = 'pending'");
-        $deny_stmt->bind_param("ii", $locker_id, $rental_id);
-        $deny_stmt->execute();
-        $deny_stmt->close();
-    }
-    
     $locker_status_id = 1; // Vacant
     switch ($new_status) {
         case 'pending':
