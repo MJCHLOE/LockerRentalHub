@@ -18,16 +18,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         // Start transaction
         $conn->begin_transaction();
 
-        // Check if locker is still vacant
-        $checkQuery = "SELECT status_id FROM lockerunits WHERE locker_id = ?";
+        // Check if user has previously rented this locker
+        $checkPrevRental = "SELECT COUNT(*) as count FROM rental WHERE user_id = ? AND locker_id = ? AND rental_status IN ('approved', 'active', 'completed')";
+        $stmt = $conn->prepare($checkPrevRental);
+        $stmt->bind_param("is", $user_id, $locker_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if ($row['count'] > 0) {
+            throw new Exception('You have previously rented this locker and cannot rent it again.');
+        }
+
+        // Check if locker is available for rent
+        $checkQuery = "SELECT lst.status_name FROM lockerunits l JOIN lockerstatuses lst ON l.status_id = lst.status_id WHERE l.locker_id = ?";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $locker = $result->fetch_assoc();
-
-        if ($locker['status_id'] != 1) {
-            throw new Exception('This locker is no longer available.');
+        if ($locker === null) {
+            throw new Exception('Locker not found.');
+        }
+        if (!in_array($locker['status_name'], ['Vacant', 'Reserved'])) {
+            throw new Exception('This locker is not available for rent.');
         }
 
         // Insert into rental table
