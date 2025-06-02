@@ -377,7 +377,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 if (status !== 'Vacant') {
                     const message = status === 'Occupied' ? 
                         'This locker is currently occupied.' : 
-                        'This locker is under maintenance.';
+                        'You cannot rent this locker.';
                     alert(message);
                 }
             });
