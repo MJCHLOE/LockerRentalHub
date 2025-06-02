@@ -163,24 +163,27 @@ if ($totalLockers > 0 && $page > $totalPages) {
         <!-- Locker Grid -->
         <div class="locker-grid" id="lockerGrid">
             <?php
-            $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month
-                      FROM lockerunits l
-                      JOIN lockersizes ls ON l.size_id = ls.size_id
-                      JOIN lockerstatuses lst ON l.status_id = lst.status_id
-                      $whereSql
-                      ORDER BY l.locker_id
-                      LIMIT $lockersPerPage OFFSET $offset";
+            // Updated SQL query to include the count of pending reservations
+            $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count
+                    FROM lockerunits l
+                    JOIN lockersizes ls ON l.size_id = ls.size_id
+                    JOIN lockerstatuses lst ON l.status_id = lst.status_id
+                    $whereSql
+                    ORDER BY l.locker_id
+                    LIMIT $lockersPerPage OFFSET $offset";
 
             $result = $conn->query($query);
 
             if ($result && $result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     $statusClass = "status-" . strtolower($row['status_name']);
+                    $reservation_count = $row['reservation_count'];
                     ?>
                     <div class="locker-card <?php echo $statusClass; ?>" 
-                         data-size="<?php echo $row['size_name']; ?>"
-                         data-status="<?php echo $row['status_name']; ?>"
-                         data-locker-id="<?php echo $row['locker_id']; ?>">
+                        data-size="<?php echo $row['size_name']; ?>"
+                        data-status="<?php echo $row['status_name']; ?>"
+                        data-locker-id="<?php echo $row['locker_id']; ?>">
                         <div class="locker-icon">
                             <iconify-icon icon="mdi:locker" width="48"></iconify-icon>
                         </div>
@@ -188,18 +191,20 @@ if ($totalLockers > 0 && $page > $totalPages) {
                             <h4><?php echo $row['locker_id']; ?></h4>
                             <p><?php echo $row['size_name']; ?></p>
                             <p class="status"><?php echo $row['status_name']; ?></p>
+                            <!-- Display reservation count only for Reserved lockers with pending reservations -->
+                            <?php if ($row['status_name'] == 'Reserved' && $reservation_count > 0): ?>
+                                <p class="reservation-count">Reserved by <?php echo $reservation_count; ?> users</p>
+                            <?php endif; ?>
                             <p class="price">₱<?php echo number_format($row['price_per_month'], 2); ?>/month</p>
-                            <?php if ($row['status_name'] == 'Vacant'): ?>
+                            <?php if ($row['status_name'] == 'Vacant' || $row['status_name'] == 'Reserved'): ?>
                                 <button class="btn btn-success btn-sm" 
                                         onclick="rentLocker('<?php echo $row['locker_id']; ?>')">
-                                    Rent Now
+                                    <?php echo ($row['status_name'] == 'Vacant') ? 'Rent Now' : 'Request Reservation'; ?>
                                 </button>
+                            <?php elseif ($row['status_name'] == 'Occupied'): ?>
+                                <p class="status-message">This locker is currently occupied</p>
                             <?php else: ?>
-                                <p class="status-message">
-                                    <?php echo ($row['status_name'] == 'Occupied') ? 
-                                        'This locker is currently occupied' : 
-                                        'This locker is under maintenance'; ?>
-                                </p>
+                                <p class="status-message">This locker is not available</p>
                             <?php endif; ?>
                         </div>
                     </div>
