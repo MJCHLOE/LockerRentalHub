@@ -1,48 +1,72 @@
+/* Minimalist Glassmorphism Pagination */
 .pagination-container {
-    margin-top: 15px;
-    margin-bottom: 25px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
 }
 
 .pagination .page-link {
-    background-color: #2c3e50;
-    color: white;
-    border-color: #34495e;
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Glass bg */
+    color: var(--text-secondary, #bdc3c7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 0 2px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
 .pagination .page-item.active .page-link {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--accent-color, #7d5fff);
+    border-color: var(--accent-color, #7d5fff);
+    color: white;
+    box-shadow: 0 0 10px rgba(125, 95, 255, 0.3);
 }
 
 .pagination .page-item.disabled .page-link {
-    background-color: #495057;
-    color: #adb5bd;
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(255, 255, 255, 0.2);
+    border-color: transparent;
 }
 
 .pagination .page-link:hover {
-    background-color: #1a252f;
+    background-color: rgba(255, 255, 255, 0.1);
     color: white;
+    transform: translateY(-2px);
 }
 
-.table-container {
-    position: relative;
-}
-
-/* Add some spacing after tables */
+/* Table Responsive adjustments for glass panels */
 .table-responsive {
     margin-bottom: 15px;
+    border-radius: 8px;
 }
 
-/* Make sure tables don't have massive vertical scrolling */
-.table-responsive {
-    max-height: calc(5 * 53px + 53px); /* Approx height for 5 rows + header */
-    overflow-y: auto;
+/* Custom Scrollbar for tables */
+.table-responsive::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-/* Keep header row visible when scrolling */
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Sticky header fix for glass tables */
 .table-responsive thead th {
     position: sticky;
     top: 0;
-    background-color: #343a40;
+    background-color: rgba(26, 26, 26, 0.95);
+    /* Nearly opaque to hide scrolling content */
     z-index: 1;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
