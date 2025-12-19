@@ -6,10 +6,16 @@ require_once "../db/database.php";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $username = trim($_POST["username"]);
     $passwordInput = trim($_POST["password"]);
+    $confirmPassword = trim($_POST["confirm_password"]);
     $firstname = trim($_POST["firstname"]);
     $lastname = trim($_POST["lastname"]);
     $email = trim($_POST["email"]);
     $phone_number = trim($_POST["phone_number"]);
+
+    if ($passwordInput !== $confirmPassword) {
+        echo "<script>alert('Passwords do not match!'); window.history.back();</script>";
+        exit;
+    }
 
     // Hash the password using password_hash
     $hashedPassword = password_hash($passwordInput, PASSWORD_BCRYPT);
