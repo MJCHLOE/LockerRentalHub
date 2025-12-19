@@ -13,28 +13,23 @@ $search = isset($_GET['search']) ? $_GET['search'] : '';
 
 function fetchSystemLogs($conn, $filter = 'all', $search = '', $limit = 50) {
     try {
+        // query base
         $query = "SELECT sl.log_id, sl.action, sl.description, sl.entity_type, 
                         sl.entity_id, sl.log_date, u.username, u.role,
                         CONCAT(u.firstname, ' ', u.lastname) as full_name
                  FROM system_logs sl
-                 JOIN users u ON sl.user_id = u.user_id ";
+                 JOIN users u ON sl.user_id = u.user_id 
+                 WHERE 1=1 ";
 
         // Add filter conditions
-        switch($filter) {
-            case 'admin':
-                $query .= "JOIN admin_logs al ON sl.log_id = al.log_id ";
-                break;
-            case 'staff':
-                $query .= "JOIN staff_logs stl ON sl.log_id = stl.log_id ";
-                break;
-            case 'client':
-                $query .= "JOIN client_logs cl ON sl.log_id = cl.log_id ";
-                break;
+        if ($filter !== 'all') {
+            $role = ucfirst($filter); // admin -> Admin, staff -> Staff, client -> Client
+            $query .= " AND u.role = ? ";
         }
 
         // Add search condition if search term exists
         if (!empty($search)) {
-            $query .= "WHERE (sl.action LIKE ? OR sl.description LIKE ? 
+            $query .= " AND (sl.action LIKE ? OR sl.description LIKE ? 
                       OR u.username LIKE ? OR u.role LIKE ?) ";
         }
 
@@ -42,12 +37,27 @@ function fetchSystemLogs($conn, $filter = 'all', $search = '', $limit = 50) {
         
         $stmt = $conn->prepare($query);
 
+        $types = "";
+        $params = [];
+
+        if ($filter !== 'all') {
+            $types .= "s";
+            $params[] = $role;
+        }
+
         if (!empty($search)) {
             $searchTerm = "%$search%";
-            $stmt->bind_param("ssssi", $searchTerm, $searchTerm, $searchTerm, $searchTerm, $limit);
-        } else {
-            $stmt->bind_param("i", $limit);
+            $types .= "ssss";
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
         }
+
+        $types .= "i";
+        $params[] = $limit;
+
+        $stmt->bind_param($types, ...$params);
 
         $stmt->execute();
         $result = $stmt->get_result();

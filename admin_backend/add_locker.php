@@ -23,8 +23,8 @@ $stmt->execute();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get form data
     $locker_id = $_POST['locker_id'];
-    $size_id = $_POST['size_id'];
-    $status_id = $_POST['status_id'];
+    $size = $_POST['size'];
+    $status = $_POST['status'];
     $price_per_month = $_POST['price_per_month'];
     
     // Validate locker ID is unique
@@ -42,31 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Insert new locker into database
-    $query = "INSERT INTO lockerunits (locker_id, size_id, status_id, price_per_month) VALUES (?, ?, ?, ?)";
+    $query = "INSERT INTO lockerunits (locker_id, size, status, price_per_month) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("siid", $locker_id, $size_id, $status_id, $price_per_month);
+    $stmt->bind_param("sssd", $locker_id, $size, $status, $price_per_month);
     
     if ($stmt->execute()) {
-        // Fetch size name and status name
-        $size_query = "SELECT size_name FROM lockersizes WHERE size_id = ?";
-        $status_query = "SELECT status_name FROM lockerstatuses WHERE status_id = ?";
-        
-        $size_stmt = $conn->prepare($size_query);
-        $size_stmt->bind_param("i", $size_id);
-        $size_stmt->execute();
-        $size_result = $size_stmt->get_result();
-        $size_name = $size_result->fetch_assoc()['size_name'];
-        
-        $status_stmt = $conn->prepare($status_query);
-        $status_stmt->bind_param("i", $status_id);
-        $status_stmt->execute();
-        $status_result = $status_stmt->get_result();
-        $status_name = $status_result->fetch_assoc()['status_name'];
-        
         $logger = new SystemLogger($conn);
         $logger->logAction(
             'Add Locker',
-            "Added new locker {$locker_id} - Size: {$size_name}, Status: {$status_name}, Price: ₱{$price_per_month}",
+            "Added new locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price_per_month}",
             'locker',
             $locker_id
         );

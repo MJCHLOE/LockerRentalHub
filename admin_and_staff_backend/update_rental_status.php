@@ -129,58 +129,32 @@ try {
                 $auto_log_id = $conn->insert_id;
                 $auto_log_stmt->close();
                 
-                // Add role-specific logs for auto-denials
-                if ($_SESSION['role'] === 'Admin') {
-                    $admin_stmt = $conn->prepare("SELECT admin_id FROM admins WHERE user_id = ?");
-                    $admin_stmt->bind_param("i", $user_id);
-                    $admin_stmt->execute();
-                    $admin_result = $admin_stmt->get_result();
-                    $admin_row = $admin_result->fetch_assoc();
-                    $admin_id = $admin_row['admin_id'];
-                    $admin_stmt->close();
-                    
-                    $admin_auto_log_stmt = $conn->prepare("INSERT INTO admin_logs (log_id, admin_id) VALUES (?, ?)");
-                    $admin_auto_log_stmt->bind_param("ii", $auto_log_id, $admin_id);
-                    $admin_auto_log_stmt->execute();
-                    $admin_auto_log_stmt->close();
-                } elseif ($_SESSION['role'] === 'Staff') {
-                    $staff_stmt = $conn->prepare("SELECT staff_id FROM staff WHERE user_id = ?");
-                    $staff_stmt->bind_param("i", $user_id);
-                    $staff_stmt->execute();
-                    $staff_result = $staff_stmt->get_result();
-                    $staff_row = $staff_result->fetch_assoc();
-                    $staff_id = $staff_row['staff_id'];
-                    $staff_stmt->close();
-                    
-                    $staff_auto_log_stmt = $conn->prepare("INSERT INTO staff_logs (log_id, staff_id) VALUES (?, ?)");
-                    $staff_auto_log_stmt->bind_param("ii", $auto_log_id, $staff_id);
-                    $staff_auto_log_stmt->execute();
-                    $staff_auto_log_stmt->close();
-                }
+                // Role-specific logs removed
+
             }
         }
     }
     
-    $locker_status_id = 1; // Vacant
+    $locker_status = 'Vacant'; // Default
     switch ($new_status) {
         case 'pending':
-            $locker_status_id = 4; // Reserved
+            $locker_status = 'Reserved';
             break;
         case 'approved':
-            $locker_status_id = 4; // Reserved
+            $locker_status = 'Reserved';
             break;
         case 'active':
-            $locker_status_id = 2; // Occupied
+            $locker_status = 'Occupied';
             break;
         case 'completed':
         case 'denied':
         case 'cancelled':
-            $locker_status_id = 1; // Vacant
+            $locker_status = 'Vacant';
             break;
     }
     
-    $stmt = $conn->prepare("UPDATE lockerunits SET status_id = ? WHERE locker_id = ?");
-    $stmt->bind_param("is", $locker_status_id, $locker_id);
+    $stmt = $conn->prepare("UPDATE lockerunits SET status = ? WHERE locker_id = ?");
+    $stmt->bind_param("ss", $locker_status, $locker_id);
     $stmt->execute();
     $stmt->close();
     
@@ -208,33 +182,8 @@ try {
     $log_id = $conn->insert_id;
     $log_stmt->close();
     
-    if ($_SESSION['role'] === 'Admin') {
-        $admin_stmt = $conn->prepare("SELECT admin_id FROM admins WHERE user_id = ?");
-        $admin_stmt->bind_param("i", $user_id);
-        $admin_stmt->execute();
-        $admin_result = $admin_stmt->get_result();
-        $admin_row = $admin_result->fetch_assoc();
-        $admin_id = $admin_row['admin_id'];
-        $admin_stmt->close();
-        
-        $admin_log_stmt = $conn->prepare("INSERT INTO admin_logs (log_id, admin_id) VALUES (?, ?)");
-        $admin_log_stmt->bind_param("ii", $log_id, $admin_id);
-        $admin_log_stmt->execute();
-        $admin_log_stmt->close();
-    } elseif ($_SESSION['role'] === 'Staff') {
-        $staff_stmt = $conn->prepare("SELECT staff_id FROM staff WHERE user_id = ?");
-        $staff_stmt->bind_param("i", $user_id);
-        $staff_stmt->execute();
-        $staff_result = $staff_stmt->get_result();
-        $staff_row = $staff_result->fetch_assoc();
-        $staff_id = $staff_row['staff_id'];
-        $staff_stmt->close();
-        
-        $staff_log_stmt = $conn->prepare("INSERT INTO staff_logs (log_id, staff_id) VALUES (?, ?)");
-        $staff_log_stmt->bind_param("ii", $log_id, $staff_id);
-        $staff_log_stmt->execute();
-        $staff_log_stmt->close();
-    }
+    // Role specific logs removed
+
     
     $payment_stmt = $conn->prepare("SELECT status_name FROM paymentstatus WHERE payment_status_id = ?");
     $payment_stmt->bind_param("i", $new_payment_status_id);
@@ -264,7 +213,7 @@ try {
     if ($update_payment) {
         $response['payment_status'] = $payment_status_name;
     }
-    $response['locker_status_id'] = $locker_status_id;
+    $response['locker_status'] = $locker_status;
     if ($denied_count > 0) {
         $response['auto_denied_count'] = $denied_count;
     }

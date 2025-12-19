@@ -24,160 +24,13 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `admins`
---
-
-CREATE TABLE `admins` (
-  `admin_id` int(5) NOT NULL,
-  `user_id` int(5) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `admins`
---
-
-INSERT INTO `admins` (`admin_id`, `user_id`, `full_name`) VALUES
-(1, 1, 'Kirk MJ Lumapas'),
-(2, 7, 'Jenny Grail');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `admin_logs`
---
-
-CREATE TABLE `admin_logs` (
-  `admin_log_id` int(11) NOT NULL,
-  `log_id` int(11) NOT NULL,
-  `admin_id` int(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `admin_logs`
---
-
-INSERT INTO `admin_logs` (`admin_log_id`, `log_id`, `admin_id`) VALUES
-(3, 3, 1),
-(4, 4, 1),
-(5, 5, 1),
-(6, 6, 1),
-(7, 7, 1),
-(8, 10, 1),
-(9, 12, 1),
-(10, 23, 1),
-(11, 24, 1),
-(12, 25, 1),
-(13, 26, 1),
-(14, 28, 1),
-(15, 29, 1),
-(16, 30, 1),
-(20, 34, 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `clients`
---
-
-CREATE TABLE `clients` (
-  `client_id` int(5) NOT NULL,
-  `user_id` int(5) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `clients`
---
-
-INSERT INTO `clients` (`client_id`, `user_id`, `full_name`) VALUES
-(4, 6, 'Gerald Harold'),
-(5, 33, 'Test User'),
-(6, 34, 'Jen Liandra');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `client_logs`
---
-
-CREATE TABLE `client_logs` (
-  `client_log_id` int(11) NOT NULL,
-  `log_id` int(11) NOT NULL,
-  `client_id` int(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `client_logs`
---
-
-INSERT INTO `client_logs` (`client_log_id`, `log_id`, `client_id`) VALUES
-(1, 8, 4),
-(2, 9, 4),
-(3, 11, 4),
-(4, 13, 4),
-(5, 14, 4),
-(6, 15, 4),
-(7, 16, 4),
-(8, 17, 6),
-(9, 18, 4),
-(10, 19, 4),
-(11, 20, 4),
-(12, 21, 4),
-(13, 22, 4),
-(14, 27, 4);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `lockersizes`
---
-
-CREATE TABLE `lockersizes` (
-  `size_id` int(5) NOT NULL,
-  `size_name` enum('Small','Medium','Large') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `lockersizes`
---
-
-INSERT INTO `lockersizes` (`size_id`, `size_name`) VALUES
-(1, 'Small'),
-(2, 'Medium'),
-(3, 'Large');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `lockerstatuses`
---
-
-CREATE TABLE `lockerstatuses` (
-  `status_id` int(5) NOT NULL,
-  `status_name` enum('Vacant','Occupied','Maintenance','Reserved') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `lockerstatuses`
---
-
-INSERT INTO `lockerstatuses` (`status_id`, `status_name`) VALUES
-(1, 'Vacant'),
-(2, 'Occupied'),
-(3, 'Maintenance'),
-(4, 'Reserved');
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `lockerunits`
 --
 
 CREATE TABLE `lockerunits` (
   `locker_id` varchar(10) NOT NULL,
-  `size_id` int(5) NOT NULL,
-  `status_id` int(5) NOT NULL,
+  `size` enum('Small','Medium','Large') NOT NULL,
+  `status` enum('Vacant','Occupied','Maintenance','Reserved') NOT NULL,
   `price_per_month` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
@@ -185,10 +38,10 @@ CREATE TABLE `lockerunits` (
 -- Dumping data for table `lockerunits`
 --
 
-INSERT INTO `lockerunits` (`locker_id`, `size_id`, `status_id`, `price_per_month`) VALUES
-('L1', 2, 1, 100.00),
-('L2', 1, 1, 100.00),
-('L3', 3, 1, 200.00);
+INSERT INTO `lockerunits` (`locker_id`, `size`, `status`, `price_per_month`) VALUES
+('L1', 'Medium', 'Vacant', 100.00),
+('L2', 'Small', 'Vacant', 100.00),
+('L3', 'Large', 'Vacant', 200.00);
 
 -- --------------------------------------------------------
 
@@ -234,37 +87,6 @@ INSERT INTO `rental` (`rental_id`, `user_id`, `locker_id`, `rental_date`, `rent_
 (6, 6, 'L3', '2025-05-09 08:21:37', NULL, 'cancelled', 1),
 (7, 6, 'L1', '2025-05-09 12:15:26', NULL, 'cancelled', 1),
 (8, 6, 'L1', '2025-05-09 13:29:03', '2025-05-09 14:33:23', 'completed', 2);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `staff`
---
-
-CREATE TABLE `staff` (
-  `staff_id` int(5) NOT NULL,
-  `user_id` int(5) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
-
---
--- Dumping data for table `staff`
---
-
-INSERT INTO `staff` (`staff_id`, `user_id`, `full_name`) VALUES
-(2, 5, 'Randy Calunod');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `staff_logs`
---
-
-CREATE TABLE `staff_logs` (
-  `staff_log_id` int(11) NOT NULL,
-  `log_id` int(11) NOT NULL,
-  `staff_id` int(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- --------------------------------------------------------
 
@@ -346,77 +168,14 @@ INSERT INTO `users` (`user_id`, `username`, `password`, `role`, `firstname`, `la
 (34, 'jens', '$2y$10$8iM59eSJZQwqqFMVjhqj0.jDU1omud7cuHagN9uZlT9pzUjbKCZUS', 'Client', 'Jen', 'Liandra', 'jenox1@gmail.com', '09700911980');
 
 --
--- Triggers `users`
---
-DELIMITER $$
-CREATE TRIGGER `after_user_insert` AFTER INSERT ON `users` FOR EACH ROW BEGIN
-  IF NEW.role = 'Admin' THEN
-    INSERT INTO admins (user_id, full_name)
-    VALUES (NEW.user_id, CONCAT(NEW.firstname, ' ', NEW.lastname));
-  ELSEIF NEW.role = 'Staff' THEN
-    INSERT INTO staff (user_id, full_name)
-    VALUES (NEW.user_id, CONCAT(NEW.firstname, ' ', NEW.lastname));
-  ELSE
-    INSERT INTO clients (user_id, full_name)
-    VALUES (NEW.user_id, CONCAT(NEW.firstname, ' ', NEW.lastname));
-  END IF;
-END
-$$
-DELIMITER ;
-
---
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`admin_id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `admin_logs`
---
-ALTER TABLE `admin_logs`
-  ADD PRIMARY KEY (`admin_log_id`),
-  ADD KEY `log_id` (`log_id`),
-  ADD KEY `admin_id` (`admin_id`);
-
---
--- Indexes for table `clients`
---
-ALTER TABLE `clients`
-  ADD PRIMARY KEY (`client_id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `client_logs`
---
-ALTER TABLE `client_logs`
-  ADD PRIMARY KEY (`client_log_id`),
-  ADD KEY `log_id` (`log_id`),
-  ADD KEY `client_id` (`client_id`);
-
---
--- Indexes for table `lockersizes`
---
-ALTER TABLE `lockersizes`
-  ADD PRIMARY KEY (`size_id`);
-
---
--- Indexes for table `lockerstatuses`
---
-ALTER TABLE `lockerstatuses`
-  ADD PRIMARY KEY (`status_id`);
 
 --
 -- Indexes for table `lockerunits`
 --
 ALTER TABLE `lockerunits`
-  ADD PRIMARY KEY (`locker_id`),
-  ADD KEY `size_id` (`size_id`),
-  ADD KEY `status_id` (`status_id`);
+  ADD PRIMARY KEY (`locker_id`);
 
 --
 -- Indexes for table `paymentstatus`
@@ -433,21 +192,6 @@ ALTER TABLE `rental`
   ADD KEY `user_id` (`user_id`),
   ADD KEY `locker_id` (`locker_id`),
   ADD KEY `rental_ibfk_3` (`payment_status_id`);
-
---
--- Indexes for table `staff`
---
-ALTER TABLE `staff`
-  ADD PRIMARY KEY (`staff_id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `staff_logs`
---
-ALTER TABLE `staff_logs`
-  ADD PRIMARY KEY (`staff_log_id`),
-  ADD KEY `log_id` (`log_id`),
-  ADD KEY `staff_id` (`staff_id`);
 
 --
 -- Indexes for table `system_logs`
@@ -469,42 +213,6 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `admins`
---
-ALTER TABLE `admins`
-  MODIFY `admin_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `admin_logs`
---
-ALTER TABLE `admin_logs`
-  MODIFY `admin_log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
-
---
--- AUTO_INCREMENT for table `clients`
---
-ALTER TABLE `clients`
-  MODIFY `client_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `client_logs`
---
-ALTER TABLE `client_logs`
-  MODIFY `client_log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- AUTO_INCREMENT for table `lockersizes`
---
-ALTER TABLE `lockersizes`
-  MODIFY `size_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `lockerstatuses`
---
-ALTER TABLE `lockerstatuses`
-  MODIFY `status_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
 -- AUTO_INCREMENT for table `paymentstatus`
 --
 ALTER TABLE `paymentstatus`
@@ -515,18 +223,6 @@ ALTER TABLE `paymentstatus`
 --
 ALTER TABLE `rental`
   MODIFY `rental_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `staff`
---
-ALTER TABLE `staff`
-  MODIFY `staff_id` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `staff_logs`
---
-ALTER TABLE `staff_logs`
-  MODIFY `staff_log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `system_logs`
@@ -545,58 +241,12 @@ ALTER TABLE `users`
 --
 
 --
--- Constraints for table `admins`
---
-ALTER TABLE `admins`
-  ADD CONSTRAINT `admins_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
-
---
--- Constraints for table `admin_logs`
---
-ALTER TABLE `admin_logs`
-  ADD CONSTRAINT `admin_logs_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `system_logs` (`log_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `admin_logs_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `admins` (`admin_id`);
-
---
--- Constraints for table `clients`
---
-ALTER TABLE `clients`
-  ADD CONSTRAINT `clients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
-
---
--- Constraints for table `client_logs`
---
-ALTER TABLE `client_logs`
-  ADD CONSTRAINT `client_logs_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `system_logs` (`log_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `client_logs_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `clients` (`client_id`);
-
---
--- Constraints for table `lockerunits`
---
-ALTER TABLE `lockerunits`
-  ADD CONSTRAINT `lockerunits_ibfk_1` FOREIGN KEY (`size_id`) REFERENCES `lockersizes` (`size_id`),
-  ADD CONSTRAINT `lockerunits_ibfk_2` FOREIGN KEY (`status_id`) REFERENCES `lockerstatuses` (`status_id`);
-
---
 -- Constraints for table `rental`
 --
 ALTER TABLE `rental`
   ADD CONSTRAINT `rental_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `rental_ibfk_2` FOREIGN KEY (`locker_id`) REFERENCES `lockerunits` (`locker_id`),
   ADD CONSTRAINT `rental_ibfk_3` FOREIGN KEY (`payment_status_id`) REFERENCES `paymentstatus` (`payment_status_id`);
-
---
--- Constraints for table `staff`
---
-ALTER TABLE `staff`
-  ADD CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
-
---
--- Constraints for table `staff_logs`
---
-ALTER TABLE `staff_logs`
-  ADD CONSTRAINT `staff_logs_ibfk_1` FOREIGN KEY (`log_id`) REFERENCES `system_logs` (`log_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `staff_logs_ibfk_2` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`);
 
 --
 -- Constraints for table `system_logs`

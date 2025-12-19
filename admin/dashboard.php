@@ -298,18 +298,19 @@
           </div>
           <div class="form-group">
             <label>Size</label>
-            <select name="size_id" class="form-control" required>
-              <?php foreach ($conn->query("SELECT * FROM lockersizes") as $row): ?>
-                <option value="<?= $row['size_id'] ?>"><?= $row['size_name'] ?></option>
-              <?php endforeach; ?>
+            <select name="size" class="form-control" required>
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
             </select>
           </div>
           <div class="form-group">
             <label>Status</label>
-            <select name="status_id" class="form-control" required>
-              <?php foreach ($conn->query("SELECT * FROM lockerstatuses") as $row): ?>
-                <option value="<?= $row['status_id'] ?>"><?= $row['status_name'] ?></option>
-              <?php endforeach; ?>
+            <select name="status" class="form-control" required>
+                <option value="Vacant">Vacant</option>
+                <option value="Occupied">Occupied</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Reserved">Reserved</option>
             </select>
           </div>
           <div class="form-group">

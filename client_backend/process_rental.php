@@ -30,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         }
 
         // Check if locker is available for rent
-        $checkQuery = "SELECT lst.status_name FROM lockerunits l JOIN lockerstatuses lst ON l.status_id = lst.status_id WHERE l.locker_id = ?";
+        // Check if locker is available for rent
+        $checkQuery = "SELECT status as status_name FROM lockerunits WHERE locker_id = ?";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
@@ -51,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         $stmt->execute();
 
         // Update locker status to 'Reserved'
-        $updateQuery = "UPDATE lockerunits SET status_id = 4 WHERE locker_id = ?";
+        $updateQuery = "UPDATE lockerunits SET status = 'Reserved' WHERE locker_id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();

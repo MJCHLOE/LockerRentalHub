@@ -10,10 +10,8 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Query to get all locker information with status and size names
-$query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month
+$query = "SELECT l.locker_id, l.size as size_name, l.status as status_name, l.price_per_month
           FROM lockerunits l
-          JOIN lockersizes ls ON l.size_id = ls.size_id
-          JOIN lockerstatuses lst ON l.status_id = lst.status_id
           ORDER BY l.locker_id";
 
 $result = $conn->query($query);

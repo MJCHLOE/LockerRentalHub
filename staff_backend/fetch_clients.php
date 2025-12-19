@@ -4,9 +4,8 @@ require '../db/database.php';
 
 // Modified query to include client_id from clients table
 $sql = "SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.phone_number,
-        CONCAT('Client #', c.client_id) as client_number
+        CONCAT('Client #', u.user_id) as client_number
         FROM users u
-        JOIN clients c ON u.user_id = c.user_id
         WHERE u.role = 'Client'
         ORDER BY u.user_id ASC";
 

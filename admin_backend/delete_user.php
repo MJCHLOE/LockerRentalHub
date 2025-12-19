@@ -64,61 +64,9 @@ try {
         throw new Exception("Cannot delete user with active rentals");
     }
     
-    // First delete all logs associated with this user
-    // Delete from admin_logs if admin
-    if ($userData['role'] === 'Admin') {
-        // Get admin_id
-        $stmt = $conn->prepare("SELECT admin_id FROM admins WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $admin = $result->fetch_assoc();
-            
-            // Delete from admin_logs
-            $stmt = $conn->prepare("DELETE FROM admin_logs WHERE admin_id = ?");
-            $stmt->bind_param("i", $admin['admin_id']);
-            if (!$stmt->execute()) {
-                throw new Exception("Error deleting admin logs: " . $stmt->error);
-            }
-        }
-    }
-    // Delete from staff_logs if staff
-    elseif ($userData['role'] === 'Staff') {
-        // Get staff_id
-        $stmt = $conn->prepare("SELECT staff_id FROM staff WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $staff = $result->fetch_assoc();
-            
-            // Delete from staff_logs
-            $stmt = $conn->prepare("DELETE FROM staff_logs WHERE staff_id = ?");
-            $stmt->bind_param("i", $staff['staff_id']);
-            if (!$stmt->execute()) {
-                throw new Exception("Error deleting staff logs: " . $stmt->error);
-            }
-        }
-    }
-    // Delete from client_logs if client
-    else {
-        // Get client_id
-        $stmt = $conn->prepare("SELECT client_id FROM clients WHERE user_id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $client = $result->fetch_assoc();
-            
-            // Delete from client_logs
-            $stmt = $conn->prepare("DELETE FROM client_logs WHERE client_id = ?");
-            $stmt->bind_param("i", $client['client_id']);
-            if (!$stmt->execute()) {
-                throw new Exception("Error deleting client logs: " . $stmt->error);
-            }
-        }
-    }
+    // Logs deletion logic simplified - system_logs handles everything via user_id
+    // Previous role-specific log deletion removed as tables are dropped
+    
     
     // Delete all rentals associated with this user
     $stmt = $conn->prepare("DELETE FROM rental WHERE user_id = ?");
@@ -134,19 +82,8 @@ try {
         throw new Exception("Error deleting system logs: " . $stmt->error);
     }
     
-    // Delete from role-specific table
-    if ($userData['role'] === 'Admin') {
-        $stmt = $conn->prepare("DELETE FROM admins WHERE user_id = ?");
-    } elseif ($userData['role'] === 'Staff') {
-        $stmt = $conn->prepare("DELETE FROM staff WHERE user_id = ?");
-    } else { // Client
-        $stmt = $conn->prepare("DELETE FROM clients WHERE user_id = ?");
-    }
+    // Role specific table deletions removed
     
-    $stmt->bind_param("i", $user_id);
-    if (!$stmt->execute()) {
-        throw new Exception("Error deleting from role table: " . $stmt->error);
-    }
     
     // Delete from users table
     $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");

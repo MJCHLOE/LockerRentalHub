@@ -23,10 +23,8 @@ $stmt->execute();
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $locker_id = $_GET['id'];
     
-    $query = "SELECT l.*, ls.size_name, lst.status_name 
+    $query = "SELECT l.*, l.size as size_name, l.status as status_name 
               FROM lockerunits l
-              JOIN lockersizes ls ON l.size_id = ls.size_id
-              JOIN lockerstatuses lst ON l.status_id = lst.status_id
               WHERE l.locker_id = ?";
     
     $stmt = $conn->prepare($query);
@@ -35,10 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $result = $stmt->get_result();
     
     if ($row = $result->fetch_assoc()) {
-        // Get all sizes and statuses for dropdowns
-        $sizes = $conn->query("SELECT * FROM lockersizes");
-        $statuses = $conn->query("SELECT * FROM lockerstatuses");
-        
         echo "<form id='editLockerForm'>
                 <input type='hidden' name='locker_id' value='{$row['locker_id']}'>
                 
@@ -49,22 +43,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
                 
                 <div class='form-group'>
                     <label>Size</label>
-                    <select name='size_id' class='form-control' required>";
-                    while ($size = $sizes->fetch_assoc()) {
-                        $selected = ($size['size_id'] == $row['size_id']) ? 'selected' : '';
-                        echo "<option value='{$size['size_id']}' {$selected}>{$size['size_name']}</option>";
-                    }
-        echo    "</select>
+                    <select name='size' class='form-control' required>
+                        <option value='Small' " . ($row['size_name'] == 'Small' ? 'selected' : '') . ">Small</option>
+                        <option value='Medium' " . ($row['size_name'] == 'Medium' ? 'selected' : '') . ">Medium</option>
+                        <option value='Large' " . ($row['size_name'] == 'Large' ? 'selected' : '') . ">Large</option>
+                    </select>
                 </div>
                 
                 <div class='form-group'>
                     <label>Status</label>
-                    <select name='status_id' class='form-control' required>";
-                    while ($status = $statuses->fetch_assoc()) {
-                        $selected = ($status['status_id'] == $row['status_id']) ? 'selected' : '';
-                        echo "<option value='{$status['status_id']}' {$selected}>{$status['status_name']}</option>";
-                    }
-        echo    "</select>
+                    <select name='status' class='form-control' required>
+                        <option value='Vacant' " . ($row['status_name'] == 'Vacant' ? 'selected' : '') . ">Vacant</option>
+                        <option value='Occupied' " . ($row['status_name'] == 'Occupied' ? 'selected' : '') . ">Occupied</option>
+                        <option value='Maintenance' " . ($row['status_name'] == 'Maintenance' ? 'selected' : '') . ">Maintenance</option>
+                        <option value='Reserved' " . ($row['status_name'] == 'Reserved' ? 'selected' : '') . ">Reserved</option>
+                    </select>
                 </div>
                 
                 <div class='form-group'>
@@ -82,38 +75,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     try {
         $locker_id = $_POST['locker_id'];
-        $size_id = $_POST['size_id'];
-        $status_id = $_POST['status_id'];
+        $size = $_POST['size'];
+        $status = $_POST['status'];
         $price_per_month = $_POST['price_per_month'];
         
         $query = "UPDATE lockerunits 
-                  SET size_id = ?, status_id = ?, price_per_month = ? 
+                  SET size = ?, status = ?, price_per_month = ? 
                   WHERE locker_id = ?";
         
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("iids", $size_id, $status_id, $price_per_month, $locker_id);
+        $stmt->bind_param("ssds", $size, $status, $price_per_month, $locker_id);
         
         if ($stmt->execute()) {
-            // Fetch size name and status name
-            $size_query = "SELECT size_name FROM lockersizes WHERE size_id = ?";
-            $status_query = "SELECT status_name FROM lockerstatuses WHERE status_id = ?";
-            
-            $size_stmt = $conn->prepare($size_query);
-            $size_stmt->bind_param("i", $size_id);
-            $size_stmt->execute();
-            $size_result = $size_stmt->get_result();
-            $size_name = $size_result->fetch_assoc()['size_name'];
-            
-            $status_stmt = $conn->prepare($status_query);
-            $status_stmt->bind_param("i", $status_id);
-            $status_stmt->execute();
-            $status_result = $status_stmt->get_result();
-            $status_name = $status_result->fetch_assoc()['status_name'];
-            
             $logger = new SystemLogger($conn);
             $logger->logAction(
                 'Edit Locker',
-                "Updated locker {$locker_id} - Size: {$size_name}, Status: {$status_name}, Price: ₱{$price_per_month}",
+                "Updated locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price_per_month}",
                 'locker',
                 $locker_id
             );

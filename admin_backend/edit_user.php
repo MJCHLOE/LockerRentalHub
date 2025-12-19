@@ -89,108 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Error updating user basic information: " . $conn->error);
         }
         
-        // Get the current role from database before updating related tables
-        $old_role = $oldData['role'];
+        // Role update handled within users table update above.
+        // No additional role-specific table updates needed as tables are dropped.
         
-        // If role has changed, update the role-specific tables
-        if ($old_role !== $role) {
-            $full_name = $firstname . ' ' . $lastname;
-            
-            // Get role-specific IDs before making changes
-            $role_id = null;
-            if ($old_role === 'Admin') {
-                $stmt = $conn->prepare("SELECT admin_id FROM admins WHERE user_id = ?");
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($row = $result->fetch_assoc()) {
-                    $role_id = $row['admin_id'];
-                    
-                    // Update admin_logs references
-                    // We need to handle logs differently - we can't easily transfer them between role types
-                    // For this example, we'll delete the admin_logs entries
-                    $stmt = $conn->prepare("DELETE al FROM admin_logs al WHERE al.admin_id = ?");
-                    $stmt->bind_param("i", $role_id);
-                    $stmt->execute();
-                }
-            } elseif ($old_role === 'Staff') {
-                $stmt = $conn->prepare("SELECT staff_id FROM staff WHERE user_id = ?");
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($row = $result->fetch_assoc()) {
-                    $role_id = $row['staff_id'];
-                    
-                    // Update staff_logs references
-                    $stmt = $conn->prepare("DELETE sl FROM staff_logs sl WHERE sl.staff_id = ?");
-                    $stmt->bind_param("i", $role_id);
-                    $stmt->execute();
-                }
-            } else { // Client
-                $stmt = $conn->prepare("SELECT client_id FROM clients WHERE user_id = ?");
-                $stmt->bind_param("i", $user_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($row = $result->fetch_assoc()) {
-                    $role_id = $row['client_id'];
-                    
-                    // Update client_logs references
-                    $stmt = $conn->prepare("DELETE cl FROM client_logs cl WHERE cl.client_id = ?");
-                    $stmt->bind_param("i", $role_id);
-                    $stmt->execute();
-                }
-            }
-            
-            // Remove from old role table
-            if ($old_role === 'Admin') {
-                $stmt = $conn->prepare("DELETE FROM admins WHERE user_id = ?");
-            } elseif ($old_role === 'Staff') {
-                $stmt = $conn->prepare("DELETE FROM staff WHERE user_id = ?");
-            } else { // Client
-                $stmt = $conn->prepare("DELETE FROM clients WHERE user_id = ?");
-            }
-            
-            $stmt->bind_param("i", $user_id);
-            $result = $stmt->execute();
-            if (!$result) {
-                throw new Exception("Error removing user from old role table: " . $conn->error);
-            }
-            
-            // Add to new role table
-            if ($role === 'Admin') {
-                $stmt = $conn->prepare("INSERT INTO admins (user_id, full_name) VALUES (?, ?)");
-            } elseif ($role === 'Staff') {
-                $stmt = $conn->prepare("INSERT INTO staff (user_id, full_name) VALUES (?, ?)");
-            } else { // Client
-                $stmt = $conn->prepare("INSERT INTO clients (user_id, full_name) VALUES (?, ?)");
-            }
-            
-            $stmt->bind_param("is", $user_id, $full_name);
-            $result = $stmt->execute();
-            if (!$result) {
-                throw new Exception("Error adding user to new role table: " . $conn->error);
-            }
-        } else {
-            // If role hasn't changed but name has, update the full_name in the respective table
-            $full_name = $firstname . ' ' . $lastname;
-            $old_full_name = $oldData['firstname'] . ' ' . $oldData['lastname'];
-            
-            if ($full_name !== $old_full_name) {
-                if ($role === 'Admin') {
-                    $stmt = $conn->prepare("UPDATE admins SET full_name = ? WHERE user_id = ?");
-                } elseif ($role === 'Staff') {
-                    $stmt = $conn->prepare("UPDATE staff SET full_name = ? WHERE user_id = ?");
-                } else { // Client
-                    $stmt = $conn->prepare("UPDATE clients SET full_name = ? WHERE user_id = ?");
-                }
-                
-                $stmt->bind_param("si", $full_name, $user_id);
-                $result = $stmt->execute();
-                if (!$result) {
-                    throw new Exception("Error updating user's full name: " . $conn->error);
-                }
-            }
-        }
+        // Log the action
+
         
         // If all operations successful, commit transaction
         $conn->commit();

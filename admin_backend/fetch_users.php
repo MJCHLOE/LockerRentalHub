@@ -3,22 +3,9 @@ require '../db/database.php';
 
 // Modified query to include role-specific IDs
 $sql = "SELECT u.user_id, u.username, u.firstname, u.lastname, u.email, u.phone_number, u.role, 
-        CASE 
-            WHEN u.role = 'Admin' THEN CONCAT('Admin #', a.admin_id)
-            WHEN u.role = 'Staff' THEN CONCAT('Staff #', s.staff_id)
-            WHEN u.role = 'Client' THEN CONCAT('Client #', c.client_id)
-            ELSE NULL
-        END as role_specific_id,
-        CASE 
-            WHEN u.role = 'Admin' THEN a.full_name
-            WHEN u.role = 'Staff' THEN s.full_name
-            WHEN u.role = 'Client' THEN c.full_name
-            ELSE NULL
-        END as full_name
-        FROM users u
-        LEFT JOIN admins a ON u.user_id = a.user_id AND u.role = 'Admin'
-        LEFT JOIN staff s ON u.user_id = s.user_id AND u.role = 'Staff'
-        LEFT JOIN clients c ON u.user_id = c.user_id AND u.role = 'Client'";
+        CONCAT(u.role, ' #', u.user_id) as role_specific_id,
+        CONCAT(u.firstname, ' ', u.lastname) as full_name
+        FROM users u";
 
 // Check if a filter was requested
 if (isset($_GET['filter']) && in_array($_GET['filter'], ['Admin', 'Staff', 'Client'])) {
