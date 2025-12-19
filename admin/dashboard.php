@@ -75,11 +75,8 @@
     <!-- Bottom Account Section -->
     <div class="mt-auto">
       <div class="dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: white; padding-left: 0;">
-             <?php 
-                $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
-                echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover; border: 2px solid var(--accent-color);">';
-            ?>
+        <a class="nav-link dropdown-toggle dropup" href="#" id="accountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--text-secondary);">
+            <iconify-icon icon="mdi:account-circle" style="font-size: 1.8rem;"></iconify-icon>
             My Account
         </a>
         <div class="dropdown-menu" aria-labelledby="accountDropdown">
