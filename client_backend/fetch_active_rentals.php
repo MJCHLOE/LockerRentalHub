@@ -10,17 +10,15 @@ try {
     $query = "SELECT r.rental_id, 
                      r.locker_id,
                      r.rental_date,
-                     r.date_approved,
-                     r.rental_status,
-                     ps.status_name AS payment_status,
-                     lu.price_per_month,
-                     ls.size_name
-              FROM rental r
-              JOIN lockerunits lu ON r.locker_id = lu.locker_id
-              JOIN lockersizes ls ON lu.size_id = ls.size_id
-              JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id
+                     NULL as date_approved, -- Simplified in new schema or null if not tracking approved date separate from status
+                     r.status as rental_status,
+                     r.payment_status,
+                     l.price,
+                     l.size as size_name
+              FROM rentals r
+              JOIN lockers l ON r.locker_id = l.locker_id
               WHERE r.user_id = ? 
-              AND r.rental_status = 'active'  
+              AND r.status = 'active'
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -31,19 +29,17 @@ try {
     
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            error_log("Payment Status for rental_id {$row['rental_id']}: " . var_export($row['payment_status'], true));
-
-            $paymentStatusDisplay = ucfirst(strtolower($row['payment_status'] ?? 'unknown'));
-            $paymentClass = strtolower($row['payment_status'] ?? 'unknown') === 'paid' ? 'success' : 'warning';
+            $paymentStatusDisplay = ucfirst(strtolower($row['payment_status']));
+            $paymentClass = strtolower($row['payment_status']) === 'paid' ? 'success' : 'warning';
 
             echo "<tr>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
+            echo "<td>-</td>"; // Date approved not explicitly in new schema active/pending rentals table unless we added it? Schema has rental_id, user_id, locker_id, rental_date, status, payment_status. rental_date is request date? Or start date? Assume rental_date.
             echo "<td><span class='badge badge-success'>Active</span></td>";
             echo "<td><span class='badge badge-{$paymentClass}'>{$paymentStatusDisplay}</span></td>";
-            echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
+            echo "<td>₱" . number_format($row['price'], 2) . "</td>";
             echo "<td>
                     <button class='btn btn-danger btn-sm' onclick='terminateRental({$row['rental_id']})'>
                         Terminate

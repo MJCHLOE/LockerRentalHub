@@ -10,8 +10,8 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Query to get all locker information with status and size names
-$query = "SELECT l.locker_id, l.size as size_name, l.status as status_name, l.price_per_month
-          FROM lockerunits l
+$query = "SELECT l.locker_id, l.size as size_name, l.status as status_name, l.price
+          FROM lockers l
           ORDER BY l.locker_id";
 
 $result = $conn->query($query);
@@ -36,7 +36,7 @@ if ($result && $result->num_rows > 0) {
         echo "<td>{$row['locker_id']}</td>";
         echo "<td>{$row['size_name']}</td>";
         echo "<td>{$row['status_name']}</td>";
-        echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
+        echo "<td>₱" . number_format($row['price'], 2) . "</td>";
         echo "<td class='text-center'>
                 <button class='btn btn-primary btn-sm' onclick='editLocker(\"{$row['locker_id']}\")'>Edit</button>
                 <button class='btn btn-danger btn-sm' onclick='confirmDeleteLocker(\"{$row['locker_id']}\")'>Delete</button>

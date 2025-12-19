@@ -10,15 +10,13 @@ try {
     $query = "SELECT r.rental_id, 
                      r.locker_id, 
                      r.rental_date, 
-                     r.date_approved,
-                     r.rental_status,
-                     lu.price_per_month, 
-                     ls.size_name
-              FROM rental r
-              JOIN lockerunits lu ON r.locker_id = lu.locker_id
-              JOIN lockersizes ls ON lu.size_id = ls.size_id
+                     r.status,
+                     l.price, 
+                     l.size as size_name
+              FROM rentals r
+              JOIN lockers l ON r.locker_id = l.locker_id
               WHERE r.user_id = ? 
-              AND r.rental_status = 'pending'
+              AND r.status = 'pending'
               ORDER BY r.rental_date DESC";
               
     $stmt = $conn->prepare($query);
@@ -32,9 +30,9 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
+            echo "<td>-</td>"; // No date_approved for pending
             echo "<td><span class='badge badge-warning'>Pending</span></td>";
-            echo "<td>₱" . number_format($row['price_per_month'], 2) . "</td>";
+            echo "<td>₱" . number_format($row['price'], 2) . "</td>";
             echo "<td>
                     <button class='btn btn-danger btn-sm' onclick='cancelRental({$row['rental_id']})'>
                         Cancel Request

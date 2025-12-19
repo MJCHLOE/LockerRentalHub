@@ -63,7 +63,11 @@
         </li>
          <!-- My Account Dropdown -->
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" style="display: flex; align-items: center;">
+            <?php 
+                $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
+                echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+            ?>
             My Account
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="accountDropdown">
@@ -435,11 +439,18 @@
     <p>Process and manage locker rentals.</p>
 
     <!-- Search and Filter Controls -->
+    <div class="mb-3">
+        <div class="btn-group mb-2" role="group">
+            <button id="tab-active" class="btn btn-primary rental-tab" onclick="loadRentals('active')">Active Rentals</button>
+            <button id="tab-archive" class="btn btn-secondary rental-tab" onclick="loadRentals('archive')">Archived History</button>
+        </div>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <input type="text" id="rentalSearchInput" class="form-control w-50" 
                placeholder="Search by ID, Client, or Locker ID" onkeyup="searchRentals()">
         
-        <div class="btn-group" role="group">
+        <div class="btn-group" role="group" id="rentalFilters">
             <button type="button" class="btn btn-primary active" onclick="filterRentals('all')">All Rentals</button>
             <button type="button" class="btn btn-warning" onclick="filterRentals('pending')">Pending</button>
             <button type="button" class="btn btn-success" onclick="filterRentals('approved')">Approved</button>

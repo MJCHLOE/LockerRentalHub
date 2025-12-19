@@ -7,27 +7,19 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 try {
-    $paymentStatuses = [
-        0 => 'Unpaid',
-        1 => 'Pending',
-        2 => 'Paid'
-    ];
-    
-    $query = "SELECT r.rental_id, 
+    $query = "SELECT r.archive_id as rental_id, 
                      r.locker_id,
-                     r.rental_date,
-                     r.date_approved,
-                     r.rent_ended_date,
-                     r.rental_status,
-                     r.payment_status_id,
-                     lu.price_per_month,
-                     ls.size_name
-              FROM rental r
-              JOIN lockerunits lu ON r.locker_id = lu.locker_id
-              JOIN lockersizes ls ON lu.size_id = ls.size_id
+                     r.start_date as rental_date,
+                     NULL as date_approved, -- Archives don't have this column, or it's implicitly part of history
+                     r.end_date as rent_ended_date,
+                     r.final_status as rental_status,
+                     r.payment_status_at_archive as payment_status,
+                     l.price,
+                     l.size as size_name
+              FROM rental_archives r
+              JOIN lockers l ON r.locker_id = l.locker_id
               WHERE r.user_id = ? 
-              AND r.rental_status IN ('completed', 'denied', 'cancelled')
-              ORDER BY r.rental_date DESC";
+              ORDER BY r.archived_at DESC";
               
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $_SESSION['user_id']);
@@ -44,18 +36,17 @@ try {
                 case 'cancelled': $statusClass = 'text-warning'; break;
             }
             
-            $paymentStatus = isset($paymentStatuses[$row['payment_status_id']]) ? 
-                            $paymentStatuses[$row['payment_status_id']] : 'Unknown';
+            $paymentStatus = ucfirst(strtolower($row['payment_status']));
             
             echo "<tr>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size_name']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
+            echo "<td>-</td>"; // No date_approved in archives display
             echo "<td>" . (!is_null($row['rent_ended_date']) ? date('Y-m-d H:i', strtotime($row['rent_ended_date'])) : "None") . "</td>";
             echo "<td class='{$statusClass}'>{$row['rental_status']}</td>";
             echo "<td>{$paymentStatus}</td>";
-            echo "<td>₱{$row['price_per_month']}</td>";
+            echo "<td>₱" . number_format($row['price'], 2) . "</td>";
             echo "</tr>";
         }
     } else {

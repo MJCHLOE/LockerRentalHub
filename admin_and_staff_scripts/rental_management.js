@@ -21,12 +21,45 @@ function filterRentals(status) {
     });
 
     // Update active button state
-    document.querySelectorAll('.btn-group button').forEach(btn => {
+    document.querySelectorAll('#rentalFilters .btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.onclick.toString().includes(status)) {
             btn.classList.add('active');
         }
     });
+}
+
+function loadRentals(type) {
+    const tbody = document.getElementById('rentalsTableBody');
+    tbody.innerHTML = '<tr><td colspan="10" class="text-center">Loading...</td></tr>';
+
+    // Update Tab UI
+    document.querySelectorAll('.rental-tab').forEach(tab => {
+        tab.classList.remove('active', 'btn-primary');
+        tab.classList.add('btn-secondary');
+    });
+    const activeTab = document.getElementById('tab-' + type);
+    if(activeTab) {
+        activeTab.classList.add('active', 'btn-primary');
+        activeTab.classList.remove('btn-secondary');
+    }
+
+    // Show/Hide relevant filters based on type
+    const filters = document.getElementById('rentalFilters');
+    if (type === 'archive') {
+         // Maybe hide "Pending/Approved/Active" filters?
+         // For now, simplify: just fetch.
+    }
+
+    fetch('../admin_and_staff_backend/fetch_rentals.php?type=' + type)
+        .then(response => response.text())
+        .then(html => {
+            tbody.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error loading rentals:', error);
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error loading data</td></tr>';
+        });
 }
 
 function updateRentalStatus(rentalId, newStatus) {
@@ -36,7 +69,7 @@ function updateRentalStatus(rentalId, newStatus) {
             confirmMessage += 'approve';
             break;
         case 'active':
-            confirmMessage += 'active';
+            confirmMessage += 'activate';
             break;
         case 'denied':
             confirmMessage += 'deny';
@@ -69,8 +102,10 @@ function updateRentalStatus(rentalId, newStatus) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Rental status updated successfully');
-            location.reload();
+            alert(data.message);
+            // Reload current view
+            const isArchive = document.getElementById('tab-archive')?.classList.contains('active');
+            loadRentals(isArchive ? 'archive' : 'active');
         } else {
             alert('Error updating rental status: ' + data.message);
         }

@@ -79,7 +79,11 @@ if (isset($_GET['success'])) {
                 </li>
                 <!-- My Account Dropdown -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-toggle="dropdown" style="display: flex; align-items: center;">
+                        <?php 
+                            $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
+                            echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+                        ?>
                         My Account
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="accountDropdown">

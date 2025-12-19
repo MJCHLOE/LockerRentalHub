@@ -9,7 +9,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $passwordInput = trim($_POST["password"]);
 
     // Check user credentials
-    $stmt = $conn->prepare("SELECT user_id, username, password, role, firstname, lastname FROM users WHERE BINARY username = ?");
+    $stmt = $conn->prepare("SELECT user_id, username, password, role, firstname, lastname, profile_pic FROM users WHERE BINARY username = ?");
     
     if (!$stmt) {
         die("Prepare failed (Login): (" . $conn->errno . ") " . $conn->error);
@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->store_result();
 
     if ($stmt->num_rows === 1) {
-        $stmt->bind_result($user_id, $usernameDB, $hashedPassword, $role, $firstname, $lastname);
+        $stmt->bind_result($user_id, $usernameDB, $hashedPassword, $role, $firstname, $lastname, $profile_pic);
         $stmt->fetch();
 
         if (password_verify($passwordInput, $hashedPassword)) {
@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 'role' => $role,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
+                'profile_pic' => $profile_pic,
                 'last_activity' => time()
             ];
 
@@ -43,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION["role"] = $role;
             $_SESSION["firstname"] = $firstname;
             $_SESSION["lastname"] = $lastname;
+            $_SESSION["profile_pic"] = $profile_pic;
 
             // Redirect based on role
             if ($role === "Admin") {

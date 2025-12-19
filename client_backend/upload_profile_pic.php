@@ -116,11 +116,21 @@ try {
         // Set proper permissions
         chmod($filePath, 0644);
         
+        // Update user profile_pic in database
+        require_once '../db/database.php';
+        $stmt = $conn->prepare("UPDATE users SET profile_pic = ? WHERE user_id = ?");
+        $stmt->bind_param("si", $fileName, $userId);
+        $stmt->execute();
+        $stmt->close();
+
+        // Update session
+        $_SESSION['profile_pic'] = $fileName;
+        
         // Return success response
         echo json_encode([
             'success' => true,
             'message' => 'Profile picture updated successfully',
-            'newSrc' => "/profile_pics/user_{$userId}.jpg",
+            'newSrc' => "/profile_pics/" . $fileName,
             'fullPath' => $filePath
         ]);
     } else {

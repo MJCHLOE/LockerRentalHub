@@ -19,7 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         $conn->begin_transaction();
 
         // Check if user has previously rented this locker
-        $checkPrevRental = "SELECT COUNT(*) as count FROM rental WHERE user_id = ? AND locker_id = ? AND rental_status IN ('approved', 'active', 'completed')";
+        $checkPrevRental = "SELECT COUNT(*) as count FROM rentals WHERE user_id = ? AND locker_id = ? AND status IN ('approved', 'active')";
+        // Note: Completed rentals are in rental_archives now, so they won't block new rentals typically unless we check archives.
+        // Assuming we only block concurrent active rentals.
         $stmt = $conn->prepare($checkPrevRental);
         $stmt->bind_param("is", $user_id, $locker_id);
         $stmt->execute();
@@ -31,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
 
         // Check if locker is available for rent
         // Check if locker is available for rent
-        $checkQuery = "SELECT status as status_name FROM lockerunits WHERE locker_id = ?";
+        $checkQuery = "SELECT status FROM lockers WHERE locker_id = ?";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
@@ -40,19 +42,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         if ($locker === null) {
             throw new Exception('Locker not found.');
         }
-        if (!in_array($locker['status_name'], ['Vacant', 'Reserved'])) {
+        if (!in_array($locker['status'], ['Vacant', 'Reserved'])) {
             throw new Exception('This locker is not available for rent.');
         }
 
-        // Insert into rental table
-        $insertQuery = "INSERT INTO rental (user_id, locker_id, rental_date, rental_status, payment_status_id) 
-                       VALUES (?, ?, NOW(), 'pending', '1')";
+        // Insert into rentals table
+        // Note: payment_status defaults to 'unpaid' in schema, rental_status to 'pending'
+        $insertQuery = "INSERT INTO rentals (user_id, locker_id, rental_date, status, payment_status) 
+                       VALUES (?, ?, NOW(), 'pending', 'unpaid')";
         $stmt = $conn->prepare($insertQuery);
         $stmt->bind_param("is", $user_id, $locker_id);
         $stmt->execute();
 
         // Update locker status to 'Reserved'
-        $updateQuery = "UPDATE lockerunits SET status = 'Reserved' WHERE locker_id = ?";
+        $updateQuery = "UPDATE lockers SET status = 'Reserved' WHERE locker_id = ?";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();

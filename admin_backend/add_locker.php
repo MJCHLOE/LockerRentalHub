@@ -25,10 +25,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $locker_id = $_POST['locker_id'];
     $size = $_POST['size'];
     $status = $_POST['status'];
-    $price_per_month = $_POST['price_per_month'];
+    $price = $_POST['price_per_month']; // Keeping POST key same for frontend compat, logic changes below
     
     // Validate locker ID is unique
-    $check_query = "SELECT locker_id FROM lockerunits WHERE locker_id = ?";
+    $check_query = "SELECT locker_id FROM lockers WHERE locker_id = ?";
     $check_stmt = $conn->prepare($check_query);
     $check_stmt->bind_param("s", $locker_id);
     $check_stmt->execute();
@@ -42,15 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Insert new locker into database
-    $query = "INSERT INTO lockerunits (locker_id, size, status, price_per_month) VALUES (?, ?, ?, ?)";
+    $query = "INSERT INTO lockers (locker_id, size, status, price) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("sssd", $locker_id, $size, $status, $price_per_month);
+    $stmt->bind_param("sssd", $locker_id, $size, $status, $price);
     
     if ($stmt->execute()) {
         $logger = new SystemLogger($conn);
         $logger->logAction(
             'Add Locker',
-            "Added new locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price_per_month}",
+            "Added new locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price}",
             'locker',
             $locker_id
         );

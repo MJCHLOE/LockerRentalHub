@@ -43,7 +43,7 @@ if ($locker_id) {
         $response['message'] = "Cannot delete locker with active rentals!";
     } else {
         // Delete the locker
-        $query = "DELETE FROM lockerunits WHERE locker_id = ?";
+        $query = "DELETE FROM lockers WHERE locker_id = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("s", $locker_id);
         

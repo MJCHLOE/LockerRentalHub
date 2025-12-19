@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $locker_id = $_GET['id'];
     
     $query = "SELECT l.*, l.size as size_name, l.status as status_name 
-              FROM lockerunits l
+              FROM lockers l
               WHERE l.locker_id = ?";
     
     $stmt = $conn->prepare($query);
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
                 
                 <div class='form-group'>
                     <label>Price per Month</label>
-                    <input type='number' step='0.01' name='price_per_month' class='form-control' value='{$row['price_per_month']}' required>
+                    <input type='number' step='0.01' name='price_per_month' class='form-control' value='{$row['price']}' required>
                 </div>
             </form>";
     }
@@ -77,20 +77,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $locker_id = $_POST['locker_id'];
         $size = $_POST['size'];
         $status = $_POST['status'];
-        $price_per_month = $_POST['price_per_month'];
+        $price = $_POST['price_per_month'];
         
-        $query = "UPDATE lockerunits 
-                  SET size = ?, status = ?, price_per_month = ? 
+        $query = "UPDATE lockers 
+                  SET size = ?, status = ?, price = ? 
                   WHERE locker_id = ?";
         
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("ssds", $size, $status, $price_per_month, $locker_id);
+        $stmt->bind_param("ssds", $size, $status, $price, $locker_id);
         
         if ($stmt->execute()) {
             $logger = new SystemLogger($conn);
             $logger->logAction(
                 'Edit Locker',
-                "Updated locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price_per_month}",
+                "Updated locker {$locker_id} - Size: {$size}, Status: {$status}, Price: ₱{$price}",
                 'locker',
                 $locker_id
             );

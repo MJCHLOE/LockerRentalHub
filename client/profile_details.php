@@ -143,8 +143,11 @@ error_log("Using profile picture URL: $profilePicUrl");
                 My Rental History
             </a>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle active" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <iconify-icon icon="mdi:account"></iconify-icon>
+                <a href="#" class="dropdown-toggle active" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center;">
+                    <?php 
+                        $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
+                        echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+                    ?>
                     My Account
                 </a>
                 <div class="dropdown-menu" aria-labelledby="accountDropdown">

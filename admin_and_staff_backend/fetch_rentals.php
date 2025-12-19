@@ -5,21 +5,36 @@ require '../db/database.php';
 $isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || $_SESSION['role'] === 'Staff');
 
 try {
-    $query = "SELECT r.rental_id, 
-                     r.user_id,
-                     CONCAT(u.firstname, ' ', u.lastname) as client_name,
-                     r.locker_id,
-                     r.rental_date,
-                     r.date_approved,
-                     r.rent_ended_date,
-                     r.rental_status,
-                     r.payment_status_id,
-                     ps.status_name as payment_status
-              FROM rental r
-              JOIN users u ON r.user_id = u.user_id
-              JOIN paymentstatus ps ON r.payment_status_id = ps.payment_status_id
-              ORDER BY FIELD(r.rental_status, 'pending', 'approved', 'active', 'denied', 'completed', 'cancelled'), 
-                       r.rental_date DESC";
+    // Check if we want archives
+    $show_archives = isset($_GET['type']) && $_GET['type'] === 'archive';
+
+    if ($show_archives) {
+        $query = "SELECT r.archive_id as rental_id, 
+                         r.user_id,
+                         CONCAT(u.firstname, ' ', u.lastname) as client_name,
+                         r.locker_id,
+                         r.start_date as rental_date,
+                         NULL as date_approved, -- Archives structure simplification
+                         r.end_date as rent_ended_date,
+                         r.final_status as rental_status,
+                         r.payment_status_at_archive as payment_status
+                  FROM rental_archives r
+                  JOIN users u ON r.user_id = u.user_id
+                  ORDER BY r.archived_at DESC";
+    } else {
+        $query = "SELECT r.rental_id, 
+                         r.user_id,
+                         CONCAT(u.firstname, ' ', u.lastname) as client_name,
+                         r.locker_id,
+                         r.rental_date,
+                         NULL as date_approved, 
+                         NULL as rent_ended_date,
+                         r.status as rental_status,
+                         r.payment_status
+                  FROM rentals r
+                  JOIN users u ON r.user_id = u.user_id
+                  ORDER BY FIELD(r.status, 'pending', 'approved', 'active') DESC, r.rental_date DESC";
+    }
               
     $stmt = $conn->prepare($query);
     $stmt->execute();
@@ -27,17 +42,17 @@ try {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo "<tr><td colspan='10'>No rental records found.</td></tr>";
+        echo "<tr><td colspan='9'>No records found.</td></tr>";
     } else {
         while ($row = $result->fetch_assoc()) {
-            echo "<tr data-rental-id='{$row['rental_id']}' data-user-id='{$row['user_id']}' data-status='{$row['rental_status']}' data-payment='{$row['payment_status']}'>";
+            echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}'>";
             echo "<td>{$row['rental_id']}</td>";
             echo "<td>{$row['user_id']}</td>";
             echo "<td>{$row['client_name']}</td>";
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
-            echo "<td>" . (!is_null($row['date_approved']) ? date('Y-m-d H:i', strtotime($row['date_approved'])) : 'None') . "</td>";
-            echo "<td>" . (!is_null($row['rent_ended_date']) ? date('Y-m-d H:i', strtotime($row['rent_ended_date'])) : "None") . "</td>";
+            echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
+            echo "<td>" . ($row['rent_ended_date'] ? date('Y-m-d H:i', strtotime($row['rent_ended_date'])) : '-') . "</td>";
             
             $statusClass = '';
             switch($row['rental_status']) {
@@ -49,13 +64,14 @@ try {
                 case 'completed': $statusClass = 'text-info'; break;
             }
             
-            echo "<td data-status='{$row['rental_status']}' class='{$statusClass}'>{$row['rental_status']}</td>";
+            echo "<td class='{$statusClass}'>{$row['rental_status']}</td>";
             
             $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
             echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
             
+            // Actions only for active rentals in default view
             echo "<td>";
-            if ($isAdminOrStaff) {
+            if ($isAdminOrStaff && !$show_archives) {
                 switch($row['rental_status']) {
                     case 'pending':
                         echo "<button class='btn btn-sm btn-success mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")'>Approve</button>";
@@ -82,6 +98,6 @@ try {
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='10'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 }
 ?>

@@ -40,8 +40,8 @@ class ClientLogger {
             $this->conn->begin_transaction();
 
             // Get locker details
-            $query = "SELECT size as size_name, price_per_month 
-                     FROM lockerunits 
+            $query = "SELECT size as size_name, price 
+                     FROM lockers 
                      WHERE locker_id = ?";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param("s", $locker_id);
@@ -52,7 +52,7 @@ class ClientLogger {
             // Create description message
             $description = "Rental Request: Client requested to rent Locker #$locker_id " .
                          "(" . $lockerDetails['size_name'] . " - ₱" . 
-                         number_format($lockerDetails['price_per_month'], 2) . "/month)";
+                         number_format($lockerDetails['price'], 2) . "/month)";
 
             // Insert into system_logs
             $query = "INSERT INTO system_logs (user_id, action, description, entity_type, entity_id) 
