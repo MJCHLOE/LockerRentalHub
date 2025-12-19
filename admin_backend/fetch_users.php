@@ -18,18 +18,18 @@ $sql .= " ORDER BY u.user_id ASC";
 $result = $conn->query($sql);
 
 // Check if there are users
-if ($result->num_rows > 0) {
+if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         // Add data-id attribute to the row for easier targeting
         echo "<tr data-id=\"{$row['user_id']}\">";
         // Display User ID and role-specific ID with parentheses and reduced opacity
         echo "<td>" . htmlspecialchars("User #{$row['user_id']}") . 
-             ($row['role_specific_id'] ? "<br><span style='opacity: 0.7'>(" . htmlspecialchars($row['role_specific_id']) . ")</span>" : "") . "</td>";
+             ($row['role_specific_id'] ? "<br><span style='opacity: 0.7; font-size: 0.8em;'>(" . htmlspecialchars($row['role_specific_id']) . ")</span>" : "") . "</td>";
         echo "<td>" . htmlspecialchars($row['username']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['firstname'] . ' ' . $row['lastname']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['full_name']) . "</td>";
         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
         echo "<td>" . htmlspecialchars($row['phone_number']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+        echo "<td><span class='status-badge bg-primary text-white'>" . htmlspecialchars($row['role']) . "</span></td>";
         echo "<td>
                 <button class='btn btn-sm btn-primary' onclick='editUser({$row['user_id']})'>Edit</button>
                 <button class='btn btn-sm btn-danger' onclick='deleteUser({$row['user_id']})'>Delete</button>

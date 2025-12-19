@@ -7,6 +7,10 @@ $isAdminOrStaff = isset($_SESSION['role']) && ($_SESSION['role'] === 'Admin' || 
 try {
     // Check if we want archives
     $show_archives = isset($_GET['type']) && $_GET['type'] === 'archive';
+    
+    // Check for status filter
+    // Filter can be 'all' or specific status
+    $filter = isset($_GET['filter']) && $_GET['filter'] !== 'all' ? $_GET['filter'] : null;
 
     if ($show_archives) {
         $query = "SELECT r.archive_id as rental_id, 
@@ -14,13 +18,19 @@ try {
                          CONCAT(u.firstname, ' ', u.lastname) as client_name,
                          r.locker_id,
                          r.start_date as rental_date,
-                         NULL as date_approved, -- Archives structure simplification
+                         NULL as date_approved, 
                          r.end_date as rent_ended_date,
                          r.final_status as rental_status,
                          r.payment_status_at_archive as payment_status
                   FROM rental_archives r
                   JOIN users u ON r.user_id = u.user_id
-                  ORDER BY r.archived_at DESC";
+                  WHERE 1=1";
+        
+        if ($filter) {
+            $query .= " AND r.final_status = ?";
+        }
+        
+        $query .= " ORDER BY r.archived_at DESC";
     } else {
         $query = "SELECT r.rental_id, 
                          r.user_id,
@@ -33,16 +43,27 @@ try {
                          r.payment_status
                   FROM rentals r
                   JOIN users u ON r.user_id = u.user_id
-                  ORDER BY FIELD(r.status, 'pending', 'approved', 'active') DESC, r.rental_date DESC";
+                  WHERE 1=1";
+        
+        if ($filter) {
+            $query .= " AND r.status = ?";
+        }
+        
+        $query .= " ORDER BY FIELD(r.status, 'pending', 'approved', 'active') DESC, r.rental_date DESC";
     }
               
     $stmt = $conn->prepare($query);
+    
+    if ($filter) {
+        $stmt->bind_param("s", $filter);
+    }
+    
     $stmt->execute();
     
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo "<tr><td colspan='9'>No records found.</td></tr>";
+        echo "<tr><td colspan='10' class='text-center'>No records found.</td></tr>";
     } else {
         while ($row = $result->fetch_assoc()) {
             echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}'>";
@@ -56,38 +77,40 @@ try {
             
             $statusClass = '';
             switch($row['rental_status']) {
-                case 'pending': $statusClass = 'text-warning'; break;
-                case 'approved': $statusClass = 'text-success'; break;
-                case 'active': $statusClass = 'text-success'; break;
-                case 'denied': $statusClass = 'text-danger'; break;
-                case 'cancelled': $statusClass = 'text-secondary'; break;
-                case 'completed': $statusClass = 'text-info'; break;
+                case 'pending': $statusClass = 'badge badge-warning text-dark'; break;
+                case 'approved': $statusClass = 'badge badge-success'; break;
+                case 'active': $statusClass = 'badge badge-success'; break;
+                case 'denied': $statusClass = 'badge badge-danger'; break;
+                case 'cancelled': $statusClass = 'badge badge-secondary'; break;
+                case 'completed': $statusClass = 'badge badge-info'; break;
             }
             
-            echo "<td class='{$statusClass}'>{$row['rental_status']}</td>";
+            echo "<td><span class='{$statusClass}'>{$row['rental_status']}</span></td>";
             
             $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
-            echo "<td class='{$paymentClass}'>{$row['payment_status']}</td>";
+            echo "<td class='{$paymentClass} font-weight-bold'>{$row['payment_status']}</td>";
             
-            // Actions only for active rentals in default view
+            // Actions
             echo "<td>";
             if ($isAdminOrStaff && !$show_archives) {
+                echo "<div class='btn-group' role='group'>";
                 switch($row['rental_status']) {
                     case 'pending':
-                        echo "<button class='btn btn-sm btn-success mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")'>Approve</button>";
-                        echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")'>Deny</button>";
+                        echo "<button class='btn btn-sm btn-success' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")' title='Approve'><iconify-icon icon='mdi:check'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")' title='Deny'><iconify-icon icon='mdi:close'></iconify-icon></button>";
                         break;
                     case 'approved':
-                        echo "<button class='btn btn-sm btn-primary mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"active\")'>Activate</button>";
-                        echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                        echo "<button class='btn btn-sm btn-primary' onclick='updateRentalStatus({$row['rental_id']}, \"active\")' title='Activate'><iconify-icon icon='mdi:play'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         break;
                     case 'active':
-                        echo "<button class='btn btn-sm btn-info mr-1' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")'>Complete</button>";
+                        echo "<button class='btn btn-sm btn-info' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")' title='Complete'><iconify-icon icon='mdi:check-all'></iconify-icon></button>";
                         if ($_SESSION['role'] === 'Admin') {
-                            echo "<button class='btn btn-sm btn-secondary ml-1' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")'>Cancel</button>";
+                            echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         }
                         break;
                 }
+                echo "</div>";
             }
             echo "</td>";
             echo "</tr>";
@@ -98,6 +121,6 @@ try {
     $stmt->close();
     
 } catch (Exception $e) {
-    echo "<tr><td colspan='9'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='10'>Error fetching rentals: " . $e->getMessage() . "</td></tr>";
 }
 ?>
