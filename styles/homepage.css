@@ -157,9 +157,8 @@ html {
   transition: transform 0.3s ease;
 }
 
-.glass-panel:hover {
-  transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.05);
+.glass-panel .text-muted {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .section-title {
