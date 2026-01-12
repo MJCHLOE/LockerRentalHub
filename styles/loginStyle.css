@@ -87,6 +87,7 @@ body {
   font-size: 3.5rem;
   font-weight: 800;
   background: -webkit-linear-gradient(45deg, #fff, #bdc3c7);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.2;
@@ -201,6 +202,10 @@ body {
   font-size: 0.9rem;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .title-text {
@@ -216,12 +221,4 @@ body {
   .login-card {
     padding: 30px 20px;
   }
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-html {
-  scroll-behavior: smooth;
 }
