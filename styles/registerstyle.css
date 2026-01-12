@@ -1,8 +1,22 @@
+:root {
+    --bg-gradient: linear-gradient(to bottom left, #1a1a1a 0%, #666699 100%);
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #ecf0f1;
+    --text-secondary: #bdc3c7;
+    --accent-color: #7d5fff;
+    --accent-hover: #6c5ce7;
+    --input-bg: rgba(0, 0, 0, 0.3);
+}
+
 body {
-    background-color: #2d2d2d;
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .container-fluid {
@@ -11,105 +25,130 @@ body {
 }
 
 .locker-background {
-    position: fixed;  /* Changed from absolute to fixed */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     z-index: 1;
+    pointer-events: none;
 }
 
 .locker-icon {
     position: absolute;
     font-size: 250px;
-    color: rgba(255, 255, 255, 0.03);  /* Made icons more subtle */
+    color: rgba(255, 255, 255, 0.03);
 }
 
 .locker-left {
     top: 10%;
-    left: 10%;  /* Adjusted position */
+    left: 5%;
     transform: rotate(-15deg);
 }
 
 .locker-right {
-    bottom: 10%;  /* Changed from top to bottom */
-    right: 10%;   /* Changed from left to right */
+    bottom: 10%;
+    right: 10%;
     transform: rotate(15deg);
 }
 
 .back-arrow {
-    position: fixed;  /* Changed from absolute to fixed */
+    position: fixed;
     top: 30px;
     left: 30px;
-    color: white;
+    color: var(--text-primary);
     z-index: 3;
     text-decoration: none;
-    transition: color 0.3s ease;  /* Added transition */
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .back-arrow:hover {
-    color: #6c757d;  /* Added hover effect */
+    background: var(--accent-color);
+    color: white;
+    transform: translateX(-3px);
+    text-decoration: none;
 }
 
 .title-text {
-    margin: 2rem auto;  /* Added margin */
-    max-width: 400px;
-    padding: 0 40px;
-    text-align: center;  /* Changed to center */
+    margin-bottom: 2rem;
+    padding: 0 20px;
 }
 
 .title-text h1 {
-    color: white;
-    font-size: 2.5rem;  /* Reduced size slightly */
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: -webkit-linear-gradient(45deg, #fff, #bdc3c7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     line-height: 1.2;
-    font-weight: bold;
-    margin-bottom: 1.5rem;  /* Added margin */
 }
 
 .login-card {
-    background-color: #1f1f1f;
-    padding: 40px;
-    border-radius: 15px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    padding: 40px 40px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
     width: 100%;
-    max-width: 450px;  /* Increased max-width */
-    z-index: 2;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);  /* Enhanced shadow */
-    margin: 2rem auto;  /* Added margin */
+    max-width: 500px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    margin: 20px 0;
 }
 
 .login-card h3 {
-    color: white;
-    margin: 1rem 0 2rem;  /* Adjusted margins */
-    font-weight: 600;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin: 10px 0 25px;
+    letter-spacing: 1px;
+}
+
+.form-group {
+    margin-bottom: 15px;
 }
 
 .input-icon {
     display: flex;
     align-items: center;
-    background-color: #343a40;
-    padding: 12px 15px;  /* Increased padding */
-    border-radius: 8px;  /* Increased border radius */
-    margin-bottom: 1rem;
-    transition: background-color 0.3s ease;  /* Added transition */
+    background-color: var(--input-bg);
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
 }
 
 .input-icon:focus-within {
-    background-color: #404850;  /* Added focus state */
+    border-color: var(--accent-color);
+    background-color: rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 15px rgba(125, 95, 255, 0.2);
 }
 
 .input-icon iconify-icon {
-    color: #6c757d;
-    margin-right: 12px;
-    font-size: 20px;
+    color: var(--text-secondary);
+    margin-right: 15px;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+}
+
+.input-icon:focus-within iconify-icon {
+    color: var(--accent-color);
 }
 
 .input-icon input.form-control {
     background: transparent;
     border: none;
-    color: white;
+    color: var(--text-primary);
     width: 100%;
-    padding: 5px 0;
+    padding: 0;
+    font-size: 1rem;
 }
 
 .input-icon input.form-control:focus {
@@ -117,48 +156,52 @@ body {
     box-shadow: none;
 }
 
+.input-icon input.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
 .btn-login {
-    background-color: #6c757d;
+    background: var(--accent-color);
     color: white;
-    font-weight: bold;
-    border-radius: 8px;  /* Increased border radius */
-    width: 100%;
-    padding: 12px;  /* Added padding */
-    margin-top: 1.5rem;  /* Added margin */
-    transition: background-color 0.3s ease;  /* Added transition */
+    font-weight: 600;
+    border-radius: 30px;
+    padding: 12px;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(125, 95, 255, 0.3);
+    margin-top: 20px;
 }
 
 .btn-login:hover {
-    background-color: #5a6268;
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(125, 95, 255, 0.4);
+    color: white;
+}
+
+.form-check-label {
+    cursor: pointer;
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .title-text {
-        padding: 0 20px;
+        text-align: center;
+        margin-bottom: 30px;
+        margin-top: 30px;
     }
 
     .title-text h1 {
-        font-size: 2rem;
-    }
-
-    .locker-icon {
-        font-size: 150px;
+        font-size: 2.8rem;
     }
 
     .login-card {
-        padding: 25px;
-        max-width: 90%;
-        margin: 1rem auto;
+        padding: 30px 20px;
     }
-}
-
-/* Add smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Improve form control placeholder color */
-::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
 }

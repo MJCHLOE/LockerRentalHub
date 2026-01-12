@@ -24,6 +24,10 @@ body {
   /* Space for fixed navbar */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -262,5 +266,14 @@ footer {
   .hero-image {
     margin-top: 40px;
     text-align: center;
+  }
+
+  .navbar-collapse {
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(15px);
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 15px;
+    border: 1px solid var(--glass-border);
   }
 }

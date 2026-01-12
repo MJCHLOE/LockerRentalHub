@@ -1,135 +1,219 @@
+:root {
+  --bg-gradient: linear-gradient(to bottom left, #1a1a1a 0%, #666699 100%);
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-primary: #ecf0f1;
+  --text-secondary: #bdc3c7;
+  --accent-color: #7d5fff;
+  --accent-hover: #6c5ce7;
+  --input-bg: rgba(0, 0, 0, 0.3);
+}
+
 body {
-    background-color: #2d2d2d;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  
-  .container-fluid {
-    position: relative;
-    z-index: 2;
-  }
-  
-  .locker-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    z-index: 1;
-  }
-  
-  .locker-icon {
-    position: absolute;
-    font-size: 250px;
-    color: rgba(255, 255, 255, 0.05);
-  }
-  
-  .locker-left {
-    top: 10%;
-    left: 5%;
-    transform: rotate(-15deg);
-  }
-  
-  .locker-right {
-    top: 45%;
-    left: 25%;
-    transform: rotate(15deg);
-  }
-  
-  .back-arrow {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    color: white;
-    z-index: 3;
-    text-decoration: none;
-  }
-  
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container-fluid {
+  position: relative;
+  z-index: 2;
+}
+
+.locker-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.locker-icon {
+  position: absolute;
+  font-size: 250px;
+  color: rgba(255, 255, 255, 0.03);
+}
+
+.locker-left {
+  top: 10%;
+  left: 5%;
+  transform: rotate(-15deg);
+}
+
+.locker-right {
+  bottom: 10%;
+  right: 10%;
+  transform: rotate(15deg);
+}
+
+.back-arrow {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  color: var(--text-primary);
+  z-index: 3;
+  text-decoration: none;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  padding: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateX(-3px);
+  text-decoration: none;
+}
+
+.title-text {
+  margin-bottom: 2rem;
+  padding: 0 20px;
+}
+
+.title-text h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: -webkit-linear-gradient(45deg, #fff, #bdc3c7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+
+.login-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  padding: 50px 40px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.login-card h3 {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 15px 0 30px;
+  letter-spacing: 1px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  display: flex;
+  align-items: center;
+  background-color: var(--input-bg);
+  padding: 12px 20px;
+  border-radius: 30px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.input-icon:focus-within {
+  border-color: var(--accent-color);
+  background-color: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 15px rgba(125, 95, 255, 0.2);
+}
+
+.input-icon iconify-icon {
+  color: var(--text-secondary);
+  margin-right: 15px;
+  font-size: 1.2rem;
+  transition: color 0.3s;
+}
+
+.input-icon:focus-within iconify-icon {
+  color: var(--accent-color);
+}
+
+.input-icon input.form-control {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  width: 100%;
+  padding: 0;
+  font-size: 1rem;
+}
+
+.input-icon input.form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.input-icon input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-login {
+  background: var(--accent-color);
+  color: white;
+  font-weight: 600;
+  border-radius: 30px;
+  padding: 12px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(125, 95, 255, 0.3);
+}
+
+.btn-login:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(125, 95, 255, 0.4);
+  color: white;
+}
+
+.btn-create {
+  background: transparent;
+  border: 2px solid var(--accent-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: 30px;
+  padding: 12px;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+}
+
+.btn-create:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.form-check-label {
+  cursor: pointer;
+  color: var(--text-secondary) !important;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
   .title-text {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 400px;
-    padding-left: 40px;
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 40px;
   }
-  
+
   .title-text h1 {
-    color: white;
-    font-size: rem;
-    line-height: 1.2;
-    font-weight: bold;
+    font-size: 2.8rem;
   }
-  
+
   .login-card {
-    background-color: #1f1f1f;
-    padding: 40px;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 400px;
-    z-index: 2;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+    padding: 30px 20px;
   }
-  
-  .login-card h3 {
-    color: white;
-    margin-top: 10px;
-  }
-  
-  .input-icon {
-    display: flex;
-    align-items: center;
-    background-color: #343a40;
-    padding: 10px;
-    border-radius: 5px;
-  }
-  
-  .input-icon iconify-icon {
-    color: white;
-    margin-right: 10px;
-    font-size: 20px;
-  }
-  
-  .input-icon input.form-control {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 100%;
-  }
-  
-  .btn-login {
-    background-color: #6c757d;
-    color: white;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-  
-  .btn-create {
-    background-color: transparent;
-    border: 2px solid #6c757d;
-    color: #6c757d;
-    font-weight: bold;
-    border-radius: 5px;
-  }
-  
-  .btn-create:hover {
-    background-color: #6c757d;
-    color: white;
-  }
-
-
-  
-  /* Ensure full responsiveness */
-  @media (max-width: 576px) {
-    .title-text h1 {
-        text-align: center;
-      font-size: 2.5rem;
-    }
-    .locker-icon {
-      font-size: 150px;
-    }
-    .login-card {
-      padding: 20px;
-      max-width: 90%;
-    }
-  }  
+}
