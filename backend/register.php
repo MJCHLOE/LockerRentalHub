@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Prepare SQL to insert new user
     // TEMPORARY: Set role to 'Admin' for registration
-    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Admin')");
+    $stmt = $conn->prepare("INSERT INTO users (username, password, firstname, lastname, email, phone_number, role) VALUES (?, ?, ?, ?, ?, ?, 'Client')");
 
     if (!$stmt) {
         die("Prepare failed (Registration): (" . $conn->errno . ") " . $conn->error);
