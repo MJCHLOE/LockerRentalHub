@@ -30,7 +30,7 @@
   <!-- Bootstrap 4 CSS -->
   <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css" />
   <!-- Custom Styles -->
-  <link rel="stylesheet" href="admin_dashboard.css" />
+  <link rel="stylesheet" href="admin_dashboard.css?v=<?php echo time(); ?>" />
   <link rel="stylesheet" href="pagination.css" />
   <!-- Iconify CDN -->
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>

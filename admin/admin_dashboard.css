@@ -241,37 +241,38 @@ h3 {
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* Custom Select Styling */
-select.form-control {
+/* Custom Select Styling - High Specificity */
+body select.form-control {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23bdc3c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
-  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23bdc3c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px !important;
+  padding-right: 40px !important;
   /* Space for arrow */
   padding-top: 10px;
   padding-bottom: 10px;
-  line-height: normal;
+  line-height: 1.5 !important;
   /* Fix clipping */
   color: white !important;
   /* Ensure visibility */
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  height: auto;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--glass-border) !important;
+  height: auto !important;
   /* Allow auto height based on padding */
 }
 
-select.form-control:focus {
-  background-color: rgba(255, 255, 255, 0.1);
+body select.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.1) !important;
   color: white !important;
+  box-shadow: 0 0 0 3px rgba(125, 95, 255, 0.2) !important;
 }
 
-select.form-control option {
-  background-color: #252a2d;
-  color: white;
+body select.form-control option {
+  background-color: #252a2d !important;
+  color: white !important;
   padding: 10px;
 }
 
@@ -302,22 +303,28 @@ select.form-control option {
   /* Ensure proper vertical alignment */
 }
 
-/* Modal Close Button */
-.modal-header .close {
-  color: white;
-  text-shadow: none;
-  opacity: 0.7;
+/* Modal Close Button - Force Override */
+body .modal-header .close {
+  color: #ffffff !important;
+  text-shadow: none !important;
+  opacity: 0.8 !important;
   transition: all 0.3s ease;
-  padding: 1rem;
-  /* Increase clickable area */
+  padding: 1rem !important;
   margin: -1rem -1rem -1rem auto;
-  outline: none;
+  outline: none !important;
+  background: transparent !important;
+  border: none !important;
 }
 
-.modal-header .close:hover {
-  opacity: 1;
+body .modal-header .close:hover {
+  opacity: 1 !important;
   transform: rotate(90deg);
-  color: var(--danger-color);
+  color: var(--danger-color) !important;
+}
+
+/* Ensure the span inside close button (if any) inherits color */
+body .modal-header .close span {
+  color: inherit;
 }
 
 .modal-body {
