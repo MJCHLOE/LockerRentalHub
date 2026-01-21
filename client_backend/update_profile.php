@@ -1,102 +1,85 @@
 <?php
 session_start();
-require_once '../db/database.php';
-require_once 'log_actions.php';
+require '../db/database.php';
 
 header('Content-Type: application/json');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Client') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userId = $_SESSION['user_id'];
-    $fieldType = $_POST['field_type'];
-    $fieldValue = trim($_POST['field_value']);
+$userId = $_SESSION['user_id'];
 
-    // Validate input
-    if (empty($fieldValue)) {
-        echo json_encode(['success' => false, 'message' => 'Field cannot be empty']);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $field = $_POST['field']; // 'username', 'fullname' (split into first/last), 'email', 'phone'
+    $value = trim($_POST['value']);
+    
+    if (empty($value)) {
+        echo json_encode(['success' => false, 'message' => 'Value cannot be empty']);
         exit;
     }
-
-    // Get current value before update
-    $getCurrentValue = "SELECT username, firstname, lastname, email, phone_number 
-                       FROM users WHERE user_id = ?";
-    $stmt = $conn->prepare($getCurrentValue);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $currentData = $result->fetch_assoc();
-    $stmt->close();
-
-    // Get old value based on field type
-    switch($fieldType) {
+    
+    $updateQuery = "";
+    $types = "";
+    $params = [];
+    
+    switch ($field) {
         case 'username':
-            $oldValue = $currentData['username'];
-            $sql = "UPDATE users SET username = ? WHERE user_id = ?";
-            break;
-        case 'fullname':
-            $oldValue = $currentData['firstname'] . ' ' . $currentData['lastname'];
-            // Split full name into first and last name
-            $names = explode(' ', $fieldValue);
-            if (count($names) < 2) {
-                echo json_encode(['success' => false, 'message' => 'Please enter both first and last name']);
-                exit;
-            }
-            $firstname = $names[0];
-            $lastname = isset($names[1]) ? $names[1] : '';
-            $sql = "UPDATE users SET firstname = ?, lastname = ? WHERE user_id = ?";
+            $updateQuery = "UPDATE users SET username = ? WHERE user_id = ?";
+            $types = "si";
+            $params = [$value, $userId];
             break;
         case 'email':
-            $oldValue = $currentData['email'];
-            if (!filter_var($fieldValue, FILTER_VALIDATE_EMAIL)) {
+             if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 echo json_encode(['success' => false, 'message' => 'Invalid email format']);
                 exit;
             }
-            $sql = "UPDATE users SET email = ? WHERE user_id = ?";
+            $updateQuery = "UPDATE users SET email = ? WHERE user_id = ?";
+            $types = "si";
+            $params = [$value, $userId];
             break;
         case 'phone':
-            $oldValue = $currentData['phone_number'];
-            $sql = "UPDATE users SET phone_number = ? WHERE user_id = ?";
+             if (!preg_match("/^[0-9]{11}$/", $value)) {
+                echo json_encode(['success' => false, 'message' => 'Invalid phone number format (11 digits)']);
+                exit;
+            }
+            $updateQuery = "UPDATE users SET phone_number = ? WHERE user_id = ?";
+            $types = "si";
+            $params = [$value, $userId];
+            break;
+        case 'fullname':
+            // Assume format "First Last"
+            $parts = explode(' ', $value, 2);
+            if (count($parts) < 2) {
+                 echo json_encode(['success' => false, 'message' => 'Please enter both first and last name']);
+                 exit;
+            }
+            $updateQuery = "UPDATE users SET firstname = ?, lastname = ? WHERE user_id = ?";
+            $types = "ssi";
+            $params = [$parts[0], $parts[1], $userId];
             break;
         default:
-            echo json_encode(['success' => false, 'message' => 'Invalid field type']);
+            echo json_encode(['success' => false, 'message' => 'Invalid field']);
             exit;
     }
-
-    try {
-        $stmt = $conn->prepare($sql);
-        
-        if ($fieldType === 'fullname') {
-            $stmt->bind_param("ssi", $firstname, $lastname, $userId);
-        } else {
-            $stmt->bind_param("si", $fieldValue, $userId);
-        }
-        
-        if ($stmt->execute()) {
-            // Log the change
-            $logger = new ClientLogger($conn);
-            $logger->logProfileUpdate($fieldType, $oldValue, $fieldValue);
-            
-            // Update session variables if username was changed
-            if ($fieldType === 'username') {
-                $_SESSION['username'] = $fieldValue;
-            }
-            
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Database error: ' . $stmt->error]);
-        }
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
-    }
     
+    $stmt = $conn->prepare($updateQuery);
+    $stmt->bind_param($types, ...$params);
+    
+    if ($stmt->execute()) {
+        // specific session update if needed
+        if ($field === 'fullname') {
+             // Update session firstname if meaningful
+             if (isset($_SESSION[md5('Client_' . $userId)])) {
+                  $_SESSION[md5('Client_' . $userId)]['firstname'] = $params[0];
+             }
+        }
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $conn->error]);
+    }
     $stmt->close();
-    $conn->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Invalid request method']);
 }
+$conn->close();
 ?>

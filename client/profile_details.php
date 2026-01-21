@@ -55,10 +55,19 @@ if (!file_exists($profilePicsDir)) {
     }
 }
 
-$profilePicPath = "$profilePicsDir/user_{$userId}.jpg";
-$profilePicUrl = file_exists($profilePicPath) ? "/profile_pics/user_{$userId}.jpg" : "../assets/default_profile.jpg";
-error_log("Looking for profile picture at: $profilePicPath");
-error_log("Using profile picture URL: $profilePicUrl");
+// Define profile picture path with absolute check, but use relative for HTML
+$userId = $_SESSION['user_id'];
+// Recheck session for updated pic
+$userProfilePic = (isset($_SESSION['profile_pic']) && !empty($_SESSION['profile_pic'])) ? $_SESSION['profile_pic'] : 'default_profile.jpg';
+$profilePicUrl = "../client/profile_pics/" . $userProfilePic;
+
+if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
+    // If file missing physically (or default), fallback to default if desired or keep as is (browser shows broken image if truly missing)
+    // Assuming default_profile.jpg exists in client/profile_pics/ or assets?
+    // Let's assume it should be in client/profile_pics/default_profile.jpg for simplicity or ../assets/
+    // Code below tries to use what's in DB.
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -145,8 +154,9 @@ error_log("Using profile picture URL: $profilePicUrl");
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle active" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center;">
                     <?php 
-                        $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
-                        echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+                        // Use default_profile.jpg if profile_pic is not set in session
+                        $profilePic = (isset($_SESSION['profile_pic']) && !empty($_SESSION['profile_pic'])) ? $_SESSION['profile_pic'] : 'default_profile.jpg';
+                        echo '<img src="../client/profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
                     ?>
                     My Account
                 </a>

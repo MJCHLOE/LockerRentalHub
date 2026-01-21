@@ -171,9 +171,9 @@ if ($totalLockers > 0 && $page > $totalPages) {
             <?php
             // Updated SQL query to include reservation checks and previous rentals
             $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count,
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
                     FROM lockerunits l
                     JOIN lockersizes ls ON l.size_id = ls.size_id
                     JOIN lockerstatuses lst ON l.status_id = lst.status_id
