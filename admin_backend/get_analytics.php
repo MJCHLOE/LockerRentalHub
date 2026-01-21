@@ -1,14 +1,12 @@
 <?php
 require '../db/database.php';
     
-    // Query to get analytics counts
+    //Query to get analytics counts
     $query = "SELECT 
         (SELECT COUNT(*) FROM users) as total_users,
-        COUNT(*) as total_lockers,
-        COUNT(CASE WHEN lst.status_name = 'Occupied' THEN 1 END) as active_rentals,
-        COUNT(CASE WHEN lst.status_name = 'Maintenance' THEN 1 END) as maintenance_count
-        FROM lockerunits l
-        JOIN lockerstatuses lst ON l.status_id = lst.status_id";
+        (SELECT COUNT(*) FROM lockers) as total_lockers,
+        (SELECT COUNT(*) FROM rentals WHERE status = 'active') as active_rentals,
+        (SELECT COUNT(*) FROM lockers WHERE status = 'Maintenance') as maintenance_count";
     
     $result = $conn->query($query);
     
