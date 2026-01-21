@@ -251,11 +251,28 @@ select.form-control {
   background-position: right 10px center;
   background-size: 16px;
   padding-right: 40px;
+  /* Space for arrow */
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: normal;
+  /* Fix clipping */
+  color: white !important;
+  /* Ensure visibility */
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  height: auto;
+  /* Allow auto height based on padding */
+}
+
+select.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
 }
 
 select.form-control option {
   background-color: #252a2d;
   color: white;
+  padding: 10px;
 }
 
 /* Status Badges */
@@ -281,7 +298,8 @@ select.form-control option {
 .modal-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding: 20px 25px;
-  align-items: center; /* Ensure proper vertical alignment */
+  align-items: center;
+  /* Ensure proper vertical alignment */
 }
 
 /* Modal Close Button */
@@ -290,7 +308,8 @@ select.form-control option {
   text-shadow: none;
   opacity: 0.7;
   transition: all 0.3s ease;
-  padding: 1rem; /* Increase clickable area */
+  padding: 1rem;
+  /* Increase clickable area */
   margin: -1rem -1rem -1rem auto;
   outline: none;
 }
