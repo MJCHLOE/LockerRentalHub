@@ -40,11 +40,11 @@ $statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
 $whereClauses = [];
 if ($sizeFilter != '') {
     $sizeFilter = $conn->real_escape_string($sizeFilter);
-    $whereClauses[] = "ls.size_name = '$sizeFilter'";
+    $whereClauses[] = "size = '$sizeFilter'";
 }
 if ($statusFilter != '') {
     $statusFilter = $conn->real_escape_string($statusFilter);
-    $whereClauses[] = "lst.status_name = '$statusFilter'";
+    $whereClauses[] = "status = '$statusFilter'";
 }
 $whereSql = '';
 if (!empty($whereClauses)) {
@@ -52,10 +52,7 @@ if (!empty($whereClauses)) {
 }
 
 // Count total lockers with filters
-$countQuery = "SELECT COUNT(*) as total FROM lockerunits l
-               JOIN lockersizes ls ON l.size_id = ls.size_id
-               JOIN lockerstatuses lst ON l.status_id = lst.status_id
-               $whereSql";
+$countQuery = "SELECT COUNT(*) as total FROM lockerunits $whereSql";
 $countResult = $conn->query($countQuery);
 $totalLockers = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalLockers / $lockersPerPage);
@@ -173,15 +170,14 @@ if ($totalLockers > 0 && $page > $totalPages) {
         <div class="locker-grid" id="lockerGrid">
             <?php
             // Updated SQL query to include reservation checks and previous rentals
-            $query = "SELECT l.locker_id, ls.size_name, lst.status_name, l.price_per_month,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.rental_status = 'pending') as reservation_count,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = l.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
-                    FROM lockerunits l
-                    JOIN lockersizes ls ON l.size_id = ls.size_id
-                    JOIN lockerstatuses lst ON l.status_id = lst.status_id
+            // Updated SQL query to match schema: lockerunits has direct enum columns for size and status
+            $query = "SELECT locker_id, size as size_name, status as status_name, price_per_month,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.rental_status = 'pending') as reservation_count,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
+                    FROM lockerunits
                     $whereSql
-                    ORDER BY l.locker_id
+                    ORDER BY locker_id
                     LIMIT $lockersPerPage OFFSET $offset";
 
             $result = $conn->query($query);

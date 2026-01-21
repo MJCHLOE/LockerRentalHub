@@ -32,11 +32,10 @@ require_once '../db/database.php';
 
 // Fetch user details
 $userId = $_SESSION['user_id'];
-$sql = "SELECT u.username, u.firstname, u.lastname, u.email, u.phone_number, 
-               c.full_name as client_name
-        FROM users u
-        JOIN clients c ON u.user_id = c.user_id
-        WHERE u.user_id = ?";
+// Updated query to fetch directly from users table, removed join to non-existent clients table
+$sql = "SELECT username, firstname, lastname, email, phone_number, CONCAT(firstname, ' ', lastname) as client_name
+        FROM users
+        WHERE user_id = ?";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userId);
