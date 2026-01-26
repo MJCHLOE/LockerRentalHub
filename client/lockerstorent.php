@@ -172,9 +172,9 @@ if ($totalLockers > 0 && $page > $totalPages) {
             // Updated SQL query to include reservation checks and previous rentals
             // Updated SQL query to match schema: lockers has direct enum columns for size and status
             $query = "SELECT locker_id, size as size_name, status as status_name, price as price_per_month,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.rental_status = 'pending') as reservation_count,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.status = 'pending') as reservation_count,
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.status IN ('approved', 'active', 'completed')) as has_rented_before,
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.status = 'pending') as has_pending_reservation
                     FROM lockers
                     $whereSql
                     ORDER BY locker_id
