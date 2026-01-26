@@ -52,7 +52,7 @@ if (!empty($whereClauses)) {
 }
 
 // Count total lockers with filters
-$countQuery = "SELECT COUNT(*) as total FROM lockerunits $whereSql";
+$countQuery = "SELECT COUNT(*) as total FROM lockers $whereSql";
 $countResult = $conn->query($countQuery);
 $totalLockers = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalLockers / $lockersPerPage);
@@ -170,12 +170,12 @@ if ($totalLockers > 0 && $page > $totalPages) {
         <div class="locker-grid" id="lockerGrid">
             <?php
             // Updated SQL query to include reservation checks and previous rentals
-            // Updated SQL query to match schema: lockerunits has direct enum columns for size and status
-            $query = "SELECT locker_id, size as size_name, status as status_name, price_per_month,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.rental_status = 'pending') as reservation_count,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
-                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockerunits.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
-                    FROM lockerunits
+            // Updated SQL query to match schema: lockers has direct enum columns for size and status
+            $query = "SELECT locker_id, size as size_name, status as status_name, price as price_per_month,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockers.locker_id AND r.rental_status = 'pending') as reservation_count,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.rental_status IN ('approved', 'active', 'completed')) as has_rented_before,
+                            (SELECT COUNT(*) FROM rental r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.rental_status = 'pending') as has_pending_reservation
+                    FROM lockers
                     $whereSql
                     ORDER BY locker_id
                     LIMIT $lockersPerPage OFFSET $offset";
