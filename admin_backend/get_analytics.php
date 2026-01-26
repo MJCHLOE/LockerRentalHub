@@ -5,7 +5,7 @@ require '../db/database.php';
     $query = "SELECT 
         (SELECT COUNT(*) FROM users) as total_users,
         (SELECT COUNT(*) FROM lockers) as total_lockers,
-        (SELECT COUNT(*) FROM rental WHERE rental_status = 'active') as active_rentals,
+        (SELECT COUNT(*) FROM rentals WHERE rental_status = 'active') as active_rentals,
         (SELECT COUNT(*) FROM lockers WHERE status = 'Maintenance') as maintenance_count";
     
     $result = $conn->query($query);
