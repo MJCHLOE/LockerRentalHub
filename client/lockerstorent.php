@@ -108,8 +108,12 @@ if ($totalLockers > 0 && $page > $totalPages) {
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center;">
                     <?php 
-                        $profilePic = isset($_SESSION['profile_pic']) ? $_SESSION['profile_pic'] : 'default.jpg';
-                        echo '<img src="../profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+                        $profilePic = (isset($_SESSION['profile_pic']) && !empty($_SESSION['profile_pic'])) ? $_SESSION['profile_pic'] : 'default_profile.jpg';
+                        $profilePicPath = "../client/profile_pics/" . $profilePic;
+                        if (!file_exists($profilePicPath)) {
+                            $profilePicPath = "../client/profile_pics/default_profile.jpg";
+                        }
+                        echo '<img src="' . $profilePicPath . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
                     ?>
                     My Account
                 </a>

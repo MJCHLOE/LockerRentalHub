@@ -158,7 +158,12 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                     <?php 
                         // Use default_profile.jpg if profile_pic is not set in session
                         $profilePic = (isset($_SESSION['profile_pic']) && !empty($_SESSION['profile_pic'])) ? $_SESSION['profile_pic'] : 'default_profile.jpg';
-                        echo '<img src="../client/profile_pics/' . $profilePic . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
+                        // Keep simple: if specific file missing, use default. If default missing, browser shows broken img (user implies file exists)
+                        $profilePicPath = "../client/profile_pics/" . $profilePic;
+                        if (!file_exists($profilePicPath)) {
+                            $profilePicPath = "../client/profile_pics/default_profile.jpg";
+                        }
+                        echo '<img src="' . $profilePicPath . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
                     ?>
                     My Account
                 </a>
@@ -199,7 +204,13 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <div class="profile-pic-container mx-auto">
-                                <img id="profile-pic" src="<?php echo htmlspecialchars($profilePicUrl); ?>" alt="Profile Picture" class="profile-pic">
+                                <img id="profile-pic" src="<?php 
+                                    $displayUrl = $profilePicUrl;
+                                    if ($userProfilePic !== 'default_profile.jpg' && !file_exists("../client/profile_pics/" . $userProfilePic)) {
+                                         $displayUrl = "../client/profile_pics/default_profile.jpg";
+                                    }
+                                    echo htmlspecialchars($displayUrl); 
+                                ?>" alt="Profile Picture" class="profile-pic">
                                 <div class="profile-pic-overlay">
                                     <div class="profile-pic-text" onclick="document.getElementById('profile-pic-upload').click()">
                                         <iconify-icon icon="mdi:camera" width="16"></iconify-icon> Change Photo
@@ -367,7 +378,7 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                     
                     // Show preview immediately for better user experience
                     reader.onload = function(e) {
-                        $('#profile-pic').attr('src', e.target.result);
+                         $('#profile-pic').attr('src', e.target.result);
                     }
                     reader.readAsDataURL(this.files[0]);
                     
