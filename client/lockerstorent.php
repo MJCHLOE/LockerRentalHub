@@ -111,7 +111,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
                         $profilePic = (isset($_SESSION['profile_pic']) && !empty($_SESSION['profile_pic'])) ? $_SESSION['profile_pic'] : 'default_profile.jpg';
                         $profilePicPath = "../client/profile_pics/" . $profilePic;
                         if (!file_exists($profilePicPath)) {
-                            $profilePicPath = "../client/profile_pics/default_profile.jpg";
+                            $profilePicPath = "../client/profile_pics/default.jpg";
                         }
                         echo '<img src="' . $profilePicPath . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
                     ?>

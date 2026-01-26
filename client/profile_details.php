@@ -161,7 +161,7 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                         // Keep simple: if specific file missing, use default. If default missing, browser shows broken img (user implies file exists)
                         $profilePicPath = "../client/profile_pics/" . $profilePic;
                         if (!file_exists($profilePicPath)) {
-                            $profilePicPath = "../client/profile_pics/default_profile.jpg";
+                            $profilePicPath = "../client/profile_pics/default.jpg";
                         }
                         echo '<img src="' . $profilePicPath . '" alt="Profile" class="rounded-circle mr-2" style="width: 30px; height: 30px; object-fit: cover;">';
                     ?>
@@ -207,7 +207,7 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                                 <img id="profile-pic" src="<?php 
                                     $displayUrl = $profilePicUrl;
                                     if ($userProfilePic !== 'default_profile.jpg' && !file_exists("../client/profile_pics/" . $userProfilePic)) {
-                                         $displayUrl = "../client/profile_pics/default_profile.jpg";
+                                         $displayUrl = "../client/profile_pics/default.jpg";
                                     }
                                     echo htmlspecialchars($displayUrl); 
                                 ?>" alt="Profile Picture" class="profile-pic">
