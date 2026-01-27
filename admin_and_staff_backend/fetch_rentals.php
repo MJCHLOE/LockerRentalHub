@@ -38,7 +38,7 @@ try {
                          r.locker_id,
                          r.rental_date,
                          NULL as date_approved, 
-                         r.rental_status,
+                         r.status as rental_status,
                          r.end_date,
                          r.payment_status
                   FROM rentals r
