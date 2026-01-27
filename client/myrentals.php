@@ -60,6 +60,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                 <iconify-icon icon="mdi:locker"></iconify-icon>
                 Lockers To Rent
             </a>
+            <a href="myrentalhistory.php">
                 <iconify-icon icon="mdi:history"></iconify-icon>
                 My Rental History
             </a>

@@ -153,6 +153,22 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
                 <iconify-icon icon="mdi:history"></iconify-icon>
                 My Rental History
             </a>
+
+            <!-- Notification Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle" id="notificationBtn" role="button" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center; position: relative;">
+                    <iconify-icon icon="mdi:bell" style="font-size: 1.2rem;"></iconify-icon>
+                    <span id="notificationBadge" class="badge badge-danger" style="position: absolute; top: -5px; right: 10px; font-size: 0.6rem; display: none;">0</span>
+                    <span class="ml-2">Notifications</span>
+                </a>
+                <div class="dropdown-menu" id="notificationDropdown" aria-labelledby="notificationBtn" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <h6 class="dropdown-header">Notifications</h6>
+                    <div id="notificationList">
+                        <!-- Loaded via JS -->
+                    </div>
+                </div>
+            </div>
+
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle active" id="accountDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: flex; align-items: center;">
                     <?php 
@@ -352,6 +368,7 @@ if (!file_exists("../client/profile_pics/" . $userProfilePic)) {
     <script src="../client_scripts/dashboard.js"></script>
     <script src="../client_scripts/dropdown.js"></script>
     <script src="../client_scripts/profile_management.js"></script>
+    <script src="../client_scripts/notifications.js"></script>
     <script>
         $(document).ready(function() {
             // Fix dropdown toggle after item click
