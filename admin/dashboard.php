@@ -539,19 +539,19 @@
   <script src="../admin_and_staff_scripts/rental_management.js"></script>
   <script src="../client_scripts/notifications.js"></script>
   <script>
-    // Temporary Diagnostic: Check Database Schema
-    fetch('../backend/check_schema.php')
-      .then(response => response.text())
-      .then(text => {
-          console.log("DB DIAGNOSTIC REPORT:");
-          console.log(text);
-          if (text.includes("ERROR")) {
-              alert("DATABASE ERROR DETECTED:\n" + text);
-          } else {
-              console.log("Database schema check passed.");
-          }
-      })
-      .catch(err => console.error("Diagnostic failed:", err));
+      // DEBUG: Run Admin Notification Test
+      fetch('../backend/test_admin_notif.php')
+        .then(res => res.text())
+        .then(text => {
+            console.log("ADMIN NOTIF TEST:");
+            console.log(text);
+            if(text.includes("FAILURE") || text.includes("Error")) {
+                alert("DEBUG REPORT:\n" + text);
+            } else {
+                console.log("Admin notification test passed successfully.");
+            }
+        });
   </script>
+
 </body>
 </html>
