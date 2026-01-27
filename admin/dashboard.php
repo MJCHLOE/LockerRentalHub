@@ -74,6 +74,21 @@
 
     <!-- Bottom Account Section -->
     <div class="mt-auto">
+      
+      <!-- Notification Dropdown -->
+      <div class="dropdown dropup mb-2">
+           <a href="#" class="nav-link dropdown-toggle" id="notificationBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--text-secondary);">
+               <iconify-icon icon="mdi:bell" style="font-size: 1.5rem;"></iconify-icon> Notifications
+               <span id="notificationBadge" class="badge badge-danger" style="display: none; margin-left: 5px;">0</span>
+           </a>
+           <div class="dropdown-menu" id="notificationDropdown" aria-labelledby="notificationBtn" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                <h6 class="dropdown-header">Notifications</h6>
+                <div id="notificationList">
+                     <!-- Loaded via JS -->
+                </div>
+           </div>
+      </div>
+
       <div class="dropdown">
         <a class="nav-link dropdown-toggle dropup" href="#" id="accountDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--text-secondary);">
             <iconify-icon icon="mdi:account-circle" style="font-size: 1.8rem;"></iconify-icon>
@@ -287,7 +302,7 @@
                     <th>Locker ID</th>
                     <th>Rental Date</th>
                     <th>Approved Date</th>
-                    <th>End Date</th>
+                    <th>Time Remaining</th>
                     <th>Status</th>
                     <th>Payment</th>
                     <th>Actions</th>
@@ -522,5 +537,6 @@
   <script src="../admin_scripts/analytics.js"></script>
   <script src="../admin_scripts/logs.js"></script>
   <script src="../admin_and_staff_scripts/rental_management.js"></script>
+  <script src="../client_scripts/notifications.js"></script>
 </body>
 </html>

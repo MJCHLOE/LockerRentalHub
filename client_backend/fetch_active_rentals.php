@@ -13,6 +13,7 @@ try {
                      NULL as date_approved, -- Simplified in new schema or null if not tracking approved date separate from status
                      r.status as rental_status,
                      r.payment_status,
+                     r.end_date,
                      l.price,
                      l.size as size_name
               FROM rentals r
@@ -38,9 +39,31 @@ try {
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td>-</td>"; // Date approved not explicitly in new schema active/pending rentals table unless we added it? Schema has rental_id, user_id, locker_id, rental_date, status, payment_status. rental_date is request date? Or start date? Assume rental_date.
             echo "<td><span class='badge badge-success'>Active</span></td>";
+            
+            // Calculate time remaining
+            $timeRemaining = "Indefinite";
+            $color = "text-white";
+            if ($row['end_date']) {
+                $now = new DateTime();
+                $end = new DateTime($row['end_date']);
+                $interval = $now->diff($end);
+                
+                if ($now > $end) {
+                    $timeRemaining = "Expired";
+                    $color = "text-danger font-weight-bold";
+                } else {
+                    $timeRemaining = $interval->format('%a days left');
+                    if ($interval->days < 3) $color = "text-warning font-weight-bold";
+                }
+            }
+            
+            echo "<td class='$color'>$timeRemaining</td>";
             echo "<td><span class='badge badge-{$paymentClass}'>{$paymentStatusDisplay}</span></td>";
             echo "<td>₱" . number_format($row['price'], 2) . "</td>";
             echo "<td>
+                    <button class='btn btn-info btn-sm mr-1' onclick='window.open(\"receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'>
+                        <iconify-icon icon='mdi:receipt'></iconify-icon>
+                    </button>
                     <button class='btn btn-danger btn-sm' onclick='terminateRental({$row['rental_id']})'>
                         Terminate
                     </button>

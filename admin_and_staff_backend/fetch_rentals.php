@@ -38,8 +38,8 @@ try {
                          r.locker_id,
                          r.rental_date,
                          NULL as date_approved, 
-                         NULL as rent_ended_date,
-                         r.status as rental_status,
+                         r.rental_status,
+                         r.end_date,
                          r.payment_status
                   FROM rentals r
                   JOIN users u ON r.user_id = u.user_id
@@ -73,7 +73,30 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
-            echo "<td>" . ($row['rent_ended_date'] ? date('Y-m-d H:i', strtotime($row['rent_ended_date'])) : '-') . "</td>";
+            echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
+            
+            // Time Remaining Calculation
+            $timeRemaining = "-";
+            $color = "";
+            if ($row['rental_status'] === 'active' && $row['end_date']) {
+                 $now = new DateTime();
+                 $end = new DateTime($row['end_date']);
+                 $interval = $now->diff($end);
+                 
+                 if ($now > $end) {
+                     $timeRemaining = "Expired";
+                     $color = "text-danger font-weight-bold";
+                 } else {
+                     $timeRemaining = $interval->format('%a days left');
+                     if ($interval->days < 3) $color = "text-warning font-weight-bold";
+                 }
+            } elseif ($row['rental_status'] === 'active') {
+                $timeRemaining = "Indefinite";
+            } else if ($row['rent_ended_date']) {
+                $timeRemaining = "Ended: " . date('Y-m-d', strtotime($row['rent_ended_date']));
+            }
+            
+            echo "<td class='$color'>$timeRemaining</td>";
             
             $statusClass = '';
             switch($row['rental_status']) {
@@ -104,7 +127,8 @@ try {
                         echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         break;
                     case 'active':
-                        echo "<button class='btn btn-sm btn-info' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")' title='Complete'><iconify-icon icon='mdi:check-all'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-info' onclick='window.open(\"../client/receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'><iconify-icon icon='mdi:receipt'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-success' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")' title='Complete'><iconify-icon icon='mdi:check-all'></iconify-icon></button>";
                         if ($_SESSION['role'] === 'Admin') {
                             echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         }
