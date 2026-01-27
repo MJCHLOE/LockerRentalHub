@@ -14,16 +14,22 @@ class Notification {
     }
 
     // Notify all admins (useful for new requests)
+    // Notify all admins (useful for new requests)
     public function notifyAdmins($title, $message, $type = 'info') {
-        $sql = "SELECT user_id FROM users WHERE role = 'Admin'";
+        // Check for common admin role names
+        $sql = "SELECT user_id FROM users WHERE role IN ('Admin', 'admin', 'Administrator')";
         $result = $this->conn->query($sql);
-        if ($result->num_rows > 0) {
+        
+        $count = 0;
+        if ($result && $result->num_rows > 0) {
             $stmt = $this->conn->prepare("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, ?)");
             while($row = $result->fetch_assoc()) {
                 $stmt->bind_param("isss", $row['user_id'], $title, $message, $type);
                 $stmt->execute();
+                $count++;
             }
-            return true;
+            $stmt->close();
+            return $count > 0;
         }
         return false;
     }
