@@ -64,6 +64,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         $logger = new ClientLogger($conn);
         $logger->logLockerRental($locker_id, 'REQUEST');
 
+        // Notify Admins
+        require_once '../backend/Notification.php';
+        $notify = new Notification($conn);
+        $notify->notifyAdmins(
+            "New Rental Request", 
+            "User ID $user_id has requested Locker $locker_id.", 
+            "request"
+        );
+
+
         // Commit transaction
         $conn->commit();
 

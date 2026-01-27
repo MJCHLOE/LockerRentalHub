@@ -1,7 +1,9 @@
 <?php
 session_start();
 require '../db/database.php';
+require '../db/database.php';
 require_once '../admin_backend/log_actions.php'; // Ensure Logger is available
+require_once '../backend/Notification.php'; // Notification System
 
 header('Content-Type: application/json');
 
@@ -127,6 +129,48 @@ try {
         $locker_stmt->bind_param("s", $locker_status, $locker_id);
         $locker_stmt->execute();
         $locker_stmt->close();
+
+        // Calculate End Date if becoming Active
+        if ($new_status === 'active') {
+            // Default 30 days. You can make this dynamic later.
+            $end_date = date('Y-m-d H:i:s', strtotime('+30 days'));
+            $date_stmt = $conn->prepare("UPDATE rentals SET end_date = ? WHERE rental_id = ?");
+            $date_stmt->bind_param("si", $end_date, $rental_id);
+            $date_stmt->execute();
+            $date_stmt->close();
+        }
+
+        // Notify User
+        $notify = new Notification($conn);
+        $msg = "";
+        $title = "Rental Update";
+        
+        switch($new_status) {
+            case 'approved': 
+                $msg = "Good news! Your request for Locker {$rental['locker_id']} has been APPROVED. You can now pay to activate it."; 
+                $title = "Rental Approved";
+                break;
+            case 'active': 
+                $msg = "Success! Your Locker {$rental['locker_id']} is now ACTIVE. Access code sent separately."; 
+                $title = "Rental Activated";
+                break;
+            case 'denied': 
+                $msg = "Update: Your request for Locker {$rental['locker_id']} was denied."; 
+                $title = "Rental Denied";
+                break;
+            case 'cancelled':
+                $msg = "Your rental for Locker {$rental['locker_id']} has been cancelled.";
+                $title = "Rental Cancelled";
+                break;
+             case 'completed':
+                $msg = "Your rental for Locker {$rental['locker_id']} is now complete. Thank you!";
+                $title = "Rental Complete";
+                break;
+        }
+        
+        if ($msg) {
+            $notify->create($rental['user_id'], $title, $msg, $new_status);
+        }
 
         // Handle Auto-Deny for Approved
         $denied_count = 0;
