@@ -538,5 +538,20 @@
   <script src="../admin_scripts/logs.js"></script>
   <script src="../admin_and_staff_scripts/rental_management.js"></script>
   <script src="../client_scripts/notifications.js"></script>
+  <script>
+    // Temporary Diagnostic: Check Database Schema
+    fetch('../backend/check_schema.php')
+      .then(response => response.text())
+      .then(text => {
+          console.log("DB DIAGNOSTIC REPORT:");
+          console.log(text);
+          if (text.includes("ERROR")) {
+              alert("DATABASE ERROR DETECTED:\n" + text);
+          } else {
+              console.log("Database schema check passed.");
+          }
+      })
+      .catch(err => console.error("Diagnostic failed:", err));
+  </script>
 </body>
 </html>
