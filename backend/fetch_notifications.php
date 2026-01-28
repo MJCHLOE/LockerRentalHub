@@ -21,4 +21,4 @@ echo json_encode([
     'unread_count' => $unreadCount,
     'notifications' => $notifications
 ]);
-?>
+

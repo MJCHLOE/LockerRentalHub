@@ -538,28 +538,7 @@
   <script src="../admin_scripts/logs.js"></script>
   <script src="../admin_and_staff_scripts/rental_management.js"></script>
   <script src="../client_scripts/notifications.js"></script>
-  <script>
-      // DEBUG: Check Session and Data
-      setTimeout(function() {
-          fetch('../backend/debug_status.php')
-            .then(res => res.text())
-            .then(text => {
-                console.log("DEBUG STATUS:");
-                console.log(text);
-                // Check if session is working and data exists
-                if (text.includes("NO USER") || text.includes("Test Notification")) { // Alert if critical info
-                    alert("DIAGNOSTIC RESULT:\n" + text);
-                } else if (!text.includes("Total Notifications: 0")) {
-                     // If we have notifications but they aren't showing, JS is the issue
-                     console.warn("Backend has data, but UI is empty?");
-                     alert("BACKEND OK, FRONTEND ISSUE:\n" + text);
-                } else {
-                     alert("BACKEND EMPTY (No notifications found):\n" + text);
-                }
-            })
-            .catch(e => alert("Debug fetch failed: " + e));
-      }, 1000); // 1s delay
-  </script>
+
 
 </body>
 </html>

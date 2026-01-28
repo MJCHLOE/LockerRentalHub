@@ -73,4 +73,3 @@ class Notification {
         return $result['info'];
     }
 }
-?>

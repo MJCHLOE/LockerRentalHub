@@ -30,7 +30,13 @@ function fetchNotifications() {
         success: function (response) {
             if (response.success) {
                 updateNotificationUI(response.unread_count, response.notifications);
+            } else {
+                console.error("Fetch notifications failed:", response.message);
             }
+        },
+        error: function (xhr, status, error) {
+            console.error("AJAX Error (Notifications):", status, error);
+            console.log("Response Text:", xhr.responseText);
         }
     });
 }
