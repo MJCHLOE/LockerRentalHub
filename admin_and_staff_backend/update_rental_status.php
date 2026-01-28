@@ -1,7 +1,6 @@
 <?php
 session_start();
-require '../db/database.php';
-require '../db/database.php';
+require_once '../db/database.php';
 require_once '../admin_backend/log_actions.php'; // Ensure Logger is available
 require_once '../backend/Notification.php'; // Notification System
 
