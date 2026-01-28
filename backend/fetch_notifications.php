@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db/database.php';
+require '../db/database.php';
 require 'Notification.php';
 
 header('Content-Type: application/json');

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db/database.php';
+require '../db/database.php';
 require 'Notification.php';
 
 header('Content-Type: application/json');
@@ -29,4 +29,4 @@ if (isset($data['mark_all']) && $data['mark_all'] == true) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
 }
-?>
+
