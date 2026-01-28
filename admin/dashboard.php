@@ -77,7 +77,7 @@
       
       <!-- Notification Dropdown -->
       <div class="dropdown dropup mb-2">
-           <a href="#" class="nav-link dropdown-toggle" id="notificationBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="color: var(--text-secondary);">
+           <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationBtn" aria-haspopup="true" aria-expanded="false" style="color: var(--text-secondary);">
                <iconify-icon icon="mdi:bell" style="font-size: 1.5rem;"></iconify-icon> Notifications
                <span id="notificationBadge" class="badge badge-danger" style="display: none; margin-left: 5px;">0</span>
            </a>
