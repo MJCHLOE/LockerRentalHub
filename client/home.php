@@ -136,7 +136,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                     <div class="stat-icon">
                         <iconify-icon icon="mdi:key" width="32"></iconify-icon>
                     </div>
-                    <h3>Active Rentals</h3>
+                    <h3>Currently Active Rental</h3>
                     <p class="stat-number" id="activeRentals">0</p>
                 </div>
                 <div class="stat-card">

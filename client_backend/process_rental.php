@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
 
         // Check if locker is available for rent
         // Check if locker is available for rent
-        $checkQuery = "SELECT status FROM lockers WHERE locker_id = ?";
+        $checkQuery = "SELECT status FROM lockers WHERE locker_id = ? FOR UPDATE";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
