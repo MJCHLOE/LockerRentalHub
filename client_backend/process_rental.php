@@ -18,17 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         // Start transaction
         $conn->begin_transaction();
 
-        // Check if user has previously rented this locker
-        $checkPrevRental = "SELECT COUNT(*) as count FROM rentals WHERE user_id = ? AND locker_id = ? AND status IN ('approved', 'active')";
-        // Note: Completed rentals are in rental_archives now, so they won't block new rentals typically unless we check archives.
-        // Assuming we only block concurrent active rentals.
-        $stmt = $conn->prepare($checkPrevRental);
-        $stmt->bind_param("is", $user_id, $locker_id);
+        // Check if user has ANY active, approved, or pending rental
+        $checkActiveRental = "SELECT COUNT(*) as count FROM rentals WHERE user_id = ? AND status IN ('pending', 'approved', 'active')";
+        $stmt = $conn->prepare($checkActiveRental);
+        $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
+        
         if ($row['count'] > 0) {
-            throw new Exception('You have previously rented this locker and cannot rent it again.');
+            throw new Exception('You already have an active or pending rental. You cannot rent another locker until your current rental is completed or cancelled.');
         }
 
         // Check if locker is available for rent

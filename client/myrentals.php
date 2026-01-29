@@ -122,52 +122,37 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Pending Rentals Section -->
-        <section id="pending-rentals" class="mt-4">
-            <h3>My Pending Rentals</h3>
-            <div class="table-responsive bg-dark text-white p-3 rounded">
-                <table class="table table-dark table-bordered">
-                <thead>
-                    <tr>
-                        <th>Locker ID</th>
-                        <th>Size</th>
-                        <th>Request Date</th>
-                        <th>Date of Approval</th>
-                        <th>Status</th>
-                        <th>Price/Month</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pendingRentalsTable">
-                    <!-- Pending rentals will be loaded here -->
-                </tbody>
-            </table>
-            </div>
-        </section>
+        <h2 class="mb-4">My Rentals</h2>
+        
+        <!-- Filter Controls -->
+        <div class="filter-group">
+            <button class="btn btn-outline-light active filter-btn" onclick="filterRentals('all', this)">All</button>
+            <button class="btn btn-outline-warning filter-btn" onclick="filterRentals('pending', this)">Pending</button>
+            <button class="btn btn-outline-success filter-btn" onclick="filterRentals('active', this)">Active</button>
+            <button class="btn btn-outline-info filter-btn" onclick="filterRentals('completed', this)">Completed</button>
+            <button class="btn btn-outline-danger filter-btn" onclick="filterRentals('denied', this)">Denied</button>
+            <button class="btn btn-outline-secondary filter-btn" onclick="filterRentals('history', this)">History</button>
+        </div>
 
-        <section id="my-rentals" class="mt-4">
-            <h3>My Active Rentals</h3>
-            <div class="table-responsive bg-dark text-white p-3 rounded">
-                <table class="table table-dark table-bordered">
+        <div class="table-container bg-dark text-white p-3 rounded">
+            <table class="table table-dark table-bordered mb-0">
                 <thead>
                     <tr>
                         <th>Locker ID</th>
                         <th>Size</th>
                         <th>Rental Date</th>
-                        <th>Date of Approval</th>
-                        <th>Status</th>
+                        <th>End Date</th>
                         <th>Time Remaining</th>
-                        <th>Payment</th>
+                        <th>Status</th>
                         <th>Price/Month</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="activeRentalsTable">
-                    <!-- Active rentals will be loaded here -->
+                <tbody id="rentalsTableBody">
+                    <!-- Loaded via JS -->
                 </tbody>
             </table>
-            </div>
-        </section>
+        </div>
     </div>
 
     <!-- Change Password Modal -->
@@ -230,33 +215,27 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="../client_scripts/dashboard.js"></script>
     <script src="../client_scripts/dropdown.js"></script>
-    <script src="../client_scripts/dashboard.js"></script>
-    <script src="../client_scripts/dropdown.js"></script>
     <script src="../client_scripts/notifications.js"></script>
     <script>
     $(document).ready(function() {
-        // Load pending rentals
-        loadPendingRentals();
-        // Load active rentals
-        loadActiveRentals();
+        // Load all rentals initially
+        filterRentals('all', $('.filter-btn').first());
     });
 
-    function loadPendingRentals() {
-        $.ajax({
-            url: '../client_backend/fetch_pending_rentals.php',
-            method: 'GET',
-            success: function(response) {
-                $('#pendingRentalsTable').html(response);
-            }
-        });
-    }
+    function filterRentals(status, btn) {
+        // Update active button
+        if(btn) {
+            $('.filter-btn').removeClass('active');
+            $(btn).addClass('active');
+        }
 
-    function loadActiveRentals() {
+        // Fetch rentals
         $.ajax({
-            url: '../client_backend/fetch_active_rentals.php',
+            url: '../client_backend/fetch_all_rentals.php',
             method: 'GET',
+            data: { status: status },
             success: function(response) {
-                $('#activeRentalsTable').html(response);
+                $('#rentalsTableBody').html(response);
                 startCountdownTimer();
             }
         });
@@ -266,33 +245,37 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     function startCountdownTimer() {
         if (countdownInterval) clearInterval(countdownInterval);
         
-        countdownInterval = setInterval(function() {
-            $('.time-remaining').each(function() {
-                const endDateStr = $(this).data('end-date');
-                if (!endDateStr) return;
+        // Run immediately
+        updateTimers();
+        
+        countdownInterval = setInterval(updateTimers, 1000);
+    }
+
+    function updateTimers() {
+        $('.time-remaining').each(function() {
+            const endDateStr = $(this).data('end-date');
+            if (!endDateStr) return;
+            
+            const now = new Date().getTime();
+            const endTime = new Date(endDateStr).getTime();
+            const distance = endTime - now;
+            
+            if (distance < 0) {
+                $(this).removeClass('text-warning text-white').addClass('text-danger font-weight-bold').text('Expired');
+            } else {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                const now = new Date().getTime();
-                const endTime = new Date(endDateStr).getTime();
-                const distance = endTime - now;
+                let timeStr = "";
+                if (days > 0) timeStr += days + "d ";
+                timeStr += hours + "h " + minutes + "m " + seconds + "s";
                 
-                if (distance < 0) {
-                    $(this).html('<span class="text-danger font-weight-bold">Expired</span>');
-                } else {
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                    
-                    let timeStr = "";
-                    if (days > 0) timeStr += days + "d ";
-                    timeStr += hours + "h " + minutes + "m " + seconds + "s";
-                    
-                    // Keep text-warning if days < 3
-                    const className = days < 3 ? 'text-warning font-weight-bold' : 'text-white';
-                    $(this).removeClass('text-white text-warning font-weight-bold').addClass(className).text(timeStr);
-                }
-            });
-        }, 1000);
+                const className = days < 3 ? 'text-warning font-weight-bold' : 'text-white';
+                $(this).removeClass('text-white text-warning text-danger font-weight-bold').addClass(className).text(timeStr);
+            }
+        });
     }
 
     function cancelRental(rentalId) {
@@ -304,7 +287,8 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                 success: function(response) {
                     if(response.success) {
                         showAlert('success', 'Rental request cancelled successfully');
-                        loadPendingRentals();
+                        // Refresh current view
+                        filterRentals($('.filter-btn.active').text().toLowerCase(), null); 
                     } else {
                         showAlert('danger', 'Error: ' + response.message);
                     }

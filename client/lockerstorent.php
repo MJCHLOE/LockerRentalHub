@@ -101,9 +101,9 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 <iconify-icon icon="mdi:locker"></iconify-icon>
                 Lockers To Rent
             </a>
-            <a href="myrentalhistory.php">
-                <iconify-icon icon="mdi:history"></iconify-icon>
-                My Rental History
+            <a href="lockerstorent.php" class="active">
+                <iconify-icon icon="mdi:locker"></iconify-icon>
+                Lockers To Rent
             </a>
 
             <!-- Notification Dropdown -->
@@ -194,7 +194,8 @@ if ($totalLockers > 0 && $page > $totalPages) {
             $query = "SELECT locker_id, size as size_name, status as status_name, price as price_per_month,
                             (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.status = 'pending') as reservation_count,
                             (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.status IN ('approved', 'active', 'completed')) as has_rented_before,
-                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.status = 'pending') as has_pending_reservation
+                            (SELECT COUNT(*) FROM rentals r WHERE r.locker_id = lockers.locker_id AND r.user_id = $user_id AND r.status = 'pending') as has_pending_reservation,
+                            (SELECT COUNT(*) FROM rentals r WHERE r.user_id = $user_id AND r.status IN ('pending', 'approved', 'active')) as has_active_global
                     FROM lockers
                     $whereSql
                     ORDER BY locker_id
@@ -234,10 +235,15 @@ if ($totalLockers > 0 && $page > $totalPages) {
                             $message = '';
                             $buttonText = '';
                             
-                            if ($has_rented_before > 0) {
-                                $message = 'You have previously rented this locker and cannot rent it again.';
+                            $has_active_global = $row['has_active_global'];
+
+                            if ($has_active_global > 0) {
+                                $canRent = false;
+                                $message = 'You have an active or pending rental. Limit: 1.';
+                            } elseif ($has_rented_before > 0) {
+                                $message = 'You have previously rented this locker.';
                             } elseif ($has_pending_reservation > 0) {
-                                $message = 'You already have a pending reservation for this locker.';
+                                $message = 'You have a pending reservation for this locker.';
                             } elseif ($row['status_name'] == 'Vacant') {
                                 $canRent = true;
                                 $buttonText = 'Rent Now';
