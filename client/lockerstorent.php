@@ -241,11 +241,10 @@ if ($totalLockers > 0 && $page > $totalPages) {
                             } elseif ($row['status_name'] == 'Vacant') {
                                 $canRent = true;
                                 $buttonText = 'Rent Now';
-                            } elseif ($row['status_name'] == 'Reserved') {
-                                $canRent = true;
-                                $buttonText = 'Request Reservation';
                             } elseif ($row['status_name'] == 'Occupied') {
                                 $message = 'This locker is currently occupied';
+                            } elseif ($row['status_name'] == 'Reserved') {
+                                $message = 'This locker is currently reserved';
                             } else {
                                 $message = 'This locker is not available';
                             }

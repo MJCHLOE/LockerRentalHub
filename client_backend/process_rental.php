@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
         if ($locker === null) {
             throw new Exception('Locker not found.');
         }
-        if (!in_array($locker['status'], ['Vacant', 'Reserved'])) {
+        if (!in_array($locker['status'], ['Vacant'])) {
             throw new Exception('This locker is not available for rent.');
         }
 
