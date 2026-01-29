@@ -103,26 +103,32 @@ function updateRentalStatus(rentalId, newStatus) {
             status: newStatus
         })
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                // Reload current view
-                const isArchive = document.getElementById('tab-archive')?.classList.contains('active');
-                const activeFilterBtn = document.querySelector('#rentalFilters .btn.active');
-                // Try to deduce status from active button
-                let status = 'all';
-                if (activeFilterBtn) {
-                    const onClick = activeFilterBtn.getAttribute('onclick');
-                    if (onClick) {
-                        const match = onClick.match(/'([^']+)'/);
-                        if (match) status = match[1];
+        .then(response => response.text())
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    alert(data.message);
+                    // Reload current view
+                    const isArchive = document.getElementById('tab-archive')?.classList.contains('active');
+                    const activeFilterBtn = document.querySelector('#rentalFilters .btn.active');
+                    // Try to deduce status from active button
+                    let status = 'all';
+                    if (activeFilterBtn) {
+                        const onClick = activeFilterBtn.getAttribute('onclick');
+                        if (onClick) {
+                            const match = onClick.match(/'([^']+)'/);
+                            if (match) status = match[1];
+                        }
                     }
-                }
 
-                filterRentals(status); // Helper that handles type and status
-            } else {
-                alert('Error updating rental status: ' + data.message);
+                    filterRentals(status); // Helper that handles type and status
+                } else {
+                    alert('Error updating rental status: ' + data.message);
+                }
+            } catch (e) {
+                console.error('Server Error:', text);
+                alert('Server Error: ' + text.substring(0, 500));
             }
         })
         .catch(error => {

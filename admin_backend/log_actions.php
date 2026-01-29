@@ -15,23 +15,17 @@ class SystemLogger {
 
     public function logAction($action, $description, $entity_type, $entity_id) {
         try {
-            // Start transaction
-            $this->conn->begin_transaction();
-
-            // Insert into system_logs first
+            // Insert into system_logs
             $query = "INSERT INTO system_logs (user_id, action, description, entity_type, entity_id) 
                      VALUES (?, ?, ?, ?, ?)";
             $stmt = $this->conn->prepare($query);
             $stmt->bind_param("issss", $this->user_id, $action, $description, $entity_type, $entity_id);
             $stmt->execute();
-
-            // Commit transaction
-            $this->conn->commit();
+            
             return true;
 
         } catch (Exception $e) {
-            // Rollback on error
-            $this->conn->rollback();
+            // Log error silently or return false
             return false;
         }
     }
