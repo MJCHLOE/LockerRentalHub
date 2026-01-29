@@ -101,10 +101,7 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 <iconify-icon icon="mdi:locker"></iconify-icon>
                 Lockers To Rent
             </a>
-            <a href="lockerstorent.php" class="active">
-                <iconify-icon icon="mdi:locker"></iconify-icon>
-                Lockers To Rent
-            </a>
+
 
             <!-- Notification Dropdown -->
             <div class="dropdown">
