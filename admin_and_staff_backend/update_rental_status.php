@@ -148,12 +148,14 @@ try {
         $locker_stmt->execute();
         $locker_stmt->close();
 
-        // Calculate End Date if becoming Active
+        // Calculate Start/End Date if becoming Active
         if ($new_status === 'active') {
-            // Default 30 days. You can make this dynamic later.
+            $start_date = date('Y-m-d H:i:s');
+            // Default 30 days from now
             $end_date = date('Y-m-d H:i:s', strtotime('+30 days'));
-            $date_stmt = $conn->prepare("UPDATE rentals SET end_date = ? WHERE rental_id = ?");
-            $date_stmt->bind_param("si", $end_date, $rental_id);
+            
+            $date_stmt = $conn->prepare("UPDATE rentals SET start_date = ?, end_date = ? WHERE rental_id = ?");
+            $date_stmt->bind_param("ssi", $start_date, $end_date, $rental_id);
             $date_stmt->execute();
             $date_stmt->close();
         }
