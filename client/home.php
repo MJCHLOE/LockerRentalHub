@@ -226,8 +226,8 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
         // Load stats immediately
         loadStats();
         
-        // Refresh stats every 5 seconds
-        setInterval(loadStats, 5000);
+        // Refresh stats every 60 seconds to save DB connections (Hostinger Limit: 500/hr)
+        setInterval(loadStats, 60000);
     });
 
     function loadStats() {
