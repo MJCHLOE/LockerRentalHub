@@ -32,6 +32,7 @@ try {
         
         $query .= " ORDER BY r.archived_at DESC";
     } else {
+        // Update query to include locker price
         $query = "SELECT r.rental_id, 
                          r.user_id,
                          CONCAT(u.firstname, ' ', u.lastname) as client_name,
@@ -40,9 +41,11 @@ try {
                          NULL as date_approved, 
                          r.status as rental_status,
                          r.end_date,
-                         r.payment_status
+                         r.payment_status as payment_status,
+                         l.price
                   FROM rentals r
                   JOIN users u ON r.user_id = u.user_id
+                  JOIN lockers l ON r.locker_id = l.locker_id
                   WHERE 1=1";
         
         if ($filter) {
@@ -63,9 +66,22 @@ try {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        echo "<tr><td colspan='10' class='text-center'>No records found.</td></tr>";
+        echo "<tr><td colspan='11' class='text-center'>No records found.</td></tr>";
     } else {
         while ($row = $result->fetch_assoc()) {
+            // Calculate Price
+            $totalPrice = 0;
+            if (isset($row['price'])) {
+                $start = new DateTime($row['rental_date']);
+                $end = $row['end_date'] ? new DateTime($row['end_date']) : clone $start;
+                if (!$row['end_date']) $end->modify('+1 month'); 
+                
+                $days = $end->diff($start)->days;
+                $months = ceil($days / 30);
+                if ($months < 1) $months = 1;
+                $totalPrice = $row['price'] * $months;
+            }
+
             echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}'>";
             echo "<td>{$row['rental_id']}</td>";
             echo "<td>{$row['user_id']}</td>";
@@ -73,7 +89,7 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
-            echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
+            echo "<td>" . ($row['end_date'] ? date('Y-m-d H:i', strtotime($row['end_date'])) : '-') . "</td>";
             
             // Time Remaining Calculation
             $timeRemaining = "-";
@@ -92,7 +108,7 @@ try {
                  }
             } elseif ($row['rental_status'] === 'active') {
                 $timeRemaining = "Indefinite";
-            } else if ($row['rent_ended_date']) {
+            } else if (isset($row['rent_ended_date'])) {
                 $timeRemaining = "Ended: " . date('Y-m-d', strtotime($row['rent_ended_date']));
             }
             

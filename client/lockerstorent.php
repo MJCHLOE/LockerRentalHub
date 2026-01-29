@@ -336,6 +336,27 @@ if ($totalLockers > 0 && $page > $totalPages) {
                         <p style="color: #000;"><strong>Size:</strong> <span id="modalLockerSize"></span></p>
                         <p style="color: #000;"><strong>Price:</strong> ₱<span id="modalLockerPrice"></span>/month</p>
                     </div>
+                    
+                    <form id="rentalDatesForm">
+                        <div class="form-group">
+                            <label for="startDate" class="text-dark font-weight-bold">Start Date:</label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate" class="text-dark font-weight-bold">End Date:</label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                        <div class="alert alert-info">
+                            <div class="d-flex justify-content-between">
+                                <span>Duration:</span>
+                                <span id="rentalDuration" class="font-weight-bold">1 Month</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <span>Total Price:</span>
+                                <span class="font-weight-bold" style="font-size: 1.2rem;">₱<span id="modalTotalPrice">0.00</span></span>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -446,15 +467,35 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 }
             });
 
+            // Handle date changes
+            $('#startDate, #endDate').on('change', updatePricing);
+
             // Handle rental confirmation
             $('#confirmRental').click(function() {
                 const lockerId = $('#modalLockerId').text();
+                const startDate = $('#startDate').val();
+                const endDate = $('#endDate').val();
+                
+                if (!startDate || !endDate) {
+                    alert("Please select both start and end dates.");
+                    return;
+                }
+                
+                if (endDate <= startDate) {
+                    alert("End date must be after the start date.");
+                    return;
+                }
+                
                 $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
                 
                 $.ajax({
                     url: '../client_backend/process_rental.php',
                     method: 'POST',
-                    data: { locker_id: lockerId },
+                    data: { 
+                        locker_id: lockerId,
+                        start_date: startDate,
+                        end_date: endDate
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -475,6 +516,31 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 });
             });
         });
+
+        function updatePricing() {
+            const startDate = new Date($('#startDate').val());
+            const endDate = new Date($('#endDate').val());
+            const pricePerMonth = parseFloat($('#modalLockerPrice').text().replace(/,/g, ''));
+
+            if (startDate && endDate && !isNaN(startDate) && !isNaN(endDate) && endDate > startDate) {
+                // Approximate months (30 days) logic or Calendar difference
+                // Using 30-day blocks for simplicity as users expect "1 month = 30 days" often in rentals
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                const months = Math.ceil(diffDays / 30);
+                
+                // Ensure at least 1 month
+                const validMonths = months < 1 ? 1 : months;
+                
+                const totalPrice = pricePerMonth * validMonths;
+                
+                $('#rentalDuration').text(validMonths + (validMonths === 1 ? ' Month' : ' Months'));
+                $('#modalTotalPrice').text(totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            } else {
+                $('#rentalDuration').text('Incomplete Dates');
+                $('#modalTotalPrice').text('0.00');
+            }
+        }
 
         function rentLocker(lockerId) {
             const lockerCard = $(`[data-locker-id="${lockerId}"]`);
@@ -502,6 +568,19 @@ if ($totalLockers > 0 && $page > $totalPages) {
             $('#modalLockerId').text(lockerId);
             $('#modalLockerSize').text(size);
             $('#modalLockerPrice').text(price);
+            
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            const nextMonth = new Date();
+            nextMonth.setDate(nextMonth.getDate() + 30);
+            const defaultEnd = nextMonth.toISOString().split('T')[0];
+            
+            $('#startDate').val(today).attr('min', today);
+            $('#endDate').val(defaultEnd).attr('min', today);
+            
+            // Initial calculation
+            updatePricing();
+            
             $('#rentalRequestModal').modal('show');
         }
 
@@ -514,18 +593,9 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     </button>
                 </div>
             `;
-            $('.alert:not(.rental-terms)').remove();
+            $('.alert:not(.rental-terms):not(.alert-info)').remove();
             $('.main-content').prepend(alertHtml);
-            setTimeout(() => $('.alert:not(.rental-terms)').fadeOut('slow', function() { $(this).remove(); }), 3000);
-        }
-
-        function togglePasswordVisibility(fieldId) {
-            var field = document.getElementById(fieldId);
-            if (field.type === "password") {
-                field.type = "text";
-            } else {
-                field.type = "password";
-            }
+            setTimeout(() => $('.alert:not(.rental-terms):not(.alert-info)').fadeOut('slow', function() { $(this).remove(); }), 3000);
         }
     </script>
 </body>

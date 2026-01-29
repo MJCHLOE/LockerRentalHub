@@ -134,9 +134,23 @@ if (!$rental) {
 
         <div class="detail-row" style="font-size: 1.2rem;">
             <span class="font-weight-bold">Total Paid:</span>
-            <span class="font-weight-bold text-success">₱<?php echo number_format($rental['price'], 2); ?></span>
+            <?php 
+                $start = new DateTime($rental['rental_date']);
+                $end = $rental['end_date'] ? new DateTime($rental['end_date']) : clone $start;
+                if (!$rental['end_date']) $end->modify('+1 month'); // Fallback if no end date
+                
+                $days = $end->diff($start)->days;
+                $months = ceil($days / 30);
+                if ($months < 1) $months = 1;
+                
+                $totalPrice = $rental['price'] * $months;
+            ?>
+            <span class="font-weight-bold text-success">
+                ₱<?php echo number_format($totalPrice, 2); ?>
+                <small class="text-muted" style="font-size: 0.8rem;">(<?php echo $months; ?> mo.)</small>
+            </span>
         </div>
-
+        
         <div class="barcode-container">
             <svg id="barcode"></svg>
             <p class="text-muted small mt-2">Scan this barcode at the kiosk for access</p>

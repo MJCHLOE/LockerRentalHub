@@ -46,12 +46,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
             throw new Exception('This locker is not available for rent.');
         }
 
+        if (!isset($_POST['start_date']) || !isset($_POST['end_date'])) {
+            throw new Exception("Start and End dates are required.");
+        }
+        $start_date = $_POST['start_date'];
+        $end_date = $_POST['end_date'];
+        
+        if (strtotime($start_date) < strtotime(date('Y-m-d'))) {
+            throw new Exception("Start date cannot be in the past.");
+        }
+        if (strtotime($end_date) <= strtotime($start_date)) {
+            throw new Exception("End date must be after start date.");
+        }
+
         // Insert into rentals table
-        // Note: payment_status defaults to 'unpaid' in schema, rental_status to 'pending'
-        $insertQuery = "INSERT INTO rentals (user_id, locker_id, rental_date, status, payment_status) 
-                       VALUES (?, ?, NOW(), 'pending', 'unpaid')";
+        $insertQuery = "INSERT INTO rentals (user_id, locker_id, rental_date, end_date, status, payment_status) 
+                       VALUES (?, ?, ?, ?, 'pending', 'unpaid')";
         $stmt = $conn->prepare($insertQuery);
-        $stmt->bind_param("is", $user_id, $locker_id);
+        $stmt->bind_param("isss", $user_id, $locker_id, $start_date, $end_date);
         $stmt->execute();
 
         // Update locker status to 'Reserved'

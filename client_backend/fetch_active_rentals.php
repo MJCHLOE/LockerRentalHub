@@ -57,7 +57,7 @@ try {
                 }
             }
             
-            echo "<td class='$color'>$timeRemaining</td>";
+            echo "<td class='$color time-remaining' data-end-date='{$row['end_date']}'>$timeRemaining</td>";
             echo "<td><span class='badge badge-{$paymentClass}'>{$paymentStatusDisplay}</span></td>";
             echo "<td>₱" . number_format($row['price'], 2) . "</td>";
             echo "<td>

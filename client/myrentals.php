@@ -257,8 +257,42 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             method: 'GET',
             success: function(response) {
                 $('#activeRentalsTable').html(response);
+                startCountdownTimer();
             }
         });
+    }
+
+    let countdownInterval;
+    function startCountdownTimer() {
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(function() {
+            $('.time-remaining').each(function() {
+                const endDateStr = $(this).data('end-date');
+                if (!endDateStr) return;
+                
+                const now = new Date().getTime();
+                const endTime = new Date(endDateStr).getTime();
+                const distance = endTime - now;
+                
+                if (distance < 0) {
+                    $(this).html('<span class="text-danger font-weight-bold">Expired</span>');
+                } else {
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    let timeStr = "";
+                    if (days > 0) timeStr += days + "d ";
+                    timeStr += hours + "h " + minutes + "m " + seconds + "s";
+                    
+                    // Keep text-warning if days < 3
+                    const className = days < 3 ? 'text-warning font-weight-bold' : 'text-white';
+                    $(this).removeClass('text-white text-warning font-weight-bold').addClass(className).text(timeStr);
+                }
+            });
+        }, 1000);
     }
 
     function cancelRental(rentalId) {

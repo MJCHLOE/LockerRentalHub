@@ -305,6 +305,7 @@
                     <th>Time Remaining</th>
                     <th>Status</th>
                     <th>Payment</th>
+                    <th>Total Price</th>
                     <th>Actions</th>
                 </tr>
             </thead>
