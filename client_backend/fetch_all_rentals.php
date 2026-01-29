@@ -98,6 +98,7 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size']}</td>";
             echo "<td>" . date('Y-m-d', strtotime($row['rental_date'])) . "</td>";
+            echo "<td>" . ($row['start_date'] ? date('Y-m-d', strtotime($row['start_date'])) : '-') . "</td>";
 
             echo "<td>" . date('Y-m-d', strtotime($row['end_date'])) . "</td>";
 
@@ -131,10 +132,10 @@ try {
             echo "</tr>";
         }
     } else {
-        echo "<tr><td colspan='7' class='text-center'>No rentals found for this status.</td></tr>";
+        echo "<tr><td colspan='9' class='text-center'>No rentals found for this status.</td></tr>";
     }
 
 } catch (Exception $e) {
-    echo "<tr><td colspan='7' class='text-center text-danger'>Error: " . $e->getMessage() . "</td></tr>";
+    echo "<tr><td colspan='9' class='text-center text-danger'>Error: " . $e->getMessage() . "</td></tr>";
 }
 ?>
