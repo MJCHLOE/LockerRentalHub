@@ -4,16 +4,27 @@ require_once '../db/database.php';
 require_once '../admin_backend/log_actions.php'; // Ensure Logger is available
 require_once '../backend/Notification.php'; // Notification System
 
+
+function writeLog($msg) {
+    file_put_contents(__DIR__ . '/debug_log.txt', date('[Y-m-d H:i:s] ') . $msg . "\n", FILE_APPEND);
+}
+
+writeLog("--- New Request ---");
+
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['Admin', 'Staff'])) {
+    writeLog("Unauthorized access attempt. Role: " . ($_SESSION['role'] ?? 'None'));
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
+$input = file_get_contents("php://input");
+writeLog("Raw Input: " . $input);
+$data = json_decode($input, true);
 
 if (!isset($data['rental_id']) || !isset($data['status'])) {
+    writeLog("Missing parameters");
     echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
     exit;
 }
@@ -22,23 +33,31 @@ $rental_id = $data['rental_id'];
 $new_status = $data['status'];
 $user_id = $_SESSION['user_id'];
 
+writeLog("Processing Rental ID: $rental_id, New Status: $new_status, Admin ID: $user_id");
+
 $valid_transition_statuses = ['approved', 'active', 'completed', 'cancelled', 'denied'];
 if (!in_array($new_status, $valid_transition_statuses)) {
+    writeLog("Invalid status: $new_status");
     echo json_encode(['success' => false, 'message' => 'Invalid status']);
     exit;
 }
 
 try {
     $conn->begin_transaction();
+    writeLog("Transaction started");
 
     // 1. Fetch current rental info
     $stmt = $conn->prepare("SELECT r.*, l.locker_id 
                           FROM rentals r -- New table name
                           JOIN lockers l ON r.locker_id = l.locker_id 
                           WHERE r.rental_id = ?");
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
     $stmt->bind_param("i", $rental_id);
     $stmt->execute();
     $result = $stmt->get_result();
+
     
     if ($result->num_rows === 0) {
         throw new Exception("Rental not found (it might have been archived already)");
@@ -229,7 +248,8 @@ try {
     echo json_encode(['success' => true, 'message' => $response_message]);
 
 } catch (Exception $e) {
-    $conn->rollback();
+    if ($conn) $conn->rollback();
+    writeLog("Exception: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
 ?>
