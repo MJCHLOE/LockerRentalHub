@@ -152,9 +152,8 @@ try {
                             echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         }
                         break;
-                    case 'completed': // Add case for completed if not falling through
+                    case 'completed': 
                          echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
-                        break;
                         break;
                 }
                 echo "</div>";
