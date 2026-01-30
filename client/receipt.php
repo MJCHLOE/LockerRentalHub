@@ -13,29 +13,62 @@ if (!isset($_GET['rental_id'])) {
 $rental_id = $_GET['rental_id'];
 $user_id = $_SESSION['user_id'];
 
-// Fetch rental details
+// Calculate logic for queries
+$rental = null;
+
+// 1. Try Active Rentals Table
 $sql = "SELECT r.*, l.size, l.price, u.firstname, u.lastname, u.email 
         FROM rentals r 
         JOIN lockers l ON r.locker_id = l.locker_id 
         JOIN users u ON r.user_id = u.user_id 
         WHERE r.rental_id = ?";
 
-// Allow Admin to view any receipt, Client only their own
 if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
     $sql .= " AND r.user_id = ?";
 }
 
 $stmt = $conn->prepare($sql);
-
 if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
     $stmt->bind_param("ii", $rental_id, $user_id);
 } else {
     $stmt->bind_param("i", $rental_id);
 }
-
 $stmt->execute();
 $result = $stmt->get_result();
-$rental = $result->fetch_assoc();
+
+if ($result->num_rows > 0) {
+    $rental = $result->fetch_assoc();
+} else {
+    // 2. If not found, try Rental Archives Table
+    $stmt->close();
+    
+    // Note: Mapping archive columns to match standard keys
+    $sql = "SELECT r.archive_id as rental_id, r.user_id, r.locker_id, 
+                   r.start_date as rental_date, r.start_date, r.end_date,
+                   r.final_status as status, r.payment_status_at_archive as payment_status,
+                   l.size, l.price, u.firstname, u.lastname, u.email 
+            FROM rental_archives r 
+            JOIN lockers l ON r.locker_id = l.locker_id 
+            JOIN users u ON r.user_id = u.user_id 
+            WHERE r.archive_id = ?";
+
+    if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
+        $sql .= " AND r.user_id = ?";
+    }
+
+    $stmt = $conn->prepare($sql);
+    if ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Staff') {
+        $stmt->bind_param("ii", $rental_id, $user_id);
+    } else {
+        $stmt->bind_param("i", $rental_id);
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $rental = $result->fetch_assoc();
+    }
+}
 
 if (!$rental) {
     die("Receipt not found or access denied.");
