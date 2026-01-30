@@ -133,7 +133,7 @@ try {
             echo "<td>";
             if ($isAdminOrStaff && !$show_archives) {
                 echo "<div class='btn-group' role='group'>";
-                switch($row['rental_status']) {
+                // Calculate Price only if valid status for price
                 switch($row['rental_status']) {
                     case 'pending':
                         echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
@@ -155,7 +155,7 @@ try {
                     case 'completed': // Add case for completed if not falling through
                          echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
                         break;
-                }
+                        break;
                 }
                 echo "</div>";
             }
