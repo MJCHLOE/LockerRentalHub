@@ -133,6 +133,7 @@ function updateRentalStatus(rentalId, newStatus) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error updating rental status');
+            // DEBUG: Show exact error
+            alert('Error updating rental status: ' + error + '\n(Check console for details)');
         });
 }
