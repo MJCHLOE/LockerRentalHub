@@ -122,7 +122,7 @@ try {
             // Actions
             echo "<td>";
             // Receipt Button (Available for all statuses except maybe denied/cancelled if desired, but receipt.php handles access. Let's make it available generally.)
-             echo "<button class='btn btn-sm btn-info mr-1' onclick=\"window.open('receipt.php?rental_id={$rental_id}', '_blank')\" title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+             echo "<button class='btn btn-sm btn-info mr-1' onclick=\"viewReceipt({$rental_id})\" title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
             
             if ($row['status'] === 'pending') {
                 echo "<button class='btn btn-sm btn-danger' onclick='cancelRental({$rental_id})' title='Cancel'><iconify-icon icon='mdi:close'></iconify-icon></button>";

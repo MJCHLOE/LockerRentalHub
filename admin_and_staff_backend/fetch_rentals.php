@@ -134,26 +134,28 @@ try {
             if ($isAdminOrStaff && !$show_archives) {
                 echo "<div class='btn-group' role='group'>";
                 switch($row['rental_status']) {
+                switch($row['rental_status']) {
                     case 'pending':
-                        echo "<button class='btn btn-sm btn-info' onclick='window.open(\"../client/receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
                         echo "<button class='btn btn-sm btn-success' onclick='updateRentalStatus({$row['rental_id']}, \"approved\")' title='Approve'><iconify-icon icon='mdi:check'></iconify-icon></button>";
                         echo "<button class='btn btn-sm btn-danger' onclick='updateRentalStatus({$row['rental_id']}, \"denied\")' title='Deny'><iconify-icon icon='mdi:close'></iconify-icon></button>";
                         break;
                     case 'approved':
-                        echo "<button class='btn btn-sm btn-info' onclick='window.open(\"../client/receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
                         echo "<button class='btn btn-sm btn-primary' onclick='updateRentalStatus({$row['rental_id']}, \"active\")' title='Activate'><iconify-icon icon='mdi:play'></iconify-icon></button>";
                         echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         break;
                     case 'active':
-                        echo "<button class='btn btn-sm btn-info' onclick='window.open(\"../client/receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+                        echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
                         echo "<button class='btn btn-sm btn-success' onclick='updateRentalStatus({$row['rental_id']}, \"completed\")' title='Complete'><iconify-icon icon='mdi:check-all'></iconify-icon></button>";
                         if ($_SESSION['role'] === 'Admin') {
                             echo "<button class='btn btn-sm btn-secondary' onclick='updateRentalStatus({$row['rental_id']}, \"cancelled\")' title='Cancel'><iconify-icon icon='mdi:cancel'></iconify-icon></button>";
                         }
                         break;
                     case 'completed': // Add case for completed if not falling through
-                         echo "<button class='btn btn-sm btn-info' onclick='window.open(\"../client/receipt.php?rental_id={$row['rental_id']}\", \"_blank\")' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+                         echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
                         break;
+                }
                 }
                 echo "</div>";
             }

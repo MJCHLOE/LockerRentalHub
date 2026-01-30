@@ -214,6 +214,23 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
         </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 650px;">
+            <div class="modal-content bg-transparent border-0 shadow-none">
+                <div class="modal-body p-0" id="receiptModalBody">
+                    <!-- Receipt Content Loaded Here -->
+                    <div class="text-center text-white py-5">
+                         <div class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading Receipt...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -226,6 +243,30 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
         // Load all rentals initially
         filterRentals('all', $('.filter-btn').first());
     });
+
+    function viewReceipt(rentalId) {
+        $('#receiptModal').modal('show');
+        $('#receiptModalBody').html(`
+            <div class="text-center text-white py-5">
+                 <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Loading Receipt...</p>
+            </div>
+        `);
+        
+        $.ajax({
+            url: '../client/receipt.php',
+            method: 'GET',
+            data: { rental_id: rentalId, mode: 'modal' },
+            success: function(response) {
+                $('#receiptModalBody').html(response);
+            },
+            error: function() {
+                $('#receiptModalBody').html('<div class="alert alert-danger">Failed to load receipt.</div>');
+            }
+        });
+    }
 
     function filterRentals(status, btn) {
         // Update active button
