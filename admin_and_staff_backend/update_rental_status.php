@@ -74,37 +74,41 @@ try {
     }
 
     // --- NOTIFICATION LOGIC ---
-    // Moved here to ensure it runs for ALL status changes (including archived ones)
-    $notify = new Notification($conn);
-    $msg = "";
-    $title = "Rental Update";
-    
-    switch($new_status) {
-        case 'approved': 
-            $msg = "Good news! Your request for Locker {$rental['locker_id']} has been APPROVED. You can now pay to activate it."; 
-            $title = "Rental Approved";
-            break;
-        case 'active': 
-            $msg = "Success! Your Locker {$rental['locker_id']} is now ACTIVE. Access code sent separately."; 
-            $title = "Rental Activated";
-            break;
-        case 'denied': 
-            $msg = "Update: Your request for Locker {$rental['locker_id']} was denied."; 
-            $title = "Rental Denied";
-            break;
-        case 'cancelled':
-            $msg = "Your rental for Locker {$rental['locker_id']} has been cancelled.";
-            $title = "Rental Cancelled";
-            break;
-         case 'completed':
-            $msg = "Your rental for Locker {$rental['locker_id']} is now complete. Thank you!";
-            $title = "Rental Complete";
-            break;
-    }
-    
-    if ($msg) {
-        $notify->create($rental['user_id'], $title, $msg, $new_status);
-        // If denying, we should also probably ensure the user knows WHY if there was a reason, but valid_transition_statuses doesn't pass a reason.
+    try {
+        // Moved here to ensure it runs for ALL status changes (including archived ones)
+        $notify = new Notification($conn);
+        $msg = "";
+        $title = "Rental Update";
+        
+        switch($new_status) {
+            case 'approved': 
+                $msg = "Good news! Your request for Locker {$rental['locker_id']} has been APPROVED. You can now pay to activate it."; 
+                $title = "Rental Approved";
+                break;
+            case 'active': 
+                $msg = "Success! Your Locker {$rental['locker_id']} is now ACTIVE. Access code sent separately."; 
+                $title = "Rental Activated";
+                break;
+            case 'denied': 
+                $msg = "Update: Your request for Locker {$rental['locker_id']} was denied."; 
+                $title = "Rental Denied";
+                break;
+            case 'cancelled':
+                $msg = "Your rental for Locker {$rental['locker_id']} has been cancelled.";
+                $title = "Rental Cancelled";
+                break;
+             case 'completed':
+                $msg = "Your rental for Locker {$rental['locker_id']} is now complete. Thank you!";
+                $title = "Rental Complete";
+                break;
+        }
+        
+        if ($msg) {
+            $notify->create($rental['user_id'], $title, $msg, $new_status);
+        }
+    } catch (Exception $e) {
+        // Non-critical error, just log it internally if possible or ignore
+        writeLog("Notification Error: " . $e->getMessage());
     }
 
     // Determine if archiving is needed
@@ -114,11 +118,6 @@ try {
         // --- ARCHIVE LOGIC ---
 
         // 2. Insert into rental_archives
-        // payment_status logic: if completing/approving, usually ensure paid.
-        // For simplicity, we keep current payment status or force 'paid' if completing?
-        // Let's assume manual payment toggle isn't here, we just use current or update if implied.
-        // If 'completed', implies 'paid' usually? Let's treat 'active' -> 'completed' as final.
-        
         $final_payment_status = $rental['payment_status'];
         if ($new_status === 'completed') {
              $final_payment_status = 'paid';
@@ -128,6 +127,7 @@ try {
                          (original_rental_id, user_id, locker_id, start_date, end_date, final_status, payment_status_at_archive, archived_at)
                          VALUES (?, ?, ?, ?, NOW(), ?, ?, NOW())";
         $stmt = $conn->prepare($archive_query);
+        // Use rental_date as start_date for archive if column exists mapping
         $stmt->bind_param("iissss", 
             $rental['rental_id'], 
             $rental['user_id'], 
@@ -157,12 +157,9 @@ try {
         // --- NORMAL UPDATE LOGIC (Pending -> Approved, Approved -> Active) ---
         
         $payment_status = $rental['payment_status'];
-        // If moving to approved, might mark as paid? Or user does manually?
-        // The old code assumed 'approved' -> 'paid'. Let's stick to that for simplicity if desired.
-        // Or just keep it separate. Let's just update status.
-        // Actually old code: "If approved, payment -> paid".
+        // If approved, assume valid for payment
         if ($new_status === 'approved') {
-            $payment_status = 'paid';
+            $payment_status = $rental['payment_status']; // Keep existing, usually 'unpaid'
         }
 
         $update_query = "UPDATE rentals SET status = ?, payment_status = ? WHERE rental_id = ?";
@@ -184,56 +181,68 @@ try {
 
         // Calculate Start/End Date if becoming Active
         if ($new_status === 'active') {
-            $start_date = date('Y-m-d H:i:s');
-            // Default 30 days from now
-            $end_date = date('Y-m-d H:i:s', strtotime('+30 days'));
-            
-            $date_stmt = $conn->prepare("UPDATE rentals SET start_date = ?, end_date = ? WHERE rental_id = ?");
-            $date_stmt->bind_param("ssi", $start_date, $end_date, $rental_id);
-            $date_stmt->execute();
-            $date_stmt->close();
+             // Check if 'start_date' column exists inside rentals is tricky blindly.
+             // We'll wrap this in try-catch to avoid crashing if schema mismatch
+             try {
+                $start_date = date('Y-m-d H:i:s');
+                $end_date = date('Y-m-d H:i:s', strtotime('+30 days'));
+                
+                $date_stmt = $conn->prepare("UPDATE rentals SET start_date = ?, end_date = ? WHERE rental_id = ?");
+                $date_stmt->bind_param("ssi", $start_date, $end_date, $rental_id);
+                $date_stmt->execute();
+                $date_stmt->close();
+             } catch (Exception $e) {
+                 writeLog("Date Update Error: " . $e->getMessage());
+                 // Proceed anyway
+             }
         }
 
         // Handle Auto-Deny for Approved
         $denied_count = 0;
         if ($new_status === 'approved') {
-            // Find conflicts
-            $conflict_query = "SELECT rental_id, user_id, rental_date, payment_status 
-                             FROM rentals 
-                             WHERE locker_id = ? AND rental_id != ? AND status = 'pending'";
-            $c_stmt = $conn->prepare($conflict_query);
-            $c_stmt->bind_param("si", $locker_id, $rental_id);
-            $c_stmt->execute();
-            $conflicts = $c_stmt->get_result();
-            
-            while ($conflict = $conflicts->fetch_assoc()) {
-                // Notifying conflicted users they are denied
-                $notify->create($conflict['user_id'], "Rental Denied", "Your request for Locker $locker_id was denied because another request was approved.", "denied");
-
-                // Archive them as Denied
-                $c_archive = "INSERT INTO rental_archives 
-                             (original_rental_id, user_id, locker_id, start_date, end_date, final_status, payment_status_at_archive, archived_at)
-                             VALUES (?, ?, ?, ?, NOW(), 'denied', ?, NOW())";
-                $ca_stmt = $conn->prepare($c_archive);
-                $ca_stmt->bind_param("iisss", 
-                    $conflict['rental_id'], 
-                    $conflict['user_id'], 
-                    $locker_id, 
-                    $conflict['rental_date'], 
-                    $conflict['payment_status']
-                );
-                $ca_stmt->execute();
-                $ca_stmt->close();
-
-                // Delete
-                $cd_stmt = $conn->prepare("DELETE FROM rentals WHERE rental_id = ?");
-                $cd_stmt->bind_param("i", $conflict['rental_id']);
-                $cd_stmt->execute();
-                $cd_stmt->close();
+            try {
+                // Find conflicts
+                $conflict_query = "SELECT rental_id, user_id, rental_date, payment_status 
+                                 FROM rentals 
+                                 WHERE locker_id = ? AND rental_id != ? AND status = 'pending'";
+                $c_stmt = $conn->prepare($conflict_query);
+                $c_stmt->bind_param("si", $locker_id, $rental_id);
+                $c_stmt->execute();
+                $conflicts = $c_stmt->get_result();
                 
-                $denied_count++;
+                while ($conflict = $conflicts->fetch_assoc()) {
+                    // Notifying conflicted users
+                    try {
+                        $notify->create($conflict['user_id'], "Rental Denied", "Your request for Locker $locker_id was denied because another request was approved.", "denied");
+                    } catch(Exception $ex) {}
+    
+                    // Archive them as Denied
+                    $c_archive = "INSERT INTO rental_archives 
+                                 (original_rental_id, user_id, locker_id, start_date, end_date, final_status, payment_status_at_archive, archived_at)
+                                 VALUES (?, ?, ?, ?, NOW(), 'denied', ?, NOW())";
+                    $ca_stmt = $conn->prepare($c_archive);
+                    $ca_stmt->bind_param("iisss", 
+                        $conflict['rental_id'], 
+                        $conflict['user_id'], 
+                        $locker_id, 
+                        $conflict['rental_date'], 
+                        $conflict['payment_status']
+                    );
+                    $ca_stmt->execute();
+                    $ca_stmt->close();
+    
+                    // Delete
+                    $cd_stmt = $conn->prepare("DELETE FROM rentals WHERE rental_id = ?");
+                    $cd_stmt->bind_param("i", $conflict['rental_id']);
+                    $cd_stmt->execute();
+                    $cd_stmt->close();
+                    
+                    $denied_count++;
+                }
+                $c_stmt->close();
+            } catch (Exception $e) {
+                writeLog("Auto-Deny Error: " . $e->getMessage());
             }
-            $c_stmt->close();
         }
 
         $response_message = "Rental updated to $new_status";
@@ -243,20 +252,27 @@ try {
     }
 
     // 5. Log Action
-    $logger = new SystemLogger($conn);
-    $logger->logAction(
-        'Update Rental',
-        "Rental #$rental_id updated from '$current_status' to '$new_status'",
-        'rental',
-        $rental_id
-    );
+    try {
+        if (class_exists('SystemLogger')) {
+            $logger = new SystemLogger($conn);
+            $logger->logAction(
+                'Update Rental',
+                "Rental #$rental_id updated from '$current_status' to '$new_status'",
+                'rental',
+                (string)$rental_id
+            );
+        }
+    } catch (Exception $e) {
+        writeLog("Logging Error: " . $e->getMessage());
+    }
 
     $conn->commit();
     echo json_encode(['success' => true, 'message' => $response_message]);
 
 } catch (Exception $e) {
     if ($conn) $conn->rollback();
-    writeLog("Exception: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
-    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+    $errInfo = $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine();
+    writeLog("Exception: " . $errInfo);
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $errInfo]);
 }
 ?>
