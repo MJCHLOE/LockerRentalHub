@@ -13,6 +13,10 @@ writeLog("--- New Request ---");
 
 header('Content-Type: application/json');
 
+// DEBUG: Enable error reporting to front-end for diagnosis
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['Admin', 'Staff'])) {
     writeLog("Unauthorized access attempt. Role: " . ($_SESSION['role'] ?? 'None'));
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
