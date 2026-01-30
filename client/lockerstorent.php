@@ -363,16 +363,64 @@ if ($totalLockers > 0 && $page > $totalPages) {
                 </div>
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmRental">Submit Request</button>
+                    <button type="button" class="btn btn-primary" id="proceedToConfirm">Proceed to Confirmation</button>
                 </div>
-                <div class="modal-payment-instructions p-3 bg-info text-white">
-                    <h6 class="font-weight-bold mb-3">Payment Instructions:</h6>
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">• Please proceed to the rental spot's cashier for payment</li>
-                        <li class="mb-2">• Payment must be completed within approval</li>
-                        <li class="mb-2">• Your rental status will remain 'Pending Payment' until paid</li>
-                        <li>• The locker will be reserved for you during this period</li>
-                    </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal (Dark Theme) -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="background-color: #2c2c2c; color: #fff; border-radius: 12px; border: 1px solid #444;">
+                <div class="modal-header" style="border-bottom: 1px solid #444;">
+                    <h5 class="modal-title" id="confirmationModalLabel" style="color: #3498db; font-weight: bold;">Confirm Your Reservation</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">Locker</small>
+                            <h5 style="font-weight: bold;">Locker <span id="confLockerId"></span> (<span id="confLockerSize" style="color: #aaa;"></span>)</h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">Payment Status</small>
+                            <h5 style="font-weight: bold;">Pending Payment</h5>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">Start Date</small>
+                            <h5 id="confStartDate"></h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">End Date</small>
+                            <h5 id="confEndDate"></h5>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">Duration</small>
+                            <h5 id="confDuration"></h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted" style="color: #aaa !important;">Total Price</small>
+                            <h3 style="color: #f1c40f; font-weight: bold;">₱<span id="confTotalPrice"></span></h3>
+                        </div>
+                    </div>
+
+                    <div class="alert" style="background-color: #fff3cd; color: #856404; border-color: #ffeeba; font-size: 0.9rem;">
+                        <iconify-icon icon="mdi:information" style="vertical-align: middle; margin-right: 5px;"></iconify-icon>
+                        Please ensure all details are correct. Payment will be processed immediately upon confirmation.
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #444; justify-content: space-between;">
+                    <button type="button" class="btn btn-outline-light" onclick="$('#confirmationModal').modal('hide'); $('#rentalRequestModal').modal('show');" style="width: 48%;">Back</button>
+                    <button type="button" class="btn btn-warning" id="finalConfirmRental" style="width: 48%; font-weight: bold; background-color: #f39c12; border: none; color: #000;">Confirm Reservation</button>
                 </div>
             </div>
         </div>
@@ -473,9 +521,11 @@ if ($totalLockers > 0 && $page > $totalPages) {
             // Handle date changes
             $('#startDate, #endDate').on('change', updatePricing);
 
-            // Handle rental confirmation
-            $('#confirmRental').click(function() {
+            // Step 1: Proceed to Confirmation
+            $('#proceedToConfirm').click(function() {
                 const lockerId = $('#modalLockerId').text();
+                const lockerSize = $('#modalLockerSize').text();
+                const lockerPrice = $('#modalLockerPrice').text();
                 const startDate = $('#startDate').val();
                 const endDate = $('#endDate').val();
                 
@@ -488,6 +538,25 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     alert("End date must be after the start date.");
                     return;
                 }
+                
+                // Populate Confirmation Modal
+                $('#confLockerId').text(lockerId);
+                $('#confLockerSize').text(lockerSize);
+                $('#confStartDate').text(startDate);
+                $('#confEndDate').text(endDate);
+                $('#confDuration').text($('#rentalDuration').text());
+                $('#confTotalPrice').text($('#modalTotalPrice').text());
+                
+                // Switch Modals
+                $('#rentalRequestModal').modal('hide');
+                $('#confirmationModal').modal('show');
+            });
+
+            // Step 2: Final Confirmation
+            $('#finalConfirmRental').click(function() {
+                const lockerId = $('#confLockerId').text();
+                const startDate = $('#confStartDate').text();
+                const endDate = $('#confEndDate').text();
                 
                 $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Processing...');
                 
@@ -502,19 +571,18 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
-                            $('#rentalRequestModal').modal('hide');
+                            $('#confirmationModal').modal('hide');
                             showAlert('success', 'Rental request submitted! Please proceed to the cashier for payment.');
                             setTimeout(() => location.reload(), 2000);
                         } else {
                             showAlert('danger', 'Error: ' + response.message);
+                            $( '#finalConfirmRental').prop('disabled', false).text('Confirm Reservation');
                         }
                     },
                     error: function(xhr, status, error) {
                         showAlert('danger', 'Error connecting to server. Please try again.');
                         console.error(error);
-                    },
-                    complete: function() {
-                        $('#confirmRental').prop('disabled', false).text('Submit Request');
+                        $( '#finalConfirmRental').prop('disabled', false).text('Confirm Reservation');
                     }
                 });
             });
@@ -596,9 +664,9 @@ if ($totalLockers > 0 && $page > $totalPages) {
                     </button>
                 </div>
             `;
-            $('.alert:not(.rental-terms):not(.alert-info)').remove();
+            $('.alert:not(.rental-terms):not(.alert-info):not(#confirmationModal .alert)').remove();
             $('.main-content').prepend(alertHtml);
-            setTimeout(() => $('.alert:not(.rental-terms):not(.alert-info)').fadeOut('slow', function() { $(this).remove(); }), 3000);
+            setTimeout(() => $('.alert:not(.rental-terms):not(.alert-info):not(#confirmationModal .alert)').fadeOut('slow', function() { $(this).remove(); }), 3000);
         }
     </script>
 </body>

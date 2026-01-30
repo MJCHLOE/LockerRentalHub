@@ -93,13 +93,27 @@ if (!$rental) {
     <div class="receipt-card">
         <div class="brand-header">
             <h4>Locker Rental Hub</h4>
-            <p class="text-muted mb-0">Official Rental Receipt</p>
+            <?php 
+            $receiptTitle = "Official Rental Receipt";
+            $instruction = "Scan this barcode at the kiosk for access";
+            
+            if ($rental['status'] === 'pending' || $rental['payment_status'] === 'unpaid') {
+                $receiptTitle = "Reservation Slip";
+                $instruction = "Present this slip at the cashier to complete payment";
+            }
+            ?>
+            <p class="text-muted mb-0"><?php echo $receiptTitle; ?></p>
         </div>
 
         <div class="text-center mb-4">
             <span class="status-badge status-<?php echo strtolower($rental['status']); ?>">
                 <?php echo $rental['status']; ?>
             </span>
+            <?php if($rental['payment_status'] === 'unpaid'): ?>
+                <span class="status-badge bg-warning text-dark ml-2">Unpaid</span>
+            <?php else: ?>
+                <span class="status-badge bg-success text-white ml-2">Paid</span>
+            <?php endif; ?>
         </div>
 
         <div class="detail-row">
@@ -153,7 +167,7 @@ if (!$rental) {
         
         <div class="barcode-container">
             <svg id="barcode"></svg>
-            <p class="text-muted small mt-2">Scan this barcode at the kiosk for access</p>
+            <p class="text-muted small mt-2"><?php echo $instruction; ?></p>
         </div>
         
         <div class="text-center mt-4 d-print-none">

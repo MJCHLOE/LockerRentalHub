@@ -131,6 +131,13 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
             <button class="btn btn-outline-secondary filter-btn" onclick="filterRentals('history', this)">History</button>
         </div>
 
+        <div class="mb-2 pl-1">
+            <small class="text-muted">
+                <iconify-icon icon="mdi:information-outline" style="vertical-align: middle;"></iconify-icon> 
+                Click the <iconify-icon icon="mdi:eye" class="text-info" style="vertical-align: middle;"></iconify-icon> icon to view your <strong>Official Receipt</strong> or <strong>Reservation Slip</strong>.
+            </small>
+        </div>
+
         <div class="table-container bg-dark text-white p-3 rounded">
             <table class="table table-dark table-bordered mb-0">
                 <thead>
