@@ -13,9 +13,9 @@ writeLog("--- New Request ---");
 
 header('Content-Type: application/json');
 
-// DEBUG: Enable error reporting to front-end for diagnosis
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// DEBUG: Disable error reporting after fix
+error_reporting(0);
+ini_set('display_errors', 0);
 
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['Admin', 'Staff'])) {
     writeLog("Unauthorized access attempt. Role: " . ($_SESSION['role'] ?? 'None'));
@@ -180,7 +180,8 @@ try {
         }
         
         $locker_stmt = $conn->prepare("UPDATE lockers SET status = ? WHERE locker_id = ?");
-        $locker_stmt->bind_param("s", $locker_status, $locker_id);
+        // FIX: Two variables meant "ss", not "s"
+        $locker_stmt->bind_param("ss", $locker_status, $locker_id);
         $locker_stmt->execute();
         $locker_stmt->close();
 
