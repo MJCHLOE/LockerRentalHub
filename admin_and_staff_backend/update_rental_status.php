@@ -169,9 +169,10 @@ try {
         $stmt->close();
 
         // Update Locker Status
-        $locker_status = 'Reserved'; // Default for Pending/Approved
-        if ($new_status === 'active') {
-             $locker_status = 'Occupied';
+        // CHANGED: User requested locker becomes 'Occupied' upon 'Approved' (or 'Reserved' might be invalid ENUM)
+        $locker_status = 'Occupied'; 
+        if ($new_status === 'pending') {
+             $locker_status = 'Vacant'; // Should not happen usually in this flow
         }
         
         $locker_stmt = $conn->prepare("UPDATE lockers SET status = ? WHERE locker_id = ?");
