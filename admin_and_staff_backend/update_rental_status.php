@@ -73,6 +73,40 @@ try {
         exit;
     }
 
+    // --- NOTIFICATION LOGIC ---
+    // Moved here to ensure it runs for ALL status changes (including archived ones)
+    $notify = new Notification($conn);
+    $msg = "";
+    $title = "Rental Update";
+    
+    switch($new_status) {
+        case 'approved': 
+            $msg = "Good news! Your request for Locker {$rental['locker_id']} has been APPROVED. You can now pay to activate it."; 
+            $title = "Rental Approved";
+            break;
+        case 'active': 
+            $msg = "Success! Your Locker {$rental['locker_id']} is now ACTIVE. Access code sent separately."; 
+            $title = "Rental Activated";
+            break;
+        case 'denied': 
+            $msg = "Update: Your request for Locker {$rental['locker_id']} was denied."; 
+            $title = "Rental Denied";
+            break;
+        case 'cancelled':
+            $msg = "Your rental for Locker {$rental['locker_id']} has been cancelled.";
+            $title = "Rental Cancelled";
+            break;
+         case 'completed':
+            $msg = "Your rental for Locker {$rental['locker_id']} is now complete. Thank you!";
+            $title = "Rental Complete";
+            break;
+    }
+    
+    if ($msg) {
+        $notify->create($rental['user_id'], $title, $msg, $new_status);
+        // If denying, we should also probably ensure the user knows WHY if there was a reason, but valid_transition_statuses doesn't pass a reason.
+    }
+
     // Determine if archiving is needed
     $is_archiving = in_array($new_status, ['completed', 'cancelled', 'denied']);
 
@@ -160,38 +194,6 @@ try {
             $date_stmt->close();
         }
 
-        // Notify User
-        $notify = new Notification($conn);
-        $msg = "";
-        $title = "Rental Update";
-        
-        switch($new_status) {
-            case 'approved': 
-                $msg = "Good news! Your request for Locker {$rental['locker_id']} has been APPROVED. You can now pay to activate it."; 
-                $title = "Rental Approved";
-                break;
-            case 'active': 
-                $msg = "Success! Your Locker {$rental['locker_id']} is now ACTIVE. Access code sent separately."; 
-                $title = "Rental Activated";
-                break;
-            case 'denied': 
-                $msg = "Update: Your request for Locker {$rental['locker_id']} was denied."; 
-                $title = "Rental Denied";
-                break;
-            case 'cancelled':
-                $msg = "Your rental for Locker {$rental['locker_id']} has been cancelled.";
-                $title = "Rental Cancelled";
-                break;
-             case 'completed':
-                $msg = "Your rental for Locker {$rental['locker_id']} is now complete. Thank you!";
-                $title = "Rental Complete";
-                break;
-        }
-        
-        if ($msg) {
-            $notify->create($rental['user_id'], $title, $msg, $new_status);
-        }
-
         // Handle Auto-Deny for Approved
         $denied_count = 0;
         if ($new_status === 'approved') {
@@ -205,6 +207,9 @@ try {
             $conflicts = $c_stmt->get_result();
             
             while ($conflict = $conflicts->fetch_assoc()) {
+                // Notifying conflicted users they are denied
+                $notify->create($conflict['user_id'], "Rental Denied", "Your request for Locker $locker_id was denied because another request was approved.", "denied");
+
                 // Archive them as Denied
                 $c_archive = "INSERT INTO rental_archives 
                              (original_rental_id, user_id, locker_id, start_date, end_date, final_status, payment_status_at_archive, archived_at)

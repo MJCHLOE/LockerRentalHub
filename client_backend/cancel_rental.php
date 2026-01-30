@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../db/database.php';
+require_once '../backend/Notification.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
@@ -45,6 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rental_id'])) {
         $stmt = $conn->prepare($updateLocker);
         $stmt->bind_param("s", $rental['locker_id']);
         $stmt->execute();
+
+        // 4. Notify User
+        $notify = new Notification($conn);
+        $notify->create($user_id, "Rental Request Cancelled", "Your rental request for Locker {$rental['locker_id']} has been successfully cancelled.", "cancelled");
+
 
         $conn->commit();
         echo json_encode(['success' => true]);
