@@ -538,7 +538,7 @@
   <script src="../admin_scripts/locker_management.js"></script>
   <script src="../admin_scripts/analytics.js"></script>
   <script src="../admin_scripts/logs.js"></script>
-  <script src="../admin_and_staff_scripts/rental_management.js"></script>
+  <script src="../admin_and_staff_scripts/rental_management.js?v=<?php echo time(); ?>"></script>
   <script src="../client_scripts/notifications.js"></script>
 
   <!-- Receipt Modal -->
