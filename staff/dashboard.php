@@ -34,6 +34,7 @@ if (isset($_GET['success'])) {
     <!-- Font Awesome / Iconify -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -316,5 +317,23 @@ if (isset($_GET['success'])) {
     <script src="../admin_and_staff_scripts/rental_management.js"></script>
     <script src="../staff_scripts/locker_management.js"></script>
     <script src="../staff_scripts/view_clients.js"></script>
+    
+    <script>
+    // Check for login success
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login_success') === '1') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Welcome back, Staff!',
+            text: 'You have successfully logged in.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Clean URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+    </script>
 </body>
 </html>

@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="pagination.css" />
   <!-- Iconify CDN -->
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -539,6 +540,24 @@
   <script src="../admin_scripts/logs.js"></script>
   <script src="../admin_and_staff_scripts/rental_management.js"></script>
   <script src="../client_scripts/notifications.js"></script>
+
+  <script>
+    // Check for login success
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login_success') === '1') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Welcome back, Admin!',
+            text: 'You have successfully logged in.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        // Clean URL
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+  </script>
 
 
 </body>

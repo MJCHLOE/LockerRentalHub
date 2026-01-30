@@ -33,6 +33,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
     <link rel="stylesheet" href="client_dashboard.css">
     <!-- Iconify CDN -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Add this button before the sidebar -->
@@ -225,6 +226,23 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
         
         // Refresh stats every 60 seconds to save DB connections (Hostinger Limit: 500/hr)
         setInterval(loadStats, 60000);
+
+        // Check for login success
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('login_success') === '1') {
+            const clientName = $('.client-name').text().trim();
+            Swal.fire({
+                icon: 'success',
+                title: `Welcome back, ${clientName}!`,
+                text: 'You have successfully logged in.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            
+            // Clean URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        }
     });
 
     function loadStats() {

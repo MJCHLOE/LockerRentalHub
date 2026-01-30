@@ -48,20 +48,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             // Redirect based on role
             if ($role === "Admin") {
-                header("Location: ../admin/dashboard.php");
+                header("Location: ../admin/dashboard.php?login_success=1");
                 exit();
             } elseif ($role === "Staff") {
-                header("Location: ../staff/dashboard.php");
+                header("Location: ../staff/dashboard.php?login_success=1");
                 exit();
             } else {
-                header("Location: ../client/home.php");
+                header("Location: ../client/home.php?login_success=1");
                 exit();
             }
         } else {
-            echo "<script>alert('Invalid password.'); window.location.href='../LoginPage.html';</script>";
+            // Invalid password
+            header("Location: ../LoginPage.html?error=invalid_password");
+            exit();
         }
     } else {
-        echo "<script>alert('Username not found.'); window.location.href='../LoginPage.html';</script>";
+        // Username not found
+        header("Location: ../LoginPage.html?error=user_not_found");
+        exit();
     }
 
     $stmt->close();

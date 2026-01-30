@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <script src="bootstrap/js/bootstrap.min.js"></script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles/loginStyle.css?v=4" />
@@ -77,6 +78,49 @@
       } else {
         passwordInput.type = "password";
       }
+    }
+
+    // Check URL parameters for errors or status
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const status = urlParams.get('status');
+
+    if (error === 'invalid_password') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: 'Invalid password. Please try again.',
+        background: '#2d3748', // Dark background
+        color: '#ffffff',
+        confirmButtonColor: '#e0d4d4',
+        confirmButtonText: '<span style="color:#000">Try Again</span>'
+      });
+    } else if (error === 'user_not_found') {
+      Swal.fire({
+        icon: 'error',
+        title: 'User Not Found',
+        text: 'The username you entered does not exist.',
+        background: '#2d3748',
+        color: '#ffffff',
+        confirmButtonColor: '#e0d4d4',
+        confirmButtonText: '<span style="color:#000">OK</span>'
+      });
+    } else if (status === 'logged_out') {
+      Swal.fire({
+        icon: 'success',
+        title: 'Logged Out',
+        text: 'You have been successfully logged out.',
+        background: '#2d3748',
+        color: '#ffffff',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    }
+
+    // Clean URL
+    if (error || status) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
     }
   </script>
 </body>
