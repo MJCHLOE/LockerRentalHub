@@ -145,6 +145,7 @@ $firstName = isset($_SESSION[$clientSessionKey]['firstname']) ?
                         <th>Locker ID</th>
                         <th>Size</th>
                         <th>Rental Date</th>
+                        <th>Approved Date</th>
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Time Remaining</th>

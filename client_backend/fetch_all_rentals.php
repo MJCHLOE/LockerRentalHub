@@ -12,13 +12,13 @@ $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
 // Base queries
 // Active rentals (rentals table)
 // Active rentals (rentals table)
-$active_query = "SELECT rental_id as id, locker_id, rental_date, start_date, end_date, status, payment_status, 'current' as source
+$active_query = "SELECT rental_id as id, locker_id, rental_date, date_approved, start_date, end_date, status, payment_status, 'current' as source
                  FROM rentals 
                  WHERE user_id = ?";
 
 // Archived rentals (rental_archives table)
 // Archived rentals (rental_archives table)
-$archive_query = "SELECT archive_id as id, locker_id, start_date as rental_date, start_date, end_date, final_status as status, payment_status_at_archive as payment_status, 'archive' as source 
+$archive_query = "SELECT archive_id as id, locker_id, start_date as rental_date, NULL as date_approved, start_date, end_date, final_status as status, payment_status_at_archive as payment_status, 'archive' as source 
                   FROM rental_archives 
                   WHERE user_id = ?";
 
@@ -98,6 +98,7 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>{$row['size']}</td>";
             echo "<td>" . date('Y-m-d', strtotime($row['rental_date'])) . "</td>";
+            echo "<td>" . ($row['date_approved'] ? date('Y-m-d', strtotime($row['date_approved'])) : '-') . "</td>";
             echo "<td>" . ($row['start_date'] ? date('Y-m-d', strtotime($row['start_date'])) : '-') . "</td>";
 
             echo "<td>" . date('Y-m-d', strtotime($row['end_date'])) . "</td>";

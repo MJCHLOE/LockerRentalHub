@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
 
         // Check if locker is available for rent
         // Check if locker is available for rent
-        $checkQuery = "SELECT status FROM lockers WHERE locker_id = ? FOR UPDATE";
+        $checkQuery = "SELECT status, price FROM lockers WHERE locker_id = ? FOR UPDATE";
         $stmt = $conn->prepare($checkQuery);
         $stmt->bind_param("s", $locker_id);
         $stmt->execute();
@@ -58,11 +58,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
             throw new Exception("End date must be after start date.");
         }
 
+        // Calculate Total Price
+        $start = new DateTime($start_date);
+        $end = new DateTime($end_date);
+        $interval = $start->diff($end);
+        $days = $interval->days;
+        
+        // Logic: minimal 1 month pricing, prorated or block? 
+        // User asked "depending how many months". Usually means blocks of months.
+        // Let's assume standard logic: ceil(days / 30) * price.
+        $months = ceil($days / 30);
+        if ($months < 1) $months = 1;
+        
+        $total_price = $locker['price'] * $months;
+
         // Insert into rentals table
-        $insertQuery = "INSERT INTO rentals (user_id, locker_id, rental_date, end_date, status, payment_status) 
-                       VALUES (?, ?, ?, ?, 'pending', 'unpaid')";
+        $insertQuery = "INSERT INTO rentals (user_id, locker_id, rental_date, end_date, status, payment_status, total_price) 
+                       VALUES (?, ?, ?, ?, 'pending', 'unpaid', ?)";
         $stmt = $conn->prepare($insertQuery);
-        $stmt->bind_param("isss", $user_id, $locker_id, $start_date, $end_date);
+        $stmt->bind_param("isssd", $user_id, $locker_id, $start_date, $end_date, $total_price);
         $stmt->execute();
 
         // Update locker status to 'Reserved'

@@ -161,14 +161,20 @@ try {
         // --- NORMAL UPDATE LOGIC (Pending -> Approved, Approved -> Active) ---
         
         $payment_status = $rental['payment_status'];
-        // If approved, assume valid for payment
+        // Use existing date_approved if available, else null
+        $date_approved = isset($rental['date_approved']) ? $rental['date_approved'] : null;
+
         if ($new_status === 'approved') {
-            $payment_status = $rental['payment_status']; // Keep existing, usually 'unpaid'
+            // Set Approved Date to NOW
+            $date_approved = date('Y-m-d H:i:s');
+        } elseif ($new_status === 'active') {
+             // Auto-set to Paid when Active
+             $payment_status = 'paid';
         }
 
-        $update_query = "UPDATE rentals SET status = ?, payment_status = ? WHERE rental_id = ?";
+        $update_query = "UPDATE rentals SET status = ?, payment_status = ?, date_approved = ? WHERE rental_id = ?";
         $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("ssi", $new_status, $payment_status, $rental_id);
+        $stmt->bind_param("sssi", $new_status, $payment_status, $date_approved, $rental_id);
         $stmt->execute();
         $stmt->close();
 

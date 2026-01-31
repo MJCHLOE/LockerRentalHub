@@ -38,11 +38,11 @@ try {
                          CONCAT(u.firstname, ' ', u.lastname) as client_name,
                          r.locker_id,
                          r.rental_date,
-                         NULL as date_approved, 
+                         r.date_approved, 
                          r.status as rental_status,
                          r.end_date,
                          r.payment_status as payment_status,
-                         l.price
+                         r.total_price
                   FROM rentals r
                   JOIN users u ON r.user_id = u.user_id
                   JOIN lockers l ON r.locker_id = l.locker_id
@@ -69,18 +69,8 @@ try {
         echo "<tr><td colspan='11' class='text-center'>No records found.</td></tr>";
     } else {
         while ($row = $result->fetch_assoc()) {
-            // Calculate Price
-            $totalPrice = 0;
-            if (isset($row['price'])) {
-                $start = new DateTime($row['rental_date']);
-                $end = $row['end_date'] ? new DateTime($row['end_date']) : clone $start;
-                if (!$row['end_date']) $end->modify('+1 month'); 
-                
-                $days = $end->diff($start)->days;
-                $months = ceil($days / 30);
-                if ($months < 1) $months = 1;
-                $totalPrice = $row['price'] * $months;
-            }
+            // Calculate Price - REMOVED, using DB value
+            $totalPrice = $row['total_price'];
 
             echo "<tr data-rental-id='{$row['rental_id']}' data-status='{$row['rental_status']}'>";
             echo "<td>{$row['rental_id']}</td>";
@@ -89,7 +79,8 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
-            echo "<td>" . ($row['end_date'] ? date('Y-m-d H:i', strtotime($row['end_date'])) : '-') . "</td>";
+            
+            // Removed extra End Date column to align with dashboard headers
             
             // Time Remaining Calculation
             $timeRemaining = "-";
@@ -128,6 +119,8 @@ try {
             
             $paymentClass = $row['payment_status'] === 'paid' ? 'text-success' : 'text-danger';
             echo "<td class='{$paymentClass} font-weight-bold'>{$row['payment_status']}</td>";
+            
+            echo "<td>₱" . number_format($totalPrice, 2) . "</td>";
             
             // Actions
             echo "<td>";
