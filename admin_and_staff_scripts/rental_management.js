@@ -138,7 +138,6 @@ function updateRentalStatus(rentalId, newStatus) {
             // DEBUG: Show exact error
             alert('Error updating rental status: ' + error + '\n(Check console for details)');
         });
-});
 }
 
 let countdownInterval;
@@ -187,3 +186,5 @@ function updateTimers() {
         }
     });
 }
+
+startCountdownTimer();
