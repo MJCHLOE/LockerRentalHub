@@ -303,6 +303,7 @@
                     <th>Locker ID</th>
                     <th>Rental Date</th>
                     <th>Approved Date</th>
+                    <th>End Date</th>
                     <th>Time Remaining</th>
                     <th>Status</th>
                     <th>Payment</th>

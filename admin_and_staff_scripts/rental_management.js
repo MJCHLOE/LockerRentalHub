@@ -29,6 +29,7 @@ function filterRentals(status) {
         .then(response => response.text())
         .then(html => {
             tbody.innerHTML = html;
+            startCountdownTimer();
         })
         .catch(error => {
             console.error('Error filtering rentals:', error);
@@ -59,6 +60,7 @@ function loadRentals(type) {
         .then(response => response.text())
         .then(html => {
             tbody.innerHTML = html;
+            startCountdownTimer();
         })
         .catch(error => {
             console.error('Error loading rentals:', error);
@@ -136,4 +138,52 @@ function updateRentalStatus(rentalId, newStatus) {
             // DEBUG: Show exact error
             alert('Error updating rental status: ' + error + '\n(Check console for details)');
         });
+});
+}
+
+let countdownInterval;
+function startCountdownTimer() {
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    // Run immediately
+    updateTimers();
+
+    countdownInterval = setInterval(updateTimers, 1000);
+}
+
+function updateTimers() {
+    // Select all elements with class time-remaining
+    const timers = document.querySelectorAll('.time-remaining');
+
+    timers.forEach(timer => {
+        const endDateStr = timer.getAttribute('data-end-date');
+        if (!endDateStr) return;
+
+        const now = new Date().getTime();
+        const endTime = new Date(endDateStr).getTime();
+        const distance = endTime - now;
+
+        if (distance < 0) {
+            timer.className = 'text-danger font-weight-bold';
+            timer.textContent = 'Expired';
+        } else {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let timeStr = "";
+            if (days > 0) timeStr += days + "d ";
+            timeStr += hours + "h " + minutes + "m " + seconds + "s";
+
+            // Text color based on urgency
+            if (days < 3) {
+                timer.className = 'text-warning font-weight-bold';
+            } else {
+                timer.className = ''; // Default inherit
+                // Or explicit color if needed, but context usually handles it
+            }
+            timer.textContent = timeStr;
+        }
+    });
 }

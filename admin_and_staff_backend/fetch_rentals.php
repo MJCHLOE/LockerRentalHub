@@ -79,6 +79,7 @@ try {
             echo "<td>{$row['locker_id']}</td>";
             echo "<td>" . date('Y-m-d H:i', strtotime($row['rental_date'])) . "</td>";
             echo "<td>" . ($row['date_approved'] ? date('Y-m-d H:i', strtotime($row['date_approved'])) : '-') . "</td>";
+            echo "<td>" . ($row['end_date'] ? date('Y-m-d H:i', strtotime($row['end_date'])) : '-') . "</td>";
             
             // Removed extra End Date column to align with dashboard headers
             
@@ -88,14 +89,14 @@ try {
             if ($row['rental_status'] === 'active' && $row['end_date']) {
                  $now = new DateTime();
                  $end = new DateTime($row['end_date']);
-                 $interval = $now->diff($end);
                  
                  if ($now > $end) {
                      $timeRemaining = "Expired";
                      $color = "text-danger font-weight-bold";
                  } else {
-                     $timeRemaining = $interval->format('%a days left');
-                     if ($interval->days < 3) $color = "text-warning font-weight-bold";
+                     // Output for JS Timer
+                     $timeRemaining = "<span class='time-remaining' data-end-date='{$row['end_date']}'>Calculating...</span>";
+                     // Color will be handled by JS based on time left
                  }
             } elseif ($row['rental_status'] === 'active') {
                 $timeRemaining = "Indefinite";
