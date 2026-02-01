@@ -173,8 +173,9 @@ try {
                 }
                 echo "</div>";
             } elseif ($isArchive) {
-                // Actions for Archive? View Receipt maybe if we stored it?
-                // Assuming no actions for now.
+                echo "<div class='btn-group' role='group'>";
+                echo "<button class='btn btn-sm btn-info' onclick='viewReceipt({$row['rental_id']})' title='View Receipt'><iconify-icon icon='mdi:eye'></iconify-icon></button>";
+                echo "</div>";
             }
             echo "</td>";
             echo "</tr>";
