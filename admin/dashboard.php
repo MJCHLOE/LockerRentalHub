@@ -275,10 +275,6 @@
     <section id="manage-rentals" class="glass-panel">
         <div class="d-flex justify-content-between align-items-center mb-4">
              <h3>Rental Management</h3>
-             <div class="btn-group">
-                <button id="tab-active" class="btn btn-primary rental-tab" onclick="loadRentals('active')">Active</button>
-                <button id="tab-archive" class="btn btn-outline-secondary rental-tab" onclick="loadRentals('archive')">History</button>
-            </div>
         </div>
 
         <div class="search-filter-container">

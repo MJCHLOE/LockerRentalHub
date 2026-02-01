@@ -21,11 +21,10 @@ function filterRentals(status) {
     const tbody = document.getElementById('rentalsTableBody');
     tbody.innerHTML = '<tr><td colspan="10" class="text-center"><div class="spinner-border text-light" role="status"></div></td></tr>';
 
-    // Determine type (active or archive) from current tab
-    const isArchive = document.getElementById('tab-archive')?.classList.contains('active');
-    const type = isArchive ? 'archive' : 'active';
+    // REMOVED: type (archive/active) logic.
+    // We now just pass the filter to the backend which handles the UNION.
 
-    fetch(`../admin_and_staff_backend/fetch_rentals.php?type=${type}&filter=${status}`)
+    fetch(`../admin_and_staff_backend/fetch_rentals.php?filter=${status}`)
         .then(response => response.text())
         .then(html => {
             tbody.innerHTML = html;
@@ -38,35 +37,18 @@ function filterRentals(status) {
 }
 
 function loadRentals(type) {
-    const tbody = document.getElementById('rentalsTableBody');
-    tbody.innerHTML = '<tr><td colspan="10" class="text-center">Loading...</td></tr>';
-
-    // Update Tab UI
-    document.querySelectorAll('.rental-tab').forEach(tab => {
-        tab.classList.remove('active', 'btn-primary');
-        tab.classList.add('btn-secondary');
-    });
-    const activeTab = document.getElementById('tab-' + type);
-    if (activeTab) {
-        activeTab.classList.add('active', 'btn-primary');
-        activeTab.classList.remove('btn-secondary'); // Ensure secondary class is gone
-    }
-
-    // Reset filter to 'all' when switching tabs, or keep? Let's reset for simplicity.
-    document.querySelectorAll('#rentalFilters .btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('#rentalFilters .btn:first-child').classList.add('active');
-
-    fetch('../admin_and_staff_backend/fetch_rentals.php?type=' + type)
-        .then(response => response.text())
-        .then(html => {
-            tbody.innerHTML = html;
-            startCountdownTimer();
-        })
-        .catch(error => {
-            console.error('Error loading rentals:', error);
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error loading data</td></tr>';
-        });
+    // NOTE: This function's argument 'type' is now ignored as we unified the table.
+    // It's kept or aliased to simple refresh calls if needed, but the buttons calling it are gone.
+    // However, if called programmatically, we treat it as a general refresh.
+    
+    // We default status to 'all' on initial load.
+    filterRentals('all');
 }
+
+// Initial load
+document.addEventListener('DOMContentLoaded', function() {
+    loadRentals('all');
+});
 
 function updateRentalStatus(rentalId, newStatus) {
     let confirmMessage = 'Are you sure you want to ';
@@ -111,10 +93,9 @@ function updateRentalStatus(rentalId, newStatus) {
                 const data = JSON.parse(text);
                 if (data.success) {
                     alert(data.message);
-                    // Reload current view
-                    const isArchive = document.getElementById('tab-archive')?.classList.contains('active');
+                    
+                    // Reload current view based on active filter
                     const activeFilterBtn = document.querySelector('#rentalFilters .btn.active');
-                    // Try to deduce status from active button
                     let status = 'all';
                     if (activeFilterBtn) {
                         const onClick = activeFilterBtn.getAttribute('onclick');
@@ -124,7 +105,7 @@ function updateRentalStatus(rentalId, newStatus) {
                         }
                     }
 
-                    filterRentals(status); // Helper that handles type and status
+                    filterRentals(status); 
                 } else {
                     alert('Error updating rental status: ' + data.message);
                 }
@@ -135,7 +116,6 @@ function updateRentalStatus(rentalId, newStatus) {
         })
         .catch(error => {
             console.error('Error:', error);
-            // DEBUG: Show exact error
             alert('Error updating rental status: ' + error + '\n(Check console for details)');
         });
 }
@@ -180,11 +160,8 @@ function updateTimers() {
                 timer.className = 'text-warning font-weight-bold';
             } else {
                 timer.className = ''; // Default inherit
-                // Or explicit color if needed, but context usually handles it
             }
             timer.textContent = timeStr;
         }
     });
 }
-
-startCountdownTimer();
