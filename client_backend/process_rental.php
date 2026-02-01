@@ -97,6 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['locker_id'])) {
             "User ID $user_id has requested Locker $locker_id.", 
             "request"
         );
+        $notify->notifyStaff(
+            "New Rental Request", 
+            "User ID $user_id has requested Locker $locker_id.", 
+            "request"
+        );
 
 
         // Commit transaction
