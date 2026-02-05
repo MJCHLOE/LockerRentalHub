@@ -1,6 +1,6 @@
 <?php
 // Database connection
-$host = "194.59.164.68";
+$host = "localhost";
 $user = "u130348899_rentlocker";
 $password = "RentLockerz_101"; 
 $dbname = "u130348899_Locker_Rental";
