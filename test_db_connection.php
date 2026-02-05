@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database connection details
-$host = "194.59.164.68";
+$host = "82.197.82.199";
 $user = "u130348899_rentlocker";
 $password = "RentLockerz_101"; 
 $dbname = "u130348899_Locker_Rental";
